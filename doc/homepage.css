@@ -1,12 +1,24 @@
+html, body {
+    font-size: 16px; /* Base font size */
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent scrollbars from minor overflows */
+}
+
 * {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 16px;
+    /* font-size: 16px; */ /* Replaced by relative units or specific settings */
+    box-sizing: border-box; /* Helps manage padding and borders better */
 }
 
 .homepage {
     display:flex;
     flex-direction: column;
-    height: 100vh; /* Added to make the container fill the viewport height */
+    height: 100vh; /* Make the container fill the viewport height */
+    width: 100%; /* Make the container fill the viewport width */
+    overflow: hidden; /* Prevent children from causing overflow on the body */
 }
 
 .homepage-header {
@@ -14,27 +26,212 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding: 10px; /* Add padding */
+    flex-shrink: 0; /* Prevent header from shrinking too much */
+}
+
+.homepage-header__title {
+    margin: 0 10px; /* Add some margin */
+    white-space: nowrap; /* Prevent title from wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis if too long */
+    min-width: 0; /* Allow shrinking */
+}
+
+.homepage-header button {
+    flex-shrink: 0; /* Prevent buttons from shrinking too much */
+    background-color: transparent;
+    border: none;
+    padding: 8px; /* Adjust padding as needed */
+    border-radius: 50%; /* Circular shape */
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.homepage-header button svg { /* Style for Lucide icons in header buttons */
+    width: 22px; /* Adjust size as needed */
+    height: 22px; /* Adjust size as needed */
+    stroke: #333; /* Icon color, adjust as needed */
+    stroke-width: 2;
+}
+
+.homepage-header button:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* Subtle hover */
+}
+
+.homepage-header button:active {
+    background-color: rgba(0, 0, 0, 0.1); /* Subtle active state */
 }
 
 
 .homepage-content{
     flex-grow:1;
+    overflow-y: auto; /* Allow vertical scroll within content if needed */
+    padding: 10px; /* Add padding */
+    /* background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("assets/poster.jpeg"); */
+    /* background-size: cover; */ /* This will make the image cover the entire div */
+    /* background-position: center; */ /* This will center the image */
+    /* background-repeat: no-repeat; */ /* This will prevent the image from repeating */
+}
+
+.homepage-content__welcome-msg pre {
+    white-space: pre-wrap;   /* CSS3 */
+    word-wrap: break-word;   /* Internet Explorer 5.5+ */
+    word-break: break-all;
+    margin: 0; /* Reset margin */
+    font-size: 0.9rem; /* Adjust font size if needed */
+}
+
+.homepage-content--with-background {
     background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url("assets/poster.jpeg");
-    background-size: cover; /* This will make the image cover the entire div */
-    background-position: center; /* This will center the image */
-    background-repeat: no-repeat; /* This will prevent the image from repeating */
-
-
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .homepage-input-area {
     margin-top: auto;
+    padding: 10px; /* Add some padding */
+    display: flex; /* Use flexbox for better control */
+    flex-wrap: wrap; /* Allow items to wrap */
+    gap: 10px; /* Add gap between items */
+    flex-shrink: 0; /* Prevent input area from shrinking too much */
+    align-items: center; /* Vertically align items */
 }
-.homepage-input-area__text-input {
+
+/* New styles for the input container */
+.homepage-input-area__input-container {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
     background-color: aliceblue;
-    height: 50px;
+    border: 1px solid #ccc;
+    border-radius: 25px; /* Rounded pill shape */
+    padding: 0 5px 0 15px; /* T R B L - space for text and button */
+    min-height: 50px;
+    box-sizing: border-box;
+}
+
+.homepage-input-area__text-input {
+    /* background-color: aliceblue; */ /* Moved to container */
+    /* height: 50px; */ /* Handled by container and content growth */
+    flex-grow: 1;
+    /* min-width: 200px; */ /* Container handles width */
+    padding: 10px 0; /* Vertical padding */
+    /* border: 1px solid #ccc; */ /* Moved to container */
+    /* border-radius: 5px; */ /* Moved to container */
+    outline: none;
+    line-height: 1.5;
+    max-height: 100px; 
+    overflow-y: auto;
+    background-color: transparent;
+    border: none;
+}
+
+.homepage-input-area__text-input[contenteditable=true]:empty::before {
+    content: attr(data-placeholder);
+    color: #999;
+    pointer-events: none;
+    display: block; 
 }
 
 .homepage-input-area__tools {
     display:flex;
+    gap: 5px; /* Add some space between buttons */
+}
+
+/* Modern styles for tool buttons */
+.homepage-input-area__tools button {
+    background-color: transparent;
+    border: none;
+    padding: 10px;
+    border-radius: 50%; /* Circular shape */
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.homepage-input-area__tools button svg { /* Lucide icons are SVGs */
+    width: 20px;
+    height: 20px;
+    stroke: #333; /* Icon color */
+}
+
+.homepage-input-area__tools button:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* Subtle hover */
+}
+
+.homepage-input-area__tools button:active {
+    background-color: rgba(0, 0, 0, 0.1); /* Subtle active state */
+}
+
+/* Modern styles for the send button - MODIFIED */
+.homepage-input-area__send-button {
+    background-color: transparent;
+    border: none;
+    padding: 8px;
+    border-radius: 50%; /* Circular */
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease-in-out;
+    flex-shrink: 0;
+    margin-left: 5px; /* Space from text input */
+}
+
+.homepage-input-area__send-button svg {
+    width: 24px; 
+    height: 24px;
+    stroke: #007bff; /* Theme blue icon */
+    stroke-width: 2;
+}
+
+.homepage-input-area__send-button:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Subtle blue hover */
+}
+
+.homepage-input-area__send-button:active {
+    background-color: rgba(0, 123, 255, 0.2); /* Subtle blue active */
+}
+
+/* Add media query for smaller screens */
+@media (max-width: 600px) {
+    html {
+        font-size: 14px; /* Smaller base font size for small screens */
+    }
+
+    .homepage-header__title {
+        font-size: 1.2rem; /* Adjust title size */
+    }
+
+    .homepage-input-area {
+        flex-direction: column; /* Stack items vertically on small screens */
+    }
+
+    .homepage-input-area__tools {
+        justify-content: flex-start; /* Align items to the start (left) */
+        gap: 20px;
+        width: 100%; /* Make tools take full width */
+    }
+
+    /* MODIFIED: Apply to input-container instead of text-input directly */
+    .homepage-input-area__input-container {
+        width: 100%; 
+        margin-bottom: 10px; 
+    }
+
+    /* REMOVE/ADJUST: .homepage-input-area__text-input specific width/margin if any, now handled by container */
+    /* .homepage-input-area__text-input { ... } */
+
+
+    /* REMOVE: Send button width override, it's an icon button now */
+    /* .homepage-input-area__send-button {
+        width: 100%; 
+    } */
 }

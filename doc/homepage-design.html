@@ -74,8 +74,16 @@
                     </script>
                 </button>
             </div>
-            <div class="homepage-input-area__text-input">input text here</div>
-            <button class="homepage-input-area__send-button"></button>
+            <div class="homepage-input-area__input-container">
+                <div class="homepage-input-area__text-input" contenteditable="true"
+                    data-placeholder="Type your message..."></div>
+                <button class="homepage-input-area__send-button">
+                    <i data-lucide="send-horizontal"></i>
+                    <script>
+                        lucide.createIcons();
+                    </script>
+                </button>
+            </div>
         </div>
 
     </div>
