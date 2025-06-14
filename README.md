@@ -2,7 +2,7 @@
 
 main project
 
-<https://github.com/kriss-spy/bluelm-shopguard>
+[https://github.com/kriss-spy/bluelm-shopguard](https://github.com/kriss-spy/bluelm-shopguard)
 
 ## dev env
 
@@ -12,17 +12,21 @@ main project
 - **GPU**: NVIDIA GeForce RTX 4060 / Intel Arc
 - **Shell**: zsh 5.9
 
-## file todos
+## general todos
 
-- general outline of README
-- what makes up a chatbot interface
-- compare interface of different products
-- design
-- design in figma
+- [x] general outline of README
+- [x] what makes up a chatbot interface
+- [x] compare interface of different products
+- [ ] design
+- [ ] design in figma
+- [ ] full design
+- [ ] quickapp page
+- [ ] quickapp program
+- [ ] test on vivo machine
 
 ## basis analysis
 
-goal: developing for blumlm-shopguard quickapp
+goal: developing for bluelm-shopguard quickapp
 viewport: typical mobile phone, like 1080x2340
 target audience: normal Chinese phone users, who may use AI app like doubao
 
@@ -39,7 +43,7 @@ quickapp for frontend page and quickapp on phone
 
 ## comparison of popular apps
 
-existing chatbot app interface, see [referces](doc/reference/chatbot-apps/)
+existing chatbot app interface, see [refenrces](doc/reference/chatbot-apps/)
 
 good domestic products are deepseek and kimi
 
@@ -95,6 +99,7 @@ account (sign in)
 user character
 theme
 language
+toggle background
 
 ## full design
 
@@ -116,8 +121,8 @@ how to manage accounts data
 
 ## references
 
-<https://github.com/ChatGPTNextWeb/NextChat>
+[https://github.com/ChatGPTNextWeb/NextChat](https://github.com/ChatGPTNextWeb/NextChat)
 
-<https://deepwiki.com/ChatGPTNextWeb/NextChat>
+[https://deepwiki.com/ChatGPTNextWeb/NextChat](https://deepwiki.com/ChatGPTNextWeb/NextChat)
 
-<https://github.com/nomic-ai/gpt4all>
+[https://github.com/nomic-ai/gpt4all](https://github.com/nomic-ai/gpt4all)
