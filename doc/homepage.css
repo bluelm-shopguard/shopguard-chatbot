@@ -1,0 +1,30 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.homepage {
+    display:flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.homepage-header {
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.homepage-content{
+    flex-grow:1;
+    margin-bottom: auto;
+}
+
+.homepage-input-area {
+    margin-top: auto;
+}
+.homepage-input-area__text-input {
+    background-color: aliceblue;
+    height: 50px;
+}
