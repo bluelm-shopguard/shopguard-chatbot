@@ -1,0 +1,13 @@
+{
+    "package": "com.shopguard.chatbot",
+    "name": "bluelm shopguard chatbot",
+    "versionName": "1.0.0",
+    "versionCode": 1,
+    "minPlatformVersion": 1070,
+    "icon": "common/images/logo.png",
+    "features": [
+      { "name": "system.network" },
+      { "name": "system.storage" },
+      { "name": "system.device" }
+    ]
+  }
