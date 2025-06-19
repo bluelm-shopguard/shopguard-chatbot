@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - ShopGuard AI</title>
+    <link rel="stylesheet" href="../common/styles/homepage.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body>
+    <div class="page-container">
+        <header class="page-header">
+            <!-- BUG respond to click on the left part, don't respond click to the right -->
+            <a href="../homepage-design.html" class="header-button" aria-label="Back to Home">
+                <i data-lucide="arrow-left"></i>
+            </a>
+            <h1 class="page-header__title">设置</h1>
+        </header>
+
+        <main class="page-content">
+            <div class="setting-group">
+                <h2 class="setting-group__title">通用</h2>
+                <ul class="setting-list">
+                    <li class="setting-list__item">
+                        <span class="label">外观模式</span>
+                        <div class="control">
+                            <div class="segmented-control" id="theme-selector"></div>
+                        </div>
+                    </li>
+                    <li class="setting-list__item">
+                        <span class="label">语言</span>
+                        <div class="control">
+                            <div class="segmented-control" id="language-selector"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="setting-group">
+                <h2 class="setting-group__title">聊天</h2>
+                <ul class="setting-list">
+                    <li class="setting-list__item">
+                        <span class="label">保存聊天记录</span>
+                        <div class="control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="save-history-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="setting-group">
+                <h2 class="setting-group__title">关于</h2>
+                <ul class="setting-list">
+                    <!-- TODO make it trigger when list__item click, not when link clicked -->
+                    <li class="setting-list__item is-link">
+                        <a href="about.html">
+                            <span class="label">关于 ShopGuard AI</span>
+                            <i data-lucide="chevron-right" class="icon"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { AppSettings, getSetting, setSetting } from '../data/settings.js';
+
+        function initializeSettings() {
+            // Theme Selector
+            const themeSelector = document.getElementById('theme-selector');
+            const currentTheme = getSetting('theme.default');
+            AppSettings.theme.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.name;
+                button.dataset.value = option.id;
+                if (option.id === currentTheme) {
+                    button.classList.add('active');
+                }
+                button.addEventListener('click', () => {
+                    setSetting('theme.default', option.id);
+                    updateActiveButton(themeSelector, button);
+                });
+                themeSelector.appendChild(button);
+            });
+
+            // Language Selector
+            const languageSelector = document.getElementById('language-selector');
+            const currentLanguage = getSetting('language.default');
+            AppSettings.language.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.name;
+                button.dataset.value = option.id;
+                if (option.id === currentLanguage) {
+                    button.classList.add('active');
+                }
+                button.addEventListener('click', () => {
+                    setSetting('language.default', option.id);
+                    updateActiveButton(languageSelector, button);
+                });
+                languageSelector.appendChild(button);
+            });
+
+            // Save History Toggle
+            const saveHistoryToggle = document.getElementById('save-history-toggle');
+            saveHistoryToggle.checked = getSetting('chat.history.save');
+            saveHistoryToggle.addEventListener('change', (e) => {
+                setSetting('chat.history.save', e.target.checked);
+            });
+        }
+
+        function updateActiveButton(container, activeButton) {
+            container.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            activeButton.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeSettings();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>

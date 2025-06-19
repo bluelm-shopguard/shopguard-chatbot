@@ -1,92 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bluelm-shopguard</title>
-    <link rel="stylesheet" href="homepage.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ShopGuard AI - 购物防诈骗助手</title>
+    <link rel="stylesheet" href="common/styles/homepage.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
 <body>
-    <div class="homepage">
-        <div class="homepage-header">
-            <button class="homepage-header__sidebar-button">
-                <i data-lucide="panel-right-close"></i>
-
-                <script>
-                    lucide.createIcons();
-                </script>
+    <div class="sidebar-overlay"></div>
+    <aside class="sidebar">
+        <header class="sidebar__header">
+            <h2 class="sidebar__title">历史对话</h2>
+            <button class="header-button close-sidebar-button" aria-label="Close sidebar">
+                <i data-lucide="x"></i>
             </button>
-            <div class="homepage-header__title">bluelm-shopguard</div>
-            <button class="homepage-header__newchat-button">
-                <i data-lucide="circle-plus"></i>
-
-                <script>
-                    lucide.createIcons();
-                </script>
-            </button>
-            <!-- <button class="homepage-header__toggle-debug">
-                <i data-lucide="bug"></i>
-
-                <script>
-                    lucide.createIcons();
-                </script>
-            </button> -->
+        </header>
+        <div class="sidebar__content">
+            <!-- Conversation history will be implemented later -->
         </div>
-
-        <div class="homepage-content">
-            <!-- TODO dynamic content -->
-            <!-- TODO poster background -->
-            <div class="homepage-content__welcome-msg">
-                <pre>哈喽我是你的购物反诈小助手 😊🔎✨
-咱们以后遇到商品真假、卖家靠不靠谱、价格划不划算、
-会不会被骗这类问题，都可以发给我看看哈👀👌
-不管是商品截图、卖家信息、付款方式还是广告对话，
-你尽管甩给我，我帮你分析得明明白白~👍😉
-
-我每次会：
-1️⃣ 认真帮你查平台和价格的可信度 🔎
-2️⃣ 分析有没有常见诈骗套路 ⚠️
-3️⃣ 明确告诉你 👉结论+建议，还会打个“虚假诈骗风险
-星级” ⭐
-
-别担心，咱们一起留个心眼，安心购物不踩坑 👀✨
-需要帮忙？直接发给我就行啦 📲🛒</pre>
+        <footer class="sidebar__footer">
+            <div class="account-info">
+                <div class="account-info__avatar">
+                    <i data-lucide="user-circle"></i>
+                </div>
+                <span class="account-info__name">Username</span>
             </div>
-        </div>
+            <a href="pages/setting.html" class="settings-button" aria-label="Settings">
+                <i data-lucide="settings"></i>
+            </a>
+        </footer>
+    </aside>
 
-        <div class="homepage-input-area">
-            <div class="homepage-input-area__tools">
-                <button class="homepage-input-area__attachment">
+    <div class="chat-app">
+        <header class="chat-header">
+            <button class="header-button open-sidebar-button" aria-label="Toggle sidebar">
+                <i data-lucide="panel-left"></i>
+            </button>
+            <h1 class="chat-header__title">ShopGuard AI</h1>
+            <button class="header-button" aria-label="New chat">
+                <i data-lucide="square-plus"></i>
+            </button>
+        </header>
+
+        <main class="chat-content">
+            <div class="chat-content__welcome">
+                <img src="common/images/logo.jpeg" alt="ShopGuard AI Logo" class="welcome-logo">
+                <h2 class="welcome-title">购物防诈骗助手</h2>
+                <p class="welcome-message">
+                    遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的“虚假诈骗风险星级”和建议，让我们一起安心购物不踩坑！
+                </p>
+            </div>
+            <!-- Chat messages will be dynamically added here -->
+        </main>
+
+        <footer class="chat-input-area">
+            <div class="input-area__toolbar">
+                <button class="toolbar-button" aria-label="Attach file">
                     <i data-lucide="paperclip"></i>
-
-                    <script>
-                        lucide.createIcons();
-                    </script>
+                    <span>附件</span>
                 </button>
-                <button class="homepage-input-area__text-input--websearch">
+                <button class="toolbar-button" aria-label="Web search">
                     <i data-lucide="globe"></i>
-
-                    <script>
-                        lucide.createIcons();
-                    </script>
+                    <span>搜索</span>
                 </button>
             </div>
-            <div class="homepage-input-area__input-container">
-                <div class="homepage-input-area__text-input" contenteditable="true"
-                    data-placeholder="Type your message..."></div>
-                <button class="homepage-input-area__send-button">
-                    <i data-lucide="send-horizontal"></i>
-                    <script>
-                        lucide.createIcons();
-                    </script>
+            <div class="input-area__input-wrapper">
+                <div class="input-area__text-input" contenteditable="true" role="textbox"
+                    data-placeholder="发消息给我分析一下..."></div>
+                <button class="send-button" aria-label="Send message">
+                    <i data-lucide="arrow-up"></i>
                 </button>
             </div>
-        </div>
-
+        </footer>
     </div>
+
+    <script>
+        lucide.createIcons();
+
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.querySelector('.sidebar-overlay');
+        const openSidebarButton = document.querySelector('.open-sidebar-button');
+        const closeSidebarButton = document.querySelector('.close-sidebar-button');
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        }
+
+        openSidebarButton.addEventListener('click', openSidebar);
+        closeSidebarButton.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+    </script>
 </body>
 
 </html>

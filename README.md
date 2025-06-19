@@ -2,7 +2,7 @@
 
 main project
 
-[https://github.com/kriss-spy/bluelm-shopguard](https://github.com/kriss-spy/bluelm-shopguard)
+[https://github.com/bluelm-shopguard/bluelm-shopguard](https://github.com/bluelm-shopguard/bluelm-shopguard)
 
 ## dev env
 
@@ -17,8 +17,8 @@ main project
 - [x] general outline of README
 - [x] what makes up a chatbot interface
 - [x] compare interface of different products
-- [ ] design
-- [ ] design in figma
+- [x] design
+<!-- - [ ] design in figma -->
 - [ ] full design
 - [ ] quickapp page
 - [ ] quickapp program
@@ -43,7 +43,7 @@ quickapp for frontend page and quickapp on phone
 
 ## comparison of popular apps
 
-existing chatbot app interface, see [refenrces](doc/reference/chatbot-apps/)
+existing chatbot app interface, see [refenrences](doc/reference/chatbot-apps/)
 
 good domestic products are deepseek and kimi
 
