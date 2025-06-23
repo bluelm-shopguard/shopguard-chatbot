@@ -98,6 +98,108 @@
         openSidebarButton.addEventListener('click', openSidebar);
         closeSidebarButton.addEventListener('click', closeSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
+
+        const chatContent = document.querySelector('.chat-content');
+        const inputArea = document.querySelector('.input-area__text-input');
+        const sendButton = document.querySelector('.send-button');
+        const welcomeView = document.querySelector('.chat-content__welcome');
+
+        sendButton.addEventListener('click', sendMessage);
+        inputArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const prompt = inputArea.textContent.trim();
+            if (!prompt) return;
+
+            if (welcomeView) {
+                welcomeView.style.display = 'none';
+            }
+
+            appendMessage('user', prompt);
+            inputArea.textContent = '';
+
+            const botMessageElement = appendMessage('bot', '...');
+            const botMessageContentElement = botMessageElement.querySelector('.chat-message__content');
+
+            try {
+                const botMessage = await callChatbotAPI(prompt);
+                botMessageContentElement.textContent = botMessage;
+            } catch (error) {
+                botMessageContentElement.textContent = '抱歉，服务暂时不可用，请稍后再试。';
+                showErrorNotification('服务暂时不可用，请稍后再试。');
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('chat-message', `chat-message--${sender}`);
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('chat-message__content');
+            messageContent.textContent = text;
+
+            messageWrapper.appendChild(messageContent);
+            chatContent.appendChild(messageWrapper);
+            chatContent.scrollTop = chatContent.scrollHeight;
+            return messageWrapper;
+        }
+
+        async function callChatbotAPI(userInput, history = []) {
+            const API_ENDPOINT = "http://localhost:8000/v1/chat/completions"; // 这是一个示例地址
+
+            const messages = [
+                ...history,
+                { role: "user", content: userInput }
+            ];
+
+            const requestBody = {
+                model: "vivo-BlueLM-TB-Pro",
+                messages: messages,
+            };
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`);
+                }
+
+                const data = await response.json();
+
+                if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                    return data.choices[0].message.content;
+                } else {
+                    throw new Error("API response did not contain a valid choice.");
+                }
+
+            } catch (error) {
+                console.error("Failed to call chatbot API:", error);
+                throw error;
+            }
+        }
+
+        function showErrorNotification(message) {
+            const notification = document.createElement('div');
+            notification.classList.add('error-notification');
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
     </script>
 </body>
 

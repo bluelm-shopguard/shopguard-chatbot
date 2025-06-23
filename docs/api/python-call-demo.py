@@ -1,14 +1,13 @@
 from openai import OpenAI
 
-client = OpenAI(api_key="YOUR_API_KEY", base_url="https://vip.apiyi.com/v1")
+client = OpenAI(api_key="NONE", base_url="http://localhost:8000/v1")
 
 completion = client.chat.completions.create(
-    model="gpt-4o-mini",
-    stream=False,
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello!"},
-    ],
+    model="vivo-BlueLM-TB-Pro",
+    messages=[{"role": "user", "content": "淘宝上有500块的苹果15,可信吗?"}],
+    temperature=0.7,
+    max_tokens=1024,
+    user="requests_test_user",
 )
 
 print(completion.choices[0].message)
