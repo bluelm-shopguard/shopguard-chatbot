@@ -73,9 +73,9 @@
 
         <footer class="chat-input-area">
             <div class="input-area__toolbar">
-                <button class="toolbar-button" aria-label="Attach file">
-                    <i data-lucide="paperclip"></i>
-                    <span>附件</span>
+                <button class="toolbar-button image-upload-button" aria-label="Attach image">
+                    <i data-lucide="image"></i>
+                    <span>图片</span>
                 </button>
                 <button class="toolbar-button" aria-label="Web search">
                     <i data-lucide="globe"></i>
@@ -83,6 +83,14 @@
                 </button>
             </div>
             <div class="input-area__input-wrapper">
+                <div class="image-preview-container" style="display: none;">
+                    <div class="image-preview">
+                        <img id="preview-image" src="" alt="Preview">
+                        <button class="remove-image-button" aria-label="Remove image">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="input-area__text-input" contenteditable="true" role="textbox"
                     data-placeholder="发消息给我分析一下..."></div>
                 <button class="send-button" aria-label="Send message">
@@ -99,6 +107,7 @@
         const sidebarOverlay = document.querySelector('.sidebar-overlay');
         const openSidebarButton = document.querySelector('.open-sidebar-button');
         const closeSidebarButton = document.querySelector('.close-sidebar-button');
+        const newChatButton = document.querySelector('.header-button[aria-label="New chat"]');
 
         function openSidebar() {
             sidebar.classList.add('active');
@@ -110,14 +119,85 @@
             sidebarOverlay.classList.remove('active');
         }
 
+        function startNewChat() {
+            // Clear all chat messages except welcome screen
+            const chatMessages = chatContent.querySelectorAll('.chat-message');
+            chatMessages.forEach(message => message.remove());
+
+            // Show welcome screen again
+            if (welcomeView) {
+                welcomeView.style.display = 'block';
+            }
+
+            // Clear input area
+            inputArea.textContent = '';
+
+            // Clear any uploaded image
+            if (currentImageData) {
+                currentImageData = null;
+                imagePreviewContainer.style.display = 'none';
+                previewImage.src = '';
+            }
+
+            // Focus on input area
+            inputArea.focus();
+        }
+
         openSidebarButton.addEventListener('click', openSidebar);
         closeSidebarButton.addEventListener('click', closeSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
+        newChatButton.addEventListener('click', startNewChat);
 
         const chatContent = document.querySelector('.chat-content');
         const inputArea = document.querySelector('.input-area__text-input');
         const sendButton = document.querySelector('.send-button');
         const welcomeView = document.querySelector('.chat-content__welcome');
+        const imageUploadButton = document.querySelector('.image-upload-button');
+        const imagePreviewContainer = document.querySelector('.image-preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const removeImageButton = document.querySelector('.remove-image-button');
+
+        let currentImageData = null; // Store the current image as base64
+
+        // Image upload functionality
+        imageUploadButton.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = handleImageUpload;
+            input.click();
+        });
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file size (limit to 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showErrorNotification('图片大小不能超过10MB');
+                return;
+            }
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                showErrorNotification('请选择图片文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImageData = e.target.result; // This is a data URL with base64
+                previewImage.src = currentImageData;
+                imagePreviewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        removeImageButton.addEventListener('click', () => {
+            currentImageData = null;
+            imagePreviewContainer.style.display = 'none';
+            previewImage.src = '';
+        });
 
         sendButton.addEventListener('click', sendMessage);
         inputArea.addEventListener('keydown', (e) => {
@@ -129,20 +209,27 @@
 
         async function sendMessage() {
             const prompt = inputArea.textContent.trim();
-            if (!prompt) return;
+            if (!prompt && !currentImageData) return;
 
             if (welcomeView) {
                 welcomeView.style.display = 'none';
             }
 
-            appendMessage('user', prompt);
+            // Display user message (with image if present)
+            appendMessage('user', prompt, currentImageData);
+
+            // Clear input and image preview
             inputArea.textContent = '';
+            const imageDataToSend = currentImageData; // Store before clearing
+            currentImageData = null;
+            imagePreviewContainer.style.display = 'none';
+            previewImage.src = '';
 
             const botMessageElement = appendMessage('bot', '...');
             const botMessageContentElement = botMessageElement.querySelector('.chat-message__content');
 
             try {
-                const botMessage = await callChatbotAPI(prompt);
+                const botMessage = await callChatbotAPI(prompt, imageDataToSend);
                 botMessageContentElement.textContent = botMessage;
             } catch (error) {
                 const errorMessage = window.getSystemSetting('chat.errorMessage');
@@ -151,9 +238,20 @@
             }
         }
 
-        function appendMessage(sender, text) {
+        function appendMessage(sender, text, imageData = null) {
             const messageWrapper = document.createElement('div');
             messageWrapper.classList.add('chat-message', `chat-message--${sender}`);
+
+            // Add image if present (for user messages)
+            if (imageData && sender === 'user') {
+                const imageElement = document.createElement('div');
+                imageElement.classList.add('chat-message__image');
+                const img = document.createElement('img');
+                img.src = imageData;
+                img.alt = 'Uploaded image';
+                imageElement.appendChild(img);
+                messageWrapper.appendChild(imageElement);
+            }
 
             const messageContent = document.createElement('div');
             messageContent.classList.add('chat-message__content');
@@ -162,17 +260,54 @@
             messageWrapper.appendChild(messageContent);
             chatContent.appendChild(messageWrapper);
             chatContent.scrollTop = chatContent.scrollHeight;
+
+            // Reinitialize Lucide icons after DOM changes
+            lucide.createIcons();
+
             return messageWrapper;
         }
 
-        async function callChatbotAPI(userInput, history = []) {
+        async function callChatbotAPI(userInput, imageData = null, history = []) {
             const API_ENDPOINT = window.getSystemSetting('api.endpoint');
             const MODEL = window.getSystemSetting('api.model');
 
-            const messages = [
-                ...history,
-                { role: "user", content: userInput }
-            ];
+            let messages = [...history];
+
+            // Create user message with text and/or image
+            if (imageData && userInput) {
+                // Both text and image
+                messages.push({
+                    role: "user",
+                    content: [
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: imageData
+                            }
+                        },
+                        {
+                            type: "text",
+                            text: userInput
+                        }
+                    ]
+                });
+            } else if (imageData) {
+                // Only image
+                messages.push({
+                    role: "user",
+                    content: [
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: imageData
+                            }
+                        }
+                    ]
+                });
+            } else {
+                // Only text
+                messages.push({ role: "user", content: userInput });
+            }
 
             const requestBody = {
                 model: MODEL,
