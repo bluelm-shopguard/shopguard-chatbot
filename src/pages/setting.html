@@ -69,13 +69,13 @@
     </div>
 
     <script type="module">
-        import { AppSettings, getSetting, setSetting } from '../data/settings.js';
+        import { UserSettings, getUserSetting, setUserSetting } from '../data/user-settings.js';
 
         function initializeSettings() {
             // Theme Selector
             const themeSelector = document.getElementById('theme-selector');
-            const currentTheme = getSetting('theme.default');
-            AppSettings.theme.options.forEach(option => {
+            const currentTheme = getUserSetting('theme.default');
+            UserSettings.theme.options.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option.name;
                 button.dataset.value = option.id;
@@ -83,7 +83,7 @@
                     button.classList.add('active');
                 }
                 button.addEventListener('click', () => {
-                    setSetting('theme.default', option.id);
+                    setUserSetting('theme.default', option.id);
                     updateActiveButton(themeSelector, button);
                 });
                 themeSelector.appendChild(button);
@@ -91,8 +91,8 @@
 
             // Language Selector
             const languageSelector = document.getElementById('language-selector');
-            const currentLanguage = getSetting('language.default');
-            AppSettings.language.options.forEach(option => {
+            const currentLanguage = getUserSetting('language.default');
+            UserSettings.language.options.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option.name;
                 button.dataset.value = option.id;
@@ -100,7 +100,7 @@
                     button.classList.add('active');
                 }
                 button.addEventListener('click', () => {
-                    setSetting('language.default', option.id);
+                    setUserSetting('language.default', option.id);
                     updateActiveButton(languageSelector, button);
                 });
                 languageSelector.appendChild(button);
@@ -108,9 +108,9 @@
 
             // Save History Toggle
             const saveHistoryToggle = document.getElementById('save-history-toggle');
-            saveHistoryToggle.checked = getSetting('chat.history.save');
+            saveHistoryToggle.checked = getUserSetting('chat.history.save');
             saveHistoryToggle.addEventListener('change', (e) => {
-                setSetting('chat.history.save', e.target.checked);
+                setUserSetting('chat.history.save', e.target.checked);
             });
         }
 

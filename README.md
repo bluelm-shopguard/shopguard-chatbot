@@ -12,6 +12,42 @@ main project
 - **GPU**: NVIDIA GeForce RTX 4060 / Intel Arc
 - **Shell**: zsh 5.9
 
+## setup
+
+### configuration
+
+Simply edit the configuration files directly:
+
+1. **System settings**: Edit `src/data/system-settings.js` for API endpoints, app settings, and feature flags
+2. **User settings**: The `src/data/user-settings.js` handles user preferences automatically
+
+**Example - updating API endpoint:**
+```javascript
+// In src/data/system-settings.js
+export let SystemSettings = {
+  api: {
+    endpoint: "https://your-api-endpoint.com/v1/chat/completions",
+    model: "your-model-name",
+    // ... other settings
+  },
+  // ... rest of config
+};
+```
+
+### settings structure
+
+The application uses a simple two-file settings system:
+
+- **`src/data/user-settings.js`** - User preferences (theme, language, chat history)
+  - Automatically saved to localStorage
+  - Can be modified through the settings UI
+  - Persists across browser sessions
+
+- **`src/data/system-settings.js`** - System configuration (API endpoints, features, messages)
+  - Edit directly in the file for different environments
+  - Contains all system-level configuration
+  - Version controlled - changes apply to all users
+
 ## general todos
 
 - [x] general outline of README
