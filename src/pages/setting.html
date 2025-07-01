@@ -70,8 +70,12 @@
 
     <script type="module">
         import { UserSettings, getUserSetting, setUserSetting } from '../data/user-settings.js';
+        import { themeManager } from '../js/theme-manager.js';
 
         function initializeSettings() {
+            // Initialize theme manager
+            themeManager.init();
+
             // Theme Selector
             const themeSelector = document.getElementById('theme-selector');
             const currentTheme = getUserSetting('theme.default');

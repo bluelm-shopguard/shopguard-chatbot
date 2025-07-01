@@ -15,6 +15,7 @@ export let UserSettings = {
     options: [
       { id: "zh-CN", name: "简体中文" },
       { id: "en-US", name: "English" },
+      // TODO Ensglish language support
     ],
   },
   chat: {
@@ -59,6 +60,18 @@ export function setUserSetting(key, value) {
       "shopguard-user-settings",
       JSON.stringify(UserSettings)
     );
+
+    // If theme setting changed, trigger theme update
+    if (key === "theme.default") {
+      // Import theme manager dynamically to avoid circular dependencies
+      import("../js/theme-manager.js")
+        .then(({ applyTheme }) => {
+          applyTheme();
+        })
+        .catch((error) => {
+          console.warn("Failed to apply theme:", error);
+        });
+    }
   } catch (error) {
     console.warn("Failed to save user settings to localStorage:", error);
   }

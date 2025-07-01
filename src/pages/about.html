@@ -68,7 +68,12 @@
         </main>
     </div>
 
-    <script>
+    <script type="module">
+        import { themeManager } from '../js/theme-manager.js';
+
+        // Initialize theme manager
+        themeManager.init();
+
         lucide.createIcons();
     </script>
 </body>

@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    /* Color System */
+    /* Light Theme Colors */
     --primary-color: #10a37f;
     --primary-hover: #0d8f6b;
     --primary-light: #e6f7f3;
@@ -50,6 +50,36 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --primary-color: #10a37f;
+    --primary-hover: #0ea472;
+    --primary-light: #064e3b;
+    --secondary-color: #818cf8;
+    --background-color: #0f172a;
+    --surface-color: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+
+    /* Dark theme gray scale */
+    --gray-50: #0f172a;
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-300: #475569;
+    --gray-400: #64748b;
+    --gray-500: #94a3b8;
+    --gray-600: #cbd5e1;
+    --gray-700: #e2e8f0;
+    --gray-800: #f1f5f9;
+    --gray-900: #f8fafc;
+
+    /* Dark theme shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.25);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.25);
 }
 
 * {
@@ -196,7 +226,8 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #ef4444; /* Red-500 */
+    background-color: #ef4444;
+    /* Red-500 */
     color: white;
     padding: var(--space-3) var(--space-4);
     border-radius: var(--border-radius-md);
@@ -369,7 +400,8 @@ body {
     border-top: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Align items */
+    justify-content: space-between;
+    /* Align items */
     gap: var(--space-3);
 }
 
@@ -377,7 +409,8 @@ body {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    flex-grow: 1; /* Allow it to take available space */
+    flex-grow: 1;
+    /* Allow it to take available space */
 }
 
 .sidebar-footer__username {
@@ -399,7 +432,8 @@ body {
     justify-content: center;
     border-radius: var(--border-radius-md);
     transition: background-color 0.2s ease, color 0.2s ease;
-    flex-shrink: 0; /* Prevent shrinking */
+    flex-shrink: 0;
+    /* Prevent shrinking */
 }
 
 .settings-button:hover {
@@ -433,7 +467,7 @@ body {
     gap: var(--space-4);
 }
 
-.page-header > .header-button {
+.page-header>.header-button {
     justify-self: start;
 }
 
@@ -570,7 +604,7 @@ body {
     padding: 0;
 }
 
-.setting-list__item.is-link > a {
+.setting-list__item.is-link>a {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -581,7 +615,7 @@ body {
     transition: background-color .2s ease;
 }
 
-.setting-list__item.is-link > a:hover {
+.setting-list__item.is-link>a:hover {
     background-color: var(--gray-50);
 }
 
@@ -634,11 +668,11 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-.toggle-switch input:checked + .slider {
+.toggle-switch input:checked+.slider {
     background-color: var(--primary-color);
 }
 
-.toggle-switch input:checked + .slider:before {
+.toggle-switch input:checked+.slider:before {
     transform: translateX(20px);
 }
 
@@ -700,27 +734,32 @@ body {
 /* Add media query for smaller screens */
 @media (max-width: 600px) {
     html {
-        font-size: 14px; /* Smaller base font size for small screens */
+        font-size: 14px;
+        /* Smaller base font size for small screens */
     }
 
     .homepage-header__title {
-        font-size: 1.2rem; /* Adjust title size */
+        font-size: 1.2rem;
+        /* Adjust title size */
     }
 
     .homepage-input-area {
-        flex-direction: column; /* Stack items vertically on small screens */
+        flex-direction: column;
+        /* Stack items vertically on small screens */
     }
 
     .homepage-input-area__tools {
-        justify-content: flex-start; /* Align items to the start (left) */
+        justify-content: flex-start;
+        /* Align items to the start (left) */
         gap: 20px;
-        width: 100%; /* Make tools take full width */
+        width: 100%;
+        /* Make tools take full width */
     }
 
     /* MODIFIED: Apply to input-container instead of text-input directly */
     .homepage-input-area__input-container {
-        width: 100%; 
-        margin-bottom: 10px; 
+        width: 100%;
+        margin-bottom: 10px;
     }
 
     /* REMOVE/ADJUST: .homepage-input-area__text-input specific width/margin if any, now handled by container */

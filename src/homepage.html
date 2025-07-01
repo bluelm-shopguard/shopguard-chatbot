@@ -10,9 +10,13 @@
     <script type="module">
         import { getSystemSetting } from './data/system-settings.js';
         import { loadUserSettings, getUserSetting } from './data/user-settings.js';
+        import { themeManager } from './js/theme-manager.js';
 
         // Load user settings
         loadUserSettings();
+
+        // Initialize theme manager
+        themeManager.init();
 
         // Make settings available globally for non-module scripts
         window.getSystemSetting = getSystemSetting;
