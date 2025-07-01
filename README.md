@@ -12,6 +12,18 @@ main project
 - **GPU**: NVIDIA GeForce RTX 4060 / Intel Arc
 - **Shell**: zsh 5.9
 
+## general todos
+
+- [x] general outline of README
+- [x] what makes up a chatbot interface
+- [x] compare interface of different products
+- [x] design
+<!-- - [ ] design in figma -->
+- [ ] full design
+- [ ] quickapp page
+- [ ] quickapp program
+- [ ] test on vivo machine
+
 ## setup
 
 ### configuration
@@ -48,17 +60,7 @@ The application uses a simple two-file settings system:
   - Contains all system-level configuration
   - Version controlled - changes apply to all users
 
-## general todos
 
-- [x] general outline of README
-- [x] what makes up a chatbot interface
-- [x] compare interface of different products
-- [x] design
-<!-- - [ ] design in figma -->
-- [ ] full design
-- [ ] quickapp page
-- [ ] quickapp program
-- [ ] test on vivo machine
 
 ## basis analysis
 

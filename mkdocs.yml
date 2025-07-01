@@ -1,0 +1,102 @@
+site_name: ShopGuard Chatbot Documentation
+site_description: Complete guide for ShopGuard AI chatbot development using Quick App framework
+site_author: ShopGuard Team
+site_url: https://shopguard-chatbot.readthedocs.io/
+
+# Repository
+repo_name: shopguard-chatbot
+repo_url: https://github.com/your-username/shopguard-chatbot
+edit_uri: edit/main/docs/
+
+# Configuration
+theme:
+  name: material
+  language: zh
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+# Extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Overview: getting-started/overview.md
+      - Environment Setup: getting-started/environment-setup.md
+      - Quick Start: getting-started/quick-start.md
+  - Development Guide:
+      - Architecture: development/architecture.md
+      - UI Design: development/ui-design.md
+      - Core Features: development/core-features.md
+      - Frontend Implementation: development/frontend.md
+      - Performance Optimization: development/performance.md
+  - API Reference:
+      - Overview: api/overview.md
+      - Backend API: api/backend.md
+      - OpenAI Compatibility: api/openai-compatibility.md
+      - Examples: api/examples.md
+  - Deployment:
+      - Build & Package: deployment/build.md
+      - Production Deployment: deployment/production.md
+      - Monitoring: deployment/monitoring.md
+  - Tutorials:
+      - Basic Chat Implementation: tutorials/basic-chat.md
+      - Advanced Features: tutorials/advanced-features.md
+      - Customization: tutorials/customization.md
+  - Reference:
+      - FAQ: reference/faq.md
+      - Troubleshooting: reference/troubleshooting.md
+      - Best Practices: reference/best-practices.md
+
+# Plugins
+plugins:
+  - search:
+      lang:
+        - en
+        - zh
+  - minify:
+      minify_html: true
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/your-username/shopguard-chatbot
+  version:
+    provider: mike
