@@ -1,51 +1,53 @@
-# System Architecture
+# Frontend Architecture
 
-This document provides a comprehensive overview of the ShopGuard chatbot architecture, including frontend, backend, and integration patterns.
+This document provides a comprehensive overview of the ShopGuard chatbot frontend architecture, built as a Quick App for vivo devices.
 
 ## Architecture Overview
 
-ShopGuard follows a modern three-tier architecture optimized for mobile Quick App deployment:
+ShopGuard frontend follows a modular architecture optimized for Quick App deployment and AI-powered chat experiences:
 
 ```mermaid
 graph TB
-    subgraph "Frontend Layer"
-        QA[Quick App UI]
+    subgraph "Presentation Layer"
+        UI[Quick App UI]
         CM[Chat Manager]
         SM[State Manager]
         TM[Theme Manager]
     end
     
-    subgraph "API Layer"
-        AG[API Gateway]
-        AM[Auth Middleware]
-        RL[Rate Limiter]
-        LB[Load Balancer]
+    subgraph "Business Logic Layer"
+        AC[API Client]
+        EH[Error Handler]
+        SEC[Security Manager]
+        PM[Privacy Manager]
     end
     
-    subgraph "Backend Services"
-        CS[Chat Service]
-        FD[Fraud Detection]
-        RAG[RAG System]
-        WS[Web Search]
+    subgraph "Data Layer"
+        LS[Local Storage]
+        SS[System Settings]
+        US[User Settings]
+        DM[Data Models]
     end
     
-    subgraph "AI & Data Layer"
-        BL[vivo BlueLM]
-        VDB[Vector Database]
-        KB[Knowledge Base]
-        SE[Search Engines]
+    subgraph "External Services"
+        API[Backend API]
+        AI[AI Models]
+        WS[Web Services]
     end
     
-    QA --> AG
-    CM --> AG
-    AG --> CS
-    AG --> FD
-    CS --> BL
-    FD --> RAG
-    FD --> WS
-    RAG --> VDB
-    RAG --> KB
-    WS --> SE
+    UI --> CM
+    CM --> SM
+    CM --> AC
+    AC --> EH
+    AC --> SEC
+    SM --> LS
+    LS --> SS
+    LS --> US
+    LS --> DM
+    AC --> API
+    API --> AI
+    API --> WS
+    TM --> US
 ```
 
 ## Frontend Architecture
@@ -251,674 +253,680 @@ export default {
 </script>
 ```
 
-## Backend Architecture
+## API Integration Architecture
 
-### Service Layer Design
+### API Client Design
 
-The backend uses a microservices-inspired architecture with clear separation of concerns:
+The frontend uses a centralized API client for all backend communication:
 
-```python
-# main.py - FastAPI application structure
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-
-from services.chat_service import ChatService
-from services.fraud_detection_service import FraudDetectionService
-from services.rag_service import RAGService
-from services.web_search_service import WebSearchService
-from middleware.auth_middleware import verify_api_key
-from middleware.rate_limit_middleware import rate_limit
-from config.settings import Settings
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    await initialize_services()
-    yield
-    # Shutdown
-    await cleanup_services()
-
-app = FastAPI(
-    title="ShopGuard API",
-    description="AI-powered shopping fraud detection API",
-    version="1.0.0",
-    lifespan=lifespan
-)
-
-# Middleware
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
-
-# Services
-chat_service = ChatService()
-fraud_service = FraudDetectionService()
-rag_service = RAGService()
-search_service = WebSearchService()
-```
-
-### Chat Service
-Core conversational AI functionality:
-
-```python
-# services/chat_service.py
-from typing import List, AsyncGenerator
-import asyncio
-from openai import AsyncOpenAI
-
-class ChatService:
-    def __init__(self):
-        self.client = AsyncOpenAI(
-            api_key=settings.VIVO_API_KEY,
-            base_url=settings.VIVO_API_BASE
-        )
-        self.active_sessions = {}
-    
-    async def create_completion(
-        self,
-        messages: List[dict],
-        model: str = "vivo-BlueLM-TB-Pro",
-        stream: bool = False,
-        **kwargs
-    ):
-        """Create chat completion with fraud detection enhancement"""
-        
-        # Enhance messages with context if fraud-related
-        enhanced_messages = await self._enhance_messages(messages)
-        
-        if stream:
-            return self._create_stream_completion(enhanced_messages, model, **kwargs)
-        else:
-            return await self._create_standard_completion(enhanced_messages, model, **kwargs)
-    
-    async def _enhance_messages(self, messages: List[dict]) -> List[dict]:
-        """Enhance messages with relevant context"""
-        
-        # Check if fraud detection is needed
-        user_message = next((m for m in reversed(messages) if m["role"] == "user"), None)
-        if not user_message:
-            return messages
-        
-        # Add fraud detection context
-        if self._is_fraud_related_query(user_message["content"]):
-            system_prompt = self._get_fraud_detection_prompt()
-            
-            # Add or update system message
-            enhanced = messages.copy()
-            if enhanced and enhanced[0]["role"] == "system":
-                enhanced[0]["content"] += "\n\n" + system_prompt
-            else:
-                enhanced.insert(0, {"role": "system", "content": system_prompt})
-            
-            return enhanced
-        
-        return messages
-    
-    def _is_fraud_related_query(self, content: str) -> bool:
-        """Detect if query is related to fraud/shopping analysis"""
-        fraud_keywords = [
-            "deal", "price", "discount", "seller", "scam", "fraud",
-            "legitimate", "trustworthy", "suspicious", "fake",
-            "shopping", "buy", "purchase", "投资", "理财", "购物"
-        ]
-        return any(keyword in content.lower() for keyword in fraud_keywords)
-```
-
-### Fraud Detection Service
-Specialized fraud analysis capabilities:
-
-```python
-# services/fraud_detection_service.py
-from dataclasses import dataclass
-from typing import Dict, List, Optional
-import re
-import asyncio
-
-@dataclass
-class FraudAnalysis:
-    risk_level: int  # 0-10 stars
-    confidence: float
-    risk_factors: List[str]
-    price_analysis: Optional[Dict]
-    seller_analysis: Optional[Dict]
-    recommendation: str
-
-class FraudDetectionService:
-    def __init__(self, rag_service, web_search_service):
-        self.rag_service = rag_service
-        self.web_search_service = web_search_service
-        self.price_analyzer = PriceAnalyzer()
-        self.url_analyzer = URLAnalyzer()
-    
-    async def analyze_query(self, query: str, context: Dict = None) -> FraudAnalysis:
-        """Comprehensive fraud analysis of user query"""
-        
-        # Parallel analysis tasks
-        tasks = [
-            self._extract_entities(query),
-            self._get_relevant_knowledge(query),
-            self._analyze_pricing(query),
-            self._analyze_urls(query)
-        ]
-        
-        # Execute analysis tasks concurrently
-        entities, knowledge, price_analysis, url_analysis = await asyncio.gather(*tasks)
-        
-        # Synthesize results
-        risk_factors = []
-        risk_score = 0
-        
-        # Price-based risk assessment
-        if price_analysis:
-            if price_analysis.get("suspiciously_low", False):
-                risk_factors.append("Abnormally low price")
-                risk_score += 3
-        
-        # URL-based risk assessment
-        if url_analysis:
-            if url_analysis.get("domain_reputation", 0) < 0.3:
-                risk_factors.append("Untrustworthy domain")
-                risk_score += 2
-        
-        # Knowledge-based risk assessment
-        if knowledge:
-            similar_scams = len([k for k in knowledge if k.get("is_scam", False)])
-            if similar_scams > 0:
-                risk_factors.append(f"Similar to {similar_scams} known scam patterns")
-                risk_score += similar_scams
-        
-        # Generate recommendation
-        recommendation = self._generate_recommendation(risk_score, risk_factors)
-        
-        return FraudAnalysis(
-            risk_level=min(10, risk_score),
-            confidence=0.8,  # Calculate based on data quality
-            risk_factors=risk_factors,
-            price_analysis=price_analysis,
-            seller_analysis=None,  # TODO: Implement seller analysis
-            recommendation=recommendation
-        )
-```
-
-### RAG System Architecture
-Retrieval-Augmented Generation for enhanced knowledge:
-
-```python
-# services/rag_service.py
-import chromadb
-from sentence_transformers import SentenceTransformer
-from typing import List, Dict
-
-class RAGService:
-    def __init__(self):
-        self.client = chromadb.PersistentClient(path="./chroma_db")
-        self.collection = self.client.get_or_create_collection(
-            name="fraud_knowledge",
-            metadata={"hnsw:space": "cosine"}
-        )
-        self.encoder = SentenceTransformer('m3e-base')
-        
-    async def retrieve_relevant_knowledge(
-        self, 
-        query: str, 
-        max_results: int = 5,
-        similarity_threshold: float = 0.7
-    ) -> List[Dict]:
-        """Retrieve relevant fraud cases and knowledge"""
-        
-        # Generate query embedding
-        query_embedding = self.encoder.encode([query])
-        
-        # Search similar documents
-        results = self.collection.query(
-            query_embeddings=query_embedding.tolist(),
-            n_results=max_results,
-            where={"type": "fraud_case"},
-            include=["documents", "metadatas", "distances"]
-        )
-        
-        # Filter by similarity threshold
-        filtered_results = []
-        for i, distance in enumerate(results["distances"][0]):
-            similarity = 1 - distance  # Convert distance to similarity
-            if similarity >= similarity_threshold:
-                filtered_results.append({
-                    "content": results["documents"][0][i],
-                    "metadata": results["metadatas"][0][i],
-                    "similarity": similarity
-                })
-        
-        return filtered_results
-    
-    async def add_knowledge(self, documents: List[str], metadatas: List[Dict]):
-        """Add new knowledge to the database"""
-        
-        # Generate embeddings
-        embeddings = self.encoder.encode(documents)
-        
-        # Generate unique IDs
-        ids = [f"doc_{i}_{hash(doc)}" for i, doc in enumerate(documents)]
-        
-        # Add to collection
-        self.collection.add(
-            documents=documents,
-            metadatas=metadatas,
-            embeddings=embeddings.tolist(),
-            ids=ids
-        )
-```
-
-## Data Architecture
-
-### Database Design
-
-```mermaid
-erDiagram
-    User ||--o{ ChatSession : has
-    ChatSession ||--o{ Message : contains
-    Message ||--o{ Attachment : has
-    User ||--o{ UserSettings : has
-    
-    User {
-        string id PK
-        string username
-        string email
-        datetime created_at
-        datetime last_active
-        json preferences
+```javascript
+// src/js/api-client.js
+class APIClient {
+    constructor() {
+        this.baseURL = SystemSettings.api.endpoint;
+        this.apiKey = SystemSettings.api.apiKey;
+        this.model = SystemSettings.api.model;
     }
     
-    ChatSession {
-        string id PK
-        string user_id FK
-        string title
-        datetime created_at
-        datetime updated_at
-        json metadata
-        boolean is_active
+    async sendMessage(messages, options = {}) {
+        const payload = {
+            model: this.model,
+            messages: messages,
+            stream: options.stream || false,
+            temperature: options.temperature || 0.7,
+            max_tokens: options.maxTokens || 2000,
+            ...options
+        };
+        
+        const response = await fetch(this.baseURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        if (options.stream) {
+            return this._handleStreamResponse(response);
+        } else {
+            return await response.json();
+        }
     }
     
-    Message {
-        string id PK
-        string session_id FK
-        string role
-        text content
-        datetime timestamp
-        json analysis_data
-        string status
+    async _handleStreamResponse(response) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        return {
+            async *[Symbol.asyncIterator]() {
+                try {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const data = line.slice(6);
+                                if (data === '[DONE]') return;
+                                
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    yield parsed;
+                                } catch (e) {
+                                    console.warn('Failed to parse SSE data:', data);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    reader.releaseLock();
+                }
+            }
+        };
+    }
+}
+```
+
+### Error Handling
+
+```javascript
+// src/js/error-handler.js
+class ErrorHandler {
+    static handleAPIError(error, context = {}) {
+        const errorInfo = {
+            timestamp: new Date().toISOString(),
+            context,
+            error: {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            }
+        };
+        
+        console.error('API Error:', errorInfo);
+        
+        // Show user-friendly error message
+        switch (error.status) {
+            case 401:
+                return 'Authentication failed. Please check your API key.';
+            case 429:
+                return 'Too many requests. Please try again later.';
+            case 500:
+                return 'Server error. Please try again later.';
+            default:
+                return 'An unexpected error occurred. Please try again.';
+        }
     }
     
-    Attachment {
-        string id PK
-        string message_id FK
-        string type
-        string file_path
-        json metadata
+    static handleNetworkError() {
+        return 'Network connection failed. Please check your internet connection.';
     }
+}
+```
+
+## Data Management
+
+### Local Storage Strategy
+
+The frontend uses browser storage APIs for persisting user data:
+
+```javascript
+// src/js/storage-manager.js
+class StorageManager {
+    constructor() {
+        this.prefix = 'shopguard_';
+    }
+    
+    // Chat history management
+    saveChatHistory(sessionId, messages) {
+        const key = `${this.prefix}chat_${sessionId}`;
+        const data = {
+            messages,
+            timestamp: Date.now(),
+            sessionId
+        };
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+    
+    getChatHistory(sessionId) {
+        const key = `${this.prefix}chat_${sessionId}`;
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+    }
+    
+    // User preferences
+    saveUserSettings(settings) {
+        localStorage.setItem(`${this.prefix}user_settings`, JSON.stringify(settings));
+    }
+    
+    getUserSettings() {
+        const data = localStorage.getItem(`${this.prefix}user_settings`);
+        return data ? JSON.parse(data) : UserSettings;
+    }
+    
+    // Session management
+    createSession() {
+        const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const session = {
+            id: sessionId,
+            title: "New Chat",
+            createdAt: Date.now(),
+            messages: []
+        };
+        
+        this.saveChatHistory(sessionId, []);
+        return session;
+    }
+    
+    getAllSessions() {
+        const sessions = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(`${this.prefix}chat_`)) {
+                const data = JSON.parse(localStorage.getItem(key));
+                sessions.push({
+                    id: data.sessionId,
+                    title: this.generateChatTitle(data.messages),
+                    createdAt: data.timestamp,
+                    messageCount: data.messages.length
+                });
+            }
+        }
+        return sessions.sort((a, b) => b.createdAt - a.createdAt);
+    }
+    
+    generateChatTitle(messages) {
+        const firstUserMessage = messages.find(m => m.role === 'user');
+        if (firstUserMessage) {
+            return firstUserMessage.content.slice(0, 30) + (firstUserMessage.content.length > 30 ? '...' : '');
+        }
+        return "New Chat";
+    }
+}
+```
+
+### Data Models
+
+```javascript
+// src/js/data-models.js
+class Message {
+    constructor(role, content, type = 'text') {
+        this.id = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.role = role; // 'user', 'assistant', 'system'
+        this.content = content;
+        this.type = type; // 'text', 'image', 'file'
+        this.timestamp = Date.now();
+        this.status = 'sent'; // 'sending', 'sent', 'error'
+    }
+}
+
+class ChatSession {
+    constructor(title = "New Chat") {
+        this.id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.title = title;
+        this.createdAt = Date.now();
+        this.updatedAt = Date.now();
+        this.messages = [];
+        this.isActive = true;
+    }
+    
+    addMessage(message) {
+        this.messages.push(message);
+        this.updatedAt = Date.now();
+    }
+    
+    getContext(maxMessages = 10) {
+        // Return recent messages for API context
+        return this.messages
+            .slice(-maxMessages)
+            .map(msg => ({
+                role: msg.role,
+                content: msg.content
+            }));
+    }
+}
 ```
 
 ### Configuration Management
 
-```python
-# config/settings.py
-from pydantic import BaseSettings, validator
-from typing import List, Optional
+The frontend uses direct JavaScript configuration files instead of environment files for simplicity and transparency:
 
-class Settings(BaseSettings):
-    # API Configuration
-    API_HOST: str = "localhost"
-    API_PORT: int = 8000
-    API_KEY: str = "default-key"
+```javascript
+// src/data/system-settings.js
+export let SystemSettings = {
+    // API Configuration
+    api: {
+        endpoint: "http://localhost:8000/v1/chat/completions",
+        model: "vivo-BlueLM-TB-Pro",
+        apiKey: "default-key"
+    },
     
-    # vivo BlueLM Configuration
-    VIVO_API_KEY: str
-    VIVO_API_BASE: str = "https://api.vivo.ai"
-    VIVO_MODEL_TB_PRO: str = "vivo-BlueLM-TB-Pro"
-    VIVO_MODEL_VISION: str = "vivo-BlueLM-V-2.0"
+    // App Configuration  
+    app: {
+        name: "ShopGuard Assistant",
+        version: "1.0.0",
+        environment: "development"
+    },
     
-    # Database Configuration
-    DATABASE_URL: str = "sqlite:///./shopguard.db"
-    CHROMA_PERSIST_DIR: str = "./chroma_db"
+    // Feature Flags
+    features: {
+        ragEnabled: true,
+        searchEnabled: true,
+        multiModalEnabled: true,
+        darkModeEnabled: true
+    },
     
-    # RAG Configuration
-    RAG_ENABLED: bool = True
-    EMBEDDING_MODEL: str = "m3e-base"
-    MAX_RETRIEVALS: int = 5
-    SIMILARITY_THRESHOLD: float = 0.7
-    
-    # Search Configuration
-    SEARCH_ENABLED: bool = True
-    SEARCH_TIMEOUT: int = 5
-    GOOGLE_API_KEY: Optional[str] = None
-    BING_API_KEY: Optional[str] = None
-    
-    # Performance Configuration
-    MAX_WORKERS: int = 4
-    REQUEST_TIMEOUT: int = 30
-    RATE_LIMIT_PER_MINUTE: int = 100
-    CACHE_TTL: int = 3600
-    
-    # Security Configuration
-    CORS_ORIGINS: List[str] = ["*"]
-    API_KEY_REQUIRED: bool = True
-    
-    @validator('VIVO_API_KEY')
-    def vivo_api_key_required(cls, v):
-        if not v:
-            raise ValueError('VIVO_API_KEY is required')
-        return v
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
-
-settings = Settings()
+    // UI Configuration
+    ui: {
+        theme: "auto",
+        maxMessages: 100,
+        typingAnimationSpeed: 50,
+        showTimestamps: true
+    }
+};
 ```
 
-## Security Architecture
-
-### Authentication & Authorization
-
-```python
-# middleware/auth_middleware.py
-from fastapi import HTTPException, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import Optional
-
-security = HTTPBearer()
-
-async def verify_api_key(
-    credentials: HTTPAuthorizationCredentials = Security(security)
-) -> str:
-    """Verify API key from request headers"""
+```javascript
+// src/data/user-settings.js  
+export let UserSettings = {
+    // User preferences (automatically managed)
+    theme: "auto",
+    fontSize: "medium", 
+    language: "zh-CN",
+    notifications: true,
     
-    if not credentials:
-        raise HTTPException(
-            status_code=401,
-            detail="Missing authentication credentials"
-        )
-    
-    api_key = credentials.credentials
-    
-    # Validate API key
-    if not is_valid_api_key(api_key):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid API key"
-        )
-    
-    return api_key
-
-def is_valid_api_key(api_key: str) -> bool:
-    """Validate API key against configured keys"""
-    valid_keys = settings.VALID_API_KEYS.split(',')
-    return api_key in valid_keys
+    // Chat preferences
+    chat: {
+        sendOnEnter: true,
+        showTypingIndicator: true,
+        autoScroll: true
+    }
+};
 ```
 
-### Rate Limiting
+## Security Considerations
 
-```python
-# middleware/rate_limit_middleware.py
-import time
-from collections import defaultdict
-from fastapi import HTTPException, Request
-from typing import Dict
+### API Key Management
 
-class RateLimiter:
-    def __init__(self, requests_per_minute: int = 60):
-        self.requests_per_minute = requests_per_minute
-        self.clients: Dict[str, List[float]] = defaultdict(list)
-    
-    def is_allowed(self, client_id: str) -> bool:
-        """Check if client is within rate limits"""
-        now = time.time()
-        minute_ago = now - 60
+```javascript
+// src/js/security-manager.js
+class SecurityManager {
+    static validateApiKey(apiKey) {
+        // Basic API key format validation
+        if (!apiKey || apiKey.length < 10) {
+            throw new Error('Invalid API key format');
+        }
         
-        # Clean old requests
-        self.clients[client_id] = [
-            timestamp for timestamp in self.clients[client_id]
-            if timestamp > minute_ago
-        ]
+        // Check for placeholder values
+        const invalidKeys = ['default-key', 'your-api-key', 'test-key'];
+        if (invalidKeys.includes(apiKey.toLowerCase())) {
+            console.warn('Using placeholder API key. Please update system settings.');
+        }
         
-        # Check if under limit
-        if len(self.clients[client_id]) >= self.requests_per_minute:
-            return False
+        return true;
+    }
+    
+    static sanitizeInput(input) {
+        // Basic input sanitization
+        if (typeof input !== 'string') return input;
         
-        # Record this request
-        self.clients[client_id].append(now)
-        return True
-
-rate_limiter = RateLimiter(settings.RATE_LIMIT_PER_MINUTE)
-
-async def rate_limit_middleware(request: Request, call_next):
-    """Rate limiting middleware"""
-    client_ip = request.client.host
+        return input
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/javascript:/gi, '')
+            .replace(/on\w+\s*=\s*"[^"]*"/gi, '');
+    }
     
-    if not rate_limiter.is_allowed(client_ip):
-        raise HTTPException(
-            status_code=429,
-            detail="Rate limit exceeded"
-        )
+    static rateLimit() {
+        const key = 'shopguard_rate_limit';
+        const now = Date.now();
+        const minute = 60 * 1000;
+        
+        let requests = JSON.parse(localStorage.getItem(key) || '[]');
+        
+        // Remove old requests
+        requests = requests.filter(timestamp => now - timestamp < minute);
+        
+        // Check limit (60 requests per minute)
+        if (requests.length >= 60) {
+            throw new Error('Rate limit exceeded. Please wait before sending another message.');
+        }
+        
+        // Add current request
+        requests.push(now);
+        localStorage.setItem(key, JSON.stringify(requests));
+        
+        return true;
+    }
+}
+```
+
+### Data Privacy
+
+```javascript
+// src/js/privacy-manager.js
+class PrivacyManager {
+    static clearSensitiveData() {
+        // Clear chat history if requested
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('shopguard_chat_')) {
+                localStorage.removeItem(key);
+            }
+        });
+    }
     
-    response = await call_next(request)
-    return response
+    static anonymizeMessage(message) {
+        // Remove potentially sensitive information
+        let content = message.content;
+        
+        // Remove email addresses
+        content = content.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL]');
+        
+        // Remove phone numbers
+        content = content.replace(/\b\d{3}-\d{3}-\d{4}\b/g, '[PHONE]');
+        
+        // Remove credit card patterns
+        content = content.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[CARD]');
+        
+        return {
+            ...message,
+            content
+        };
+    }
+}
 ```
 
 ## Deployment Architecture
 
-### Container Setup
+### Quick App Packaging
 
-```dockerfile
-# Dockerfile
-FROM python:3.9-slim
+The frontend follows Quick App packaging standards for vivo devices:
 
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash app
-USER app
-
-# Expose port
-EXPOSE 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# Start application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```json
+// manifest.json
+{
+  "package": "com.shopguard.chatbot",
+  "name": "ShopGuard Assistant",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minPlatformVersion": "1070",
+  "icon": "/common/images/logo.jpeg",
+  "features": [
+    {"name": "system.network"},
+    {"name": "system.storage"},
+    {"name": "system.clipboard"},
+    {"name": "system.device"}
+  ],
+  "permissions": [
+    {"origin": "*"}
+  ],
+  "config": {
+    "logLevel": "debug",
+    "designWidth": 750
+  },
+  "router": {
+    "entry": "Homepage",
+    "pages": {
+      "Homepage": {
+        "component": "index"
+      },
+      "Chat": {
+        "component": "index",
+        "path": "/chat"
+      },
+      "Settings": {
+        "component": "index", 
+        "path": "/settings"
+      }
+    }
+  },
+  "display": {
+    "titleBarBackgroundColor": "#ffffff",
+    "titleBarTextColor": "#000000",
+    "menu": true,
+    "pages": {
+      "Homepage": {
+        "titleBarText": "ShopGuard Assistant",
+        "menu": false
+      }
+    }
+  }
+}
 ```
 
-### Kubernetes Deployment
+### Build Process
 
-```yaml
-# deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: shopguard-api
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: shopguard-api
-  template:
-    metadata:
-      labels:
-        app: shopguard-api
-    spec:
-      containers:
-      - name: api
-        image: shopguard/api:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: shopguard-secrets
-              key: api-key
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+```bash
+# Development build
+npm run dev
+
+# Production build
+npm run build
+
+# Package for distribution
+npm run pack
+
+# Test on device
+npm run test
 ```
 
-## Performance Optimization
+### Performance Optimization
 
-### Caching Strategy
-
-```python
-# services/cache_service.py
-import redis
-import json
-from typing import Any, Optional
-from functools import wraps
-
-class CacheService:
-    def __init__(self):
-        self.redis_client = redis.Redis(
-            host=settings.REDIS_HOST,
-            port=settings.REDIS_PORT,
-            db=0,
-            decode_responses=True
-        )
-    
-    def cache_result(self, key_prefix: str, ttl: int = 3600):
-        """Decorator to cache function results"""
-        def decorator(func):
-            @wraps(func)
-            async def wrapper(*args, **kwargs):
-                # Generate cache key
-                cache_key = f"{key_prefix}:{hash(str(args) + str(kwargs))}"
-                
-                # Try to get from cache
-                cached = self.get(cache_key)
-                if cached is not None:
-                    return cached
-                
-                # Execute function and cache result
-                result = await func(*args, **kwargs)
-                self.set(cache_key, result, ttl)
-                
-                return result
-            return wrapper
-        return decorator
-    
-    def set(self, key: str, value: Any, ttl: int = 3600):
-        """Set value in cache"""
-        self.redis_client.setex(
-            key, 
-            ttl, 
-            json.dumps(value, default=str)
-        )
-    
-    def get(self, key: str) -> Optional[Any]:
-        """Get value from cache"""
-        cached = self.redis_client.get(key)
-        if cached:
-            return json.loads(cached)
-        return None
-
-cache_service = CacheService()
-```
-
-## Monitoring and Observability
-
-### Metrics Collection
-
-```python
-# monitoring/metrics.py
-from prometheus_client import Counter, Histogram, Gauge
-import time
-from functools import wraps
-
-# Define metrics
-REQUEST_COUNT = Counter(
-    'http_requests_total',
-    'Total HTTP requests',
-    ['method', 'endpoint', 'status']
-)
-
-REQUEST_DURATION = Histogram(
-    'http_request_duration_seconds',
-    'HTTP request duration'
-)
-
-ACTIVE_SESSIONS = Gauge(
-    'active_chat_sessions',
-    'Number of active chat sessions'
-)
-
-FRAUD_DETECTIONS = Counter(
-    'fraud_detections_total',
-    'Total fraud detections',
-    ['risk_level']
-)
-
-def monitor_requests(func):
-    """Decorator to monitor API requests"""
-    @wraps(func)
-    async def wrapper(request, *args, **kwargs):
-        start_time = time.time()
+```javascript
+// src/js/performance-manager.js
+class PerformanceManager {
+    static optimizeImages() {
+        // Lazy loading for images
+        const images = document.querySelectorAll('img[data-src]');
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
         
-        try:
-            response = await func(request, *args, **kwargs)
-            status = getattr(response, 'status_code', 200)
-            
-            # Record metrics
-            REQUEST_COUNT.labels(
-                method=request.method,
-                endpoint=request.url.path,
-                status=status
-            ).inc()
-            
-            REQUEST_DURATION.observe(time.time() - start_time)
-            
-            return response
-            
-        except Exception as e:
-            REQUEST_COUNT.labels(
-                method=request.method,
-                endpoint=request.url.path,
-                status=500
-            ).inc()
-            raise e
+        images.forEach(img => imageObserver.observe(img));
+    }
     
-    return wrapper
+    static debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    static throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        }
+    }
+}
 ```
 
-This architecture provides a solid foundation for building and scaling the ShopGuard chatbot application. The modular design allows for easy maintenance and feature expansion while maintaining high performance and reliability.
+## Testing Strategy
+
+### Component Testing
+
+```javascript
+// tests/components/message-bubble.test.js
+import { MessageBubble } from '../src/components/message-bubble';
+
+describe('MessageBubble Component', () => {
+    test('renders user message correctly', () => {
+        const message = {
+            role: 'user',
+            content: 'Hello, world!',
+            timestamp: Date.now()
+        };
+        
+        const component = new MessageBubble(message);
+        const element = component.render();
+        
+        expect(element.classList.contains('user-message')).toBe(true);
+        expect(element.textContent).toContain('Hello, world!');
+    });
+    
+    test('renders assistant message with markdown', () => {
+        const message = {
+            role: 'assistant',
+            content: '**Bold text** and *italic text*',
+            timestamp: Date.now()
+        };
+        
+        const component = new MessageBubble(message);
+        const element = component.render();
+        
+        expect(element.classList.contains('assistant-message')).toBe(true);
+        expect(element.innerHTML).toContain('<strong>Bold text</strong>');
+        expect(element.innerHTML).toContain('<em>italic text</em>');
+    });
+});
+```
+
+### Integration Testing
+
+```javascript
+// tests/integration/chat-flow.test.js
+import { ChatManager } from '../src/js/chat-manager';
+import { APIClient } from '../src/js/api-client';
+
+describe('Chat Flow Integration', () => {
+    let chatManager;
+    let mockApiClient;
+    
+    beforeEach(() => {
+        mockApiClient = {
+            sendMessage: jest.fn()
+        };
+        chatManager = new ChatManager(mockApiClient);
+    });
+    
+    test('complete chat conversation flow', async () => {
+        // Mock API response
+        mockApiClient.sendMessage.mockResolvedValue({
+            choices: [{
+                message: {
+                    role: 'assistant',
+                    content: 'Hello! How can I help you?'
+                }
+            }]
+        });
+        
+        // Send user message
+        await chatManager.sendMessage('Hello');
+        
+        // Verify message was sent to API
+        expect(mockApiClient.sendMessage).toHaveBeenCalledWith(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    role: 'user',
+                    content: 'Hello'
+                })
+            ])
+        );
+        
+        // Verify response was processed
+        expect(chatManager.getCurrentSession().messages).toHaveLength(2);
+    });
+});
+```
+
+## Best Practices
+
+### Code Organization
+
+```javascript
+// src/js/utils/constants.js
+export const CONSTANTS = {
+    API: {
+        TIMEOUT: 30000,
+        RETRY_ATTEMPTS: 3,
+        RATE_LIMIT: 60
+    },
+    UI: {
+        ANIMATION_DURATION: 300,
+        DEBOUNCE_DELAY: 300,
+        MAX_MESSAGE_LENGTH: 4000
+    },
+    STORAGE: {
+        PREFIX: 'shopguard_',
+        MAX_SESSIONS: 50,
+        MAX_MESSAGES_PER_SESSION: 100
+    }
+};
+```
+
+### Error Boundaries
+
+```javascript
+// src/js/utils/error-boundary.js
+class ErrorBoundary {
+    constructor(component, fallbackUI) {
+        this.component = component;
+        this.fallbackUI = fallbackUI;
+        this.hasError = false;
+    }
+    
+    componentDidCatch(error, errorInfo) {
+        this.hasError = true;
+        console.error('Component Error:', error, errorInfo);
+        
+        // Log to monitoring service
+        this.logError(error, errorInfo);
+        
+        // Show fallback UI
+        if (this.fallbackUI) {
+            this.component.parentNode.replaceChild(
+                this.fallbackUI,
+                this.component
+            );
+        }
+    }
+    
+    logError(error, errorInfo) {
+        // Send to error tracking service
+        const errorData = {
+            message: error.message,
+            stack: error.stack,
+            componentStack: errorInfo.componentStack,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            url: window.location.href
+        };
+        
+        console.log('Error logged:', errorData);
+    }
+}
+```
+
+This frontend architecture provides a solid foundation for building and maintaining the ShopGuard Quick App. The modular design ensures scalability, maintainability, and optimal performance on vivo devices.
 
 ## Next Steps
 
-- **[UI Design Guide](ui-design.md)**: Detailed interface design patterns
-- **[Core Features](core-features.md)**: Implementation of key functionality
-- **[Performance Optimization](performance.md)**: Advanced optimization techniques
+- **[Quick Start Guide](../getting-started/quick-start.md)**: Get started with development
+- **[Component Library](../reference/components.md)**: Reusable UI components
+- **[API Integration](../api/overview.md)**: Backend integration patterns
