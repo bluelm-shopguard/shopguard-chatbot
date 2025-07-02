@@ -1,7 +1,32 @@
-// System configuration settings
-// These settings can be modified directly in this file for different environments
-// No need for additional config.js - this IS the configuration file
+/**
+ * System configuration settings
+ * @module system-settings
+ * @description Core configuration settings for the application.
+ * These settings can be modified directly in this file for different environments.
+ * This IS the configuration file - no need for additional config files.
+ */
 
+/**
+ * @typedef {Object} SystemSettingsObject
+ * @property {Object} api - API configuration
+ * @property {string} api.endpoint - API endpoint URL
+ * @property {string} api.model - Model name to use
+ * @property {number} api.timeout - API request timeout in milliseconds
+ * @property {number} api.maxRetries - Maximum number of API request retries
+ * @property {Object} app - Application settings
+ * @property {string} app.name - Application name
+ * @property {string} app.version - Application version
+ * @property {string} app.environment - Environment (development, staging, production)
+ * @property {Object} features - Feature flags
+ * @property {boolean} features.webSearch - Whether web search is enabled
+ * @property {boolean} features.fileUpload - Whether file upload is enabled
+ * @property {boolean} features.chatHistory - Whether chat history is enabled
+ * @property {Object} chat - Chat settings
+ * @property {string} chat.welcomeMessage - Welcome message shown to users
+ * @property {string} chat.errorMessage - Error message shown when API fails
+ */
+
+/** @type {SystemSettingsObject} */
 export let SystemSettings = {
   api: {
     endpoint: "http://localhost:8000/v1/chat/completions",
@@ -26,6 +51,13 @@ export let SystemSettings = {
   },
 };
 
+/**
+ * Get a system setting by key
+ * @param {string} key - Dot notation path to the setting (e.g., "api.endpoint")
+ * @returns {*} The setting value or undefined if not found
+ * @example
+ * const apiUrl = getSystemSetting("api.endpoint");
+ */
 export function getSystemSetting(key) {
   if (!key) return undefined;
   const keys = key.split(".");
@@ -39,6 +71,13 @@ export function getSystemSetting(key) {
   return result;
 }
 
+/**
+ * Set a system setting by key
+ * @param {string} key - Dot notation path to the setting (e.g., "api.endpoint")
+ * @param {*} value - Value to set
+ * @example
+ * setSystemSetting("api.endpoint", "https://api.example.com/v1");
+ */
 export function setSystemSetting(key, value) {
   if (!key) return;
   const keys = key.split(".");
@@ -53,5 +92,12 @@ export function setSystemSetting(key, value) {
     setting = setting[keys[i]];
   }
   setting[keys[keys.length - 1]] = value;
-  console.log("System settings updated:", SystemSettings);
+  console.log(`System setting updated: ${key} =`, value);
+
+  // Dispatch event for other components to react to system setting changes
+  document.dispatchEvent(
+    new CustomEvent("systemSettingsChanged", {
+      detail: { key, value },
+    })
+  );
 }

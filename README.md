@@ -1,166 +1,177 @@
-# bluelm-shopguard quickapp frontend
+# ShopGuard AI - 购物防诈骗助手
 
-main project
+<div align="center">
+  <img src="docs/assets/full-design.png" alt="ShopGuard AI Logo" width="200">
+  <p>
+    <strong>智能购物防诈骗助手，基于大语言模型，帮助您识别商品风险</strong>
+  </p>
+  <p>
+    <a href="https://github.com/bluelm-shopguard/bluelm-shopguard"><strong>主项目仓库</strong></a>
+    ·
+    <a href="https://shopguard-chatbot.readthedocs.io/"><strong>在线文档</strong></a>
+    ·
+    <a href="docs/getting-started/quick-start.md"><strong>快速开始</strong></a>
+  </p>
+</div>
 
-[https://github.com/bluelm-shopguard/bluelm-shopguard](https://github.com/bluelm-shopguard/bluelm-shopguard)
+## 📱 项目概述
 
-## dev env
+ShopGuard AI 是一款专为识别购物诈骗风险设计的智能助手应用。用户可以发送商品截图、链接或聊天记录，AI 将分析内容并提供风险评估。项目支持网页版和快应用两种形式，本仓库主要包含快应用前端的实现。
 
-- **OS**: Ubuntu 24.04 LTS (via WSL2)
-- **Kernel**: 6.6.87.1-microsoft-standard-WSL2
-- **CPU**: Intel(R) Core(TM) Ultra 9 185H
-- **GPU**: NVIDIA GeForce RTX 4060 / Intel Arc
-- **Shell**: zsh 5.9
+### 主要功能
 
-## general todos
+- 🔍 **图片识别**：分析商品图片中的风险信息
+- 🔗 **链接分析**：检测可疑购物链接
+- 💬 **聊天记录分析**：识别卖家聊天中的诈骗迹象
+- ⭐ **风险评级**：提供直观的"诈骗风险星级"评分
+- 🛡️ **购物建议**：针对不同风险提供专业防骗建议
 
-- [x] general outline of README
-- [x] what makes up a chatbot interface
-- [x] compare interface of different products
-- [x] design
-<!-- - [ ] design in figma -->
-- [ ] full design
-- [ ] quickapp page
-- [ ] quickapp program
-- [ ] test on vivo machine
+## 🚀 快速开始
 
-## setup
+### 环境要求
 
-### configuration
+- Web 环境：现代浏览器（Chrome、Firefox、Safari 等）
+- 快应用环境：支持快应用的安卓设备或模拟器
 
-Simply edit the configuration files directly:
+### 安装运行
 
-1. **System settings**: Edit `src/data/system-settings.js` for API endpoints, app settings, and feature flags
-2. **User settings**: The `src/data/user-settings.js` handles user preferences automatically
+1. 克隆仓库：
 
-**Example - updating API endpoint:**
+```bash
+git clone https://github.com/bluelm-shopguard/shopguard-chatbot.git
+cd shopguard-chatbot
+```
+
+2. 安装依赖：
+
+```bash
+npm install
+```
+
+3. 配置 API 连接：
+
+打开 `src/data/system-settings.js` 更新 API 配置：
+
 ```javascript
-// In src/data/system-settings.js
 export let SystemSettings = {
   api: {
     endpoint: "https://your-api-endpoint.com/v1/chat/completions",
     model: "your-model-name",
-    // ... other settings
+    // ... 其他设置
   },
-  // ... rest of config
 };
 ```
 
-### settings structure
+4. 启动开发服务器：
 
-The application uses a simple two-file settings system:
+```bash
+npm run serve
+```
 
-- **`src/data/user-settings.js`** - User preferences (theme, language, chat history)
-  - Automatically saved to localStorage
-  - Can be modified through the settings UI
-  - Persists across browser sessions
+5. 构建生产版本：
 
-- **`src/data/system-settings.js`** - System configuration (API endpoints, features, messages)
-  - Edit directly in the file for different environments
-  - Contains all system-level configuration
-  - Version controlled - changes apply to all users
+```bash
+npm run build
+```
 
+## 📁 项目结构
 
+```
+shopguard-chatbot/
+├── docs/                 # 项目文档
+├── src/                  # 源代码
+│   ├── app.ux            # 快应用入口文件
+│   ├── manifest.json     # 快应用配置文件
+│   ├── homepage.html     # 网页版主页面
+│   ├── common/           # 共享资源
+│   │   ├── images/       # 图片资源
+│   │   └── styles/       # 样式文件
+│   ├── data/             # 数据管理
+│   │   ├── system-settings.js  # 系统设置
+│   │   └── user-settings.js    # 用户设置
+│   ├── js/               # JavaScript 模块
+│   └── pages/            # 子页面
+└── mkdocs.yml            # 文档配置
+```
 
-## basis analysis
+## ⚙️ 配置说明
 
-goal: developing for bluelm-shopguard quickapp
-viewport: typical mobile phone, like 1080x2340
-target audience: normal Chinese phone users, who may use AI app like doubao
+### 系统设置
 
-### requirement
+编辑 `src/data/system-settings.js` 可配置：
+- API 端点和模型
+- 功能开关
+- 错误信息和欢迎语
 
-help user identify fake ad and misleading promotion
-interface needs to be simple
-hide the background process;
-supports tools like image input (camera), websearch, reading webpage
+```javascript
+export let SystemSettings = {
+  api: {
+    endpoint: "http://localhost:8000/v1/chat/completions",
+    model: "vivo-BlueLM-TB-Pro",
+    timeout: 30000, // 30秒
+    maxRetries: 3,
+  },
+  // ... 更多配置
+};
+```
 
-### tech stack
+### 用户设置
 
-quickapp for frontend page and quickapp on phone
+`src/data/user-settings.js` 存储用户首选项：
+- 主题设置
+- 语言选择
+- 历史记录保存选项
 
-## comparison of popular apps
+这些设置会自动保存到 localStorage。
 
-existing chatbot app interface, see [refenrences](doc/reference/chatbot-apps/)
+## 🛠️ 开发指南
 
-good domestic products are deepseek and kimi
+完整的开发文档请访问 [在线文档](https://shopguard-chatbot.readthedocs.io/)
 
-kimi has a friendly welcome message at opening page
-lots of tools including phone call and camera
+### 网页版到快应用转换
 
-deepseek has a simple welcome message
-tools are limited to "DeepThink" and "Search" (not multimodal)
+本项目正在从网页版向快应用迁移，详细转换指南请参考：[从网页版迁移到快应用](docs/getting-started/web-to-quickapp.md)
 
-## design
+### 组件开发
 
-### interface design
+参考 [组件库文档](docs/development/components.md) 了解组件设计和使用方式。
 
-#### homepage design
+### 样式指南
 
-##### layout
+我们遵循 [样式指南](docs/development/style-guide.md) 确保界面的一致性。
 
-top
-content
-bottom
-left sidebar
+## 📋 待办清单
 
-##### top
+- [x] 项目基本结构搭建
+- [x] 网页版原型实现
+- [x] 聊天功能实现
+- [x] 图片上传功能
+- [ ] 完善快应用页面
+- [ ] 快应用程序实现
+- [ ] 在真机上测试
 
-sidebar button, product name or conversation topic (if available), new chat button
+## 🌍 浏览器兼容性
 
-##### content
+- Chrome (最近2个版本)
+- Firefox (最近2个版本)
+- Safari (最近2个版本)
+- Edge (最近2个版本)
 
-startup:
-poster
-chatbot pfp
-welcome message
+## 📱 快应用兼容性
 
-in conversation:
-message in turn, scrollbar
+- 兼容华为、OPPO、VIVO、小米等支持快应用标准的设备
+- 最低平台版本：1070
 
-##### bottom
+## 👥 贡献指南
 
-tools
+欢迎贡献代码、报告问题或提出新功能建议！
 
-input
-input area, send button
+1. Fork 本仓库
+2. 创建您的特性分支: `git checkout -b feature/amazing-feature`
+3. 提交您的更改: `git commit -m 'Add some amazing feature'`
+4. 推送到分支: `git push origin feature/amazing-feature`
+5. 提交 Pull Request
 
-#### sidebar design
+## 📄 许可证
 
-history conversation list
-
-setting button
-
-#### setting menu design
-
-account (sign in)
-user character
-theme
-language
-toggle background
-
-## full design
-
-[full-design-image](doc/full-design.png)
-
-[full-design-html](doc/full-design.html)
-
-### program design
-
-webpage with .ux
-css
-interaction logic, js
-how to call backend service
-how to parse string to markdown
-how to display markdown answer on screen
-how to enable user to change settings
-how to manage accounts
-how to manage accounts data
-
-## references
-
-[https://github.com/ChatGPTNextWeb/NextChat](https://github.com/ChatGPTNextWeb/NextChat)
-
-[https://deepwiki.com/ChatGPTNextWeb/NextChat](https://deepwiki.com/ChatGPTNextWeb/NextChat)
-
-[https://github.com/nomic-ai/gpt4all](https://github.com/nomic-ai/gpt4all)
+本项目采用 MIT 许可证 - 详情请参见 [LICENSE](LICENSE) 文件

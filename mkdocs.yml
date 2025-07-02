@@ -36,6 +36,9 @@ theme:
     - search.share
     - content.code.copy
     - content.code.annotate
+    - navigation.footer
+    - navigation.tracking
+    - toc.follow
 
 # Extensions
 markdown_extensions:
@@ -49,54 +52,66 @@ markdown_extensions:
   - pymdownx.details
   - admonition
   - attr_list
+  - def_list
+  - tables
+  - footnotes
   - md_in_html
   - toc:
       permalink: true
 
-# Navigation
-nav:
-  - Home: index.md
-  - Getting Started:
-      - Overview: getting-started/overview.md
-      - Environment Setup: getting-started/environment-setup.md
-      - Quick Start: getting-started/quick-start.md
-  - Development Guide:
-      - Architecture: development/architecture.md
-      - UI Design: development/ui-design.md
-      - Core Features: development/core-features.md
-      - Frontend Implementation: development/frontend.md
-      - Performance Optimization: development/performance.md
-  - API Reference:
-      - Overview: api/overview.md
-      - Backend API: api/backend.md
-      - OpenAI Compatibility: api/openai-compatibility.md
-      - Examples: api/examples.md
-  - Deployment:
-      - Build & Package: deployment/build.md
-      - Production Deployment: deployment/production.md
-      - Monitoring: deployment/monitoring.md
-  - Tutorials:
-      - Basic Chat Implementation: tutorials/basic-chat.md
-      - Advanced Features: tutorials/advanced-features.md
-      - Customization: tutorials/customization.md
-  - Reference:
-      - FAQ: reference/faq.md
-      - Troubleshooting: reference/troubleshooting.md
-      - Best Practices: reference/best-practices.md
-
-# Plugins
 plugins:
-  - search:
-      lang:
-        - en
-        - zh
+  - search
   - minify:
       minify_html: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - tags
 
-# Extra
+# Navigation structure
+nav:
+  - 首页: index.md
+  - 入门指南:
+      - 概述: getting-started/overview.md
+      - 快速开始: getting-started/quick-start.md
+      - 环境设置: getting-started/environment-setup.md
+      - 从网页版迁移到快应用: getting-started/web-to-quickapp.md
+  - 开发文档:
+      - 架构: development/architecture.md
+      - 组件库: development/components.md
+      - 样式指南: development/style-guide.md
+      - 最佳实践: development/best-practices.md
+      - 调试技巧: development/debugging.md
+  - API 文档:
+      - 概述: api/overview.md
+      - 后端 API: api/backend.md
+      - OpenAI 兼容性: api/openai-compatibility.md
+      - 示例: api/examples.md
+  - 部署:
+      - 环境设置: deployment/environment-setup.md
+      - 构建流程: deployment/build-process.md
+      - 发布指南: deployment/publishing-guide.md
+  - 教程:
+      - 聊天功能实现: tutorials/chat-implementation.md
+      - 主题切换: tutorials/theme-switching.md
+      - 图片识别集成: tutorials/image-recognition.md
+  - 用户指南:
+      - 安装应用: user-guide/installation.md
+      - 基本使用: user-guide/basic-usage.md
+      - 故障排除: user-guide/troubleshooting.md
+  - 参考:
+      - 常见问题: reference/faq.md
+      - 原始指南: reference/original-guide.md
+      - 兼容性列表: reference/compatibility.md
+      - 更新日志: reference/changelog.md
+
+# Customization
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/your-username/shopguard-chatbot
-  version:
-    provider: mike
+  generator: false
+
+extra_css:
+  - assets/extra.css
+
+copyright: Copyright &copy; 2025 ShopGuard Team

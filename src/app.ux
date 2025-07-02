@@ -1,0 +1,36 @@
+<template>
+  <!-- Root app component template -->
+  <div class="app">
+    <router-match>
+      <home path="/"></home>
+      <setting path="/setting"></setting>
+      <about path="/about"></about>
+    </router-match>
+  </div>
+</template>
+
+<script>
+  /**
+   * Root app component
+   * @desc Main application entry point for Quick App
+   */
+  export default {
+    // App lifecycle hooks
+    onCreate() {
+      console.log('App onCreate')
+      // Initialize app here
+      this.$page.setTitleBar({ text: 'ShopGuard AI' })
+    },
+    onDestroy() {
+      console.log('App onDestroy')
+      // Cleanup resources
+    }
+  }
+</script>
+
+<style>
+  .app {
+    flex: 1;
+    flex-direction: column;
+  }
+</style>

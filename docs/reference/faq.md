@@ -1,313 +1,226 @@
-# FAQ - Frequently Asked Questions
+# 常见问题解答 (FAQ)
 
-This page addresses common questions about ShopGuard chatbot development and usage.
+本页面收集了 ShopGuard AI 聊天机器人开发和使用过程中的常见问题及其解答。如果您的问题未在此列出，请在 [GitHub Issues](https://github.com/bluelm-shopguard/shopguard-chatbot/issues) 中提出。
 
-## General Questions
+## 一般问题
 
-### What is ShopGuard?
+### ShopGuard AI 是什么？
 
-ShopGuard is an AI-powered chatbot designed to help users identify online shopping fraud and scams. It's built using the Quick App framework and powered by vivo BlueLM AI model.
+ShopGuard AI 是一款购物防诈骗助手，利用大语言模型帮助用户识别商品、商家或交易过程中的潜在风险。用户可以发送商品截图、链接或聊天记录，AI 将分析内容并提供风险评级和专业建议。
 
-### Why use Quick App instead of native development?
+### 这款应用如何保护我的隐私？
 
-Quick App offers several advantages:
-- **No installation required**: Users can access instantly without downloading
-- **Web technology familiarity**: Uses HTML, CSS, JavaScript that developers already know
-- **Cross-platform compatibility**: Works across different Quick App platforms
-- **Easy development**: Lower barrier to entry compared to native app development
-- **Fast deployment**: Simplified distribution and update process
+ShopGuard AI 在设计上注重隐私保护：
 
-### Is ShopGuard free to use?
+1. 所有分析都在服务器端完成，无需在本地存储敏感数据
+2. 默认情况下不会永久保存用户上传的图片
+3. 聊天记录仅存储在用户自己的设备上
+4. 用户可以随时清除聊天历史
 
-The open-source version of ShopGuard is free to use and modify. However, you'll need:
-- API access to vivo BlueLM (may have costs)
-- Hosting for the backend service
-- Optional: Premium features or support
+### 支持哪些平台？
 
-## Technical Questions
+ShopGuard AI 目前支持：
 
-### What are the system requirements?
+- 网页版：兼容现代浏览器（Chrome、Firefox、Safari、Edge 等）
+- 快应用版：兼容支持快应用标准的安卓设备（华为、OPPO、VIVO、小米等）
 
-**For Development:**
-- Node.js 12.0+
-- Quick App IDE
-- Python 3.8+ (for backend)
-- 4GB RAM minimum, 8GB recommended
+## 使用问题
 
-**For Users:**
-- Quick App runtime installed
-- Android 6.0+ or iOS 10.0+
-- Internet connection for AI features
+### 如何使用图片分析功能？
 
-### Can I use a different AI model?
+1. 点击聊天输入框旁边的图片按钮
+2. 选择您要分析的商品图片
+3. 可以添加文字描述提供更多上下文（可选）
+4. 点击发送按钮
+5. AI 将分析图片内容并提供风险评估
 
-Yes! The architecture is designed to be model-agnostic. You can integrate:
-- OpenAI GPT models
-- Claude (Anthropic)
-- Local models via Ollama
-- Other vivo BlueLM variants
+### 图片上传有什么限制？
 
-Simply modify the API client configuration in the backend.
+图片上传限制如下：
+- 最大文件大小：10MB
+- 支持格式：JPEG、PNG、WebP 等常见图片格式
+- 每次对话最多可发送一张图片
 
-### How accurate is the fraud detection?
+### 无法连接到服务器怎么办？
 
-Fraud detection accuracy depends on several factors:
-- **Training data quality**: Better data = better detection
-- **Model capabilities**: vivo BlueLM provides strong analytical capabilities
-- **Knowledge base**: RAG system enhances accuracy with real fraud cases
-- **Continuous learning**: System improves with more data
+如果遇到连接问题，请尝试：
 
-Typical accuracy ranges from 80-95% depending on fraud type and context.
+1. 检查网络连接
+2. 确认是否配置了正确的 API 端点
+3. 检查 API 服务是否在运行
+4. 重启应用程序
+5. 如果问题持续存在，请尝试在设置中切换到备用 API 端点
 
-### Can I customize the UI?
+### 如何清除我的聊天记录？
 
-Absolutely! The UI is built with standard web technologies:
-- Modify styles in `src/common/styles/`
-- Update colors, fonts, layouts
-- Add custom components
-- Implement different themes
-- Responsive design modifications
+1. 点击侧边栏中的设置图标
+2. 在设置页面中找到"聊天历史"选项
+3. 选择"清除所有历史记录"
+4. 确认操作后，所有本地存储的聊天记录将被删除
 
-## Development Questions
+## 开发问题
 
-### How do I get started with development?
+### 如何配置 API 连接？
 
-1. **Follow the setup guide**: Complete [Environment Setup](../getting-started/environment-setup.md)
-2. **Clone the repository**: Get the source code
-3. **Run the quick start**: Follow [Quick Start Guide](../getting-started/quick-start.md)
-4. **Read the documentation**: Explore [Development Guide](../development/architecture.md)
+更新 `src/data/system-settings.js` 中的配置：
 
-### What if I encounter build errors?
+```javascript
+export let SystemSettings = {
+  api: {
+    endpoint: "https://your-api-endpoint.com/v1/chat/completions",
+    model: "your-model-name",
+    timeout: 30000, // 30秒
+    maxRetries: 3,
+  },
+  // ... 其他设置
+};
+```
 
-Common solutions:
-1. **Clear cache**: Delete `node_modules` and reinstall
-2. **Check Node.js version**: Ensure 12.0+ is installed
-3. **Verify manifest.json**: Check syntax and required fields
-4. **Update dependencies**: Run `npm update`
-5. **Check console logs**: Look for specific error messages
+### 如何本地部署调试服务器？
 
-### How do I add new features?
+1. 确保您已安装 Node.js（推荐版本 14 或更高）
+2. 在项目根目录下运行：`npm install` 安装依赖
+3. 运行 `npm run serve` 启动开发服务器
+4. 访问 `http://localhost:8080` 打开应用
 
-1. **Plan the feature**: Define requirements and user stories
-2. **Design the architecture**: Plan component structure
-3. **Implement frontend**: Add UI components and logic
-4. **Implement backend**: Add API endpoints if needed
-5. **Test thoroughly**: Unit tests, integration tests, user testing
-6. **Document changes**: Update documentation
+### 如何将应用打包为快应用？
 
-### Can I contribute to the project?
+1. 安装快应用开发工具：`npm install -g hap-toolkit`
+2. 在项目根目录下运行：`npm run build:quickapp`
+3. 生成的快应用包将位于 `dist/` 目录中
+4. 使用快应用预览工具安装和测试
 
-Yes! We welcome contributions:
-- **Bug reports**: Submit issues on GitHub
-- **Feature requests**: Propose new features
-- **Code contributions**: Submit pull requests
-- **Documentation**: Improve documentation
-- **Testing**: Help with testing and quality assurance
-
-## Deployment Questions
-
-### How do I deploy ShopGuard?
-
-**Frontend Deployment:**
-1. Build the Quick App package
-2. Sign with your developer certificate
-3. Submit to Quick App stores
-4. Or distribute via QR code for testing
-
-**Backend Deployment:**
-1. Choose hosting provider (AWS, Azure, GCP, VPS)
-2. Set up Docker container
-3. Configure environment variables
-4. Set up monitoring and logging
-5. Configure SSL/HTTPS
-
-### What hosting options are available?
-
-**Cloud Platforms:**
-- AWS (EC2, Lambda, ECS)
-- Google Cloud Platform
-- Microsoft Azure
-- DigitalOcean
-- Heroku
-
-**Self-hosted:**
-- VPS providers (Linode, Vultr)
-- On-premises servers
-- Home servers (for development)
-
-### How much does hosting cost?
-
-Costs vary by usage and provider:
-- **Development**: $5-20/month (basic VPS)
-- **Small scale**: $20-100/month (managed services)
-- **Production**: $100-500/month (high availability)
-- **Enterprise**: $500+/month (multiple regions, dedicated support)
-
-## Usage Questions
-
-### How do I analyze a shopping link?
-
-1. **Copy the suspicious link**
-2. **Paste it into the chat**
-3. **Add context**: Describe what you're buying
-4. **Ask for analysis**: "Is this deal legitimate?"
-5. **Review the assessment**: Check risk level and recommendations
-
-### What types of fraud can ShopGuard detect?
-
-- **Price fraud**: Unrealistic discounts and pricing
-- **Fake websites**: Impersonation of legitimate stores
-- **Seller fraud**: Untrustworthy merchants
-- **Product fraud**: Fake or misrepresented products
-- **Payment fraud**: Unsafe payment methods
-- **Phishing**: Attempts to steal personal information
-
-### How do I report a false positive/negative?
-
-Help improve the system by reporting:
-1. **False positives**: Legitimate deals marked as fraud
-2. **False negatives**: Scams not detected
-3. **Feedback method**: Use the feedback button in the app
-4. **Provide details**: Include URLs, screenshots, context
-5. **Follow up**: Check if the issue is resolved in updates
-
-## Troubleshooting
-
-### The app won't start
-
-**Possible causes and solutions:**
-- **Check device compatibility**: Ensure Quick App runtime is installed
-- **Update runtime**: Install latest Quick App runtime version
-- **Clear cache**: Clear app data and cache
-- **Restart device**: Sometimes a simple restart helps
-- **Check internet connection**: Many features require connectivity
-
-### Messages aren't sending
-
-**Troubleshooting steps:**
-1. **Check internet connection**: Ensure stable connectivity
-2. **Verify backend status**: Check if API server is running
-3. **Check API key**: Ensure valid API key is configured
-4. **Check rate limits**: You may have exceeded usage limits
-5. **Try again later**: Server may be temporarily unavailable
-
-### Fraud detection seems inaccurate
-
-**Improvement strategies:**
-- **Provide more context**: Include product details, seller info
-- **Report feedback**: Help train the system
-- **Check for updates**: New versions may have improved accuracy
-- **Verify information**: Cross-reference with other sources
-- **Use additional tools**: Combine with other fraud detection methods
-
-### How do I backup my chat history?
-
-**Backup methods:**
-1. **Export feature**: Use built-in export functionality
-2. **Cloud sync**: Enable cloud synchronization if available
-3. **Manual backup**: Screenshot important conversations
-4. **Database backup**: Advanced users can backup local storage
-
-## Performance Questions
-
-### Why is the app slow?
-
-**Common causes:**
-- **Poor internet connection**: Slow network affects AI responses
-- **Server overload**: High traffic can slow response times
-- **Device performance**: Older devices may be slower
-- **Large chat history**: Too many messages can slow the app
-- **Background apps**: Other apps consuming resources
-
-**Performance optimization:**
-- **Clear chat history**: Remove old conversations
-- **Close other apps**: Free up device resources
-- **Use Wi-Fi**: Faster than mobile data
-- **Update app**: Latest version may have optimizations
-
-### How can I make responses faster?
-
-**Speed optimization tips:**
-- **Disable unnecessary features**: Turn off web search if not needed
-- **Use shorter messages**: Concise queries process faster
-- **Clear context**: Remove unnecessary conversation history
-- **Local processing**: Some features can work offline
-- **Upgrade internet**: Faster connection = faster responses
-
-## Security Questions
-
-### Is my data safe?
-
-**Data protection measures:**
-- **Encryption**: All data transmitted securely
-- **No storage**: Conversations aren't permanently stored by default
-- **Privacy controls**: User controls data sharing
-- **Open source**: Code can be audited for security
-- **Local processing**: Some features work without sending data
-
-### What data is collected?
-
-**Typical data collection:**
-- **Chat messages**: For processing and response generation
-- **Usage analytics**: Anonymous usage statistics
-- **Error logs**: For debugging and improvement
-- **Device info**: Basic device and app version info
-- **Performance metrics**: Response times and success rates
-
-**Data not collected:**
-- **Personal information**: Unless explicitly provided
-- **Financial data**: No payment or banking information
-- **Location data**: Unless required for specific features
-- **Contacts**: No access to personal contacts
-
-### Can I use ShopGuard offline?
-
-**Offline capabilities:**
-- **Basic UI**: Interface works without internet
-- **Cached responses**: Some responses may be cached
-- **Local storage**: Chat history stored locally
-- **Limited functionality**: AI features require internet connection
-
-**Online requirements:**
-- **AI responses**: Requires connection to AI model
-- **Fraud detection**: Needs access to knowledge base
-- **Web search**: Real-time information gathering
-- **Updates**: App updates and improvements
-
-## Support Questions
-
-### Where can I get help?
-
-**Support channels:**
-- **Documentation**: Start with these docs
-- **GitHub Issues**: Report bugs and request features
-- **Community Forums**: Discuss with other users
-- **Discord/Slack**: Real-time community support
-- **Email Support**: For specific technical issues
-
-### How do I report bugs?
-
-**Bug reporting process:**
-1. **Check existing issues**: Search for similar problems
-2. **Gather information**: Screenshots, error messages, steps to reproduce
-3. **Create detailed report**: Use the bug report template
-4. **Provide context**: Device info, app version, network conditions
-5. **Follow up**: Respond to questions from developers
-
-### How often is ShopGuard updated?
-
-**Update frequency:**
-- **Security patches**: As needed (immediately for critical issues)
-- **Bug fixes**: Weekly to monthly
-- **Feature updates**: Monthly to quarterly
-- **Major releases**: Quarterly to biannually
-
-**Update channels:**
-- **Automatic updates**: Through Quick App store
-- **Beta testing**: Early access to new features
-- **GitHub releases**: Development versions
-- **Announcement channels**: Stay informed about updates
-
----
-
-*Don't see your question here? [Submit an issue](https://github.com/your-username/shopguard-chatbot/issues) or reach out through our [community channels](https://github.com/your-username/shopguard-chatbot/discussions).*
+### 如何添加新的主题？
+
+1. 在 `src/common/styles/homepage.css` 中为新主题添加 CSS 变量：
+
+```css
+[data-theme="your-theme-name"] {
+  --primary-color: #your-color;
+  --primary-hover: #your-hover-color;
+  /* 添加所有必要的颜色变量 */
+}
+```
+
+2. 在 `src/data/user-settings.js` 的主题选项中添加新主题：
+
+```javascript
+theme: {
+  default: "light",
+  options: [
+    { id: "light", name: "浅色模式" },
+    { id: "dark", name: "深色模式" },
+    { id: "your-theme-name", name: "您的主题名称" },
+    { id: "system", name: "跟随系统" },
+  ],
+},
+```
+
+### 如何定制错误消息？
+
+在 `src/data/system-settings.js` 中更新 `chat.errorMessage`：
+
+```javascript
+chat: {
+  welcomeMessage: "...",
+  errorMessage: "您的自定义错误消息",
+}
+```
+
+您也可以在 `callChatbotAPI` 函数中针对不同错误类型定制不同的错误消息。
+
+## 快应用转换问题
+
+### 快应用与网页版有哪些主要区别？
+
+主要区别包括：
+
+1. 文件结构：网页版使用 HTML/CSS/JS，快应用使用 .ux 文件（类似 Vue 单文件组件）
+2. API 访问：快应用使用特定的系统 API 而非浏览器 API
+3. 存储机制：使用 `@system.storage` 替代 localStorage
+4. 样式系统：快应用仅支持 Flex 布局
+5. 组件系统：某些 HTML 元素在快应用中有不同的对应元素
+
+详细信息请参考[从网页版迁移到快应用](../getting-started/web-to-quickapp.md)文档。
+
+### 快应用中如何处理图片上传？
+
+快应用使用媒体 API 处理图片选择：
+
+```javascript
+import media from '@system.media';
+
+export default {
+  pickImage() {
+    media.pickImage({
+      success: (data) => {
+        this.currentImageData = data.uri;
+      },
+      fail: (data, code) => {
+        console.error(`Failed to pick image: ${code}`);
+      }
+    });
+  }
+}
+```
+
+### 如何在快应用中实现页面路由？
+
+快应用使用内置的路由系统：
+
+```javascript
+import router from '@system.router';
+
+export default {
+  goToPage() {
+    router.push({
+      uri: '/pages/PageName',
+      params: { key: 'value' }
+    });
+  }
+}
+```
+
+## 故障排除
+
+### API 调用失败
+
+常见原因和解决方法：
+
+1. **网络问题**：检查网络连接
+2. **API 端点错误**：验证 `system-settings.js` 中的 API 端点配置
+3. **CORS 问题**：确保 API 服务器允许来自应用域名的跨域请求
+4. **身份验证失败**：检查是否提供了必要的 API 密钥或令牌
+5. **请求格式错误**：验证发送到 API 的消息格式是否符合要求
+
+### 图片上传问题
+
+如果图片上传失败：
+
+1. 确认图片未超过大小限制（10MB）
+2. 检查图片格式是否受支持
+3. 尝试使用较小或已压缩的图片
+4. 检查浏览器控制台是否有相关错误信息
+
+### 主题切换不生效
+
+可能的原因：
+
+1. 本地存储被禁用或已满
+2. CSS 变量未正确定义
+3. 主题管理器未正确初始化
+
+解决方法：
+
+1. 清除浏览器缓存和 Cookie
+2. 确认 `theme-manager.js` 中的事件监听器正常工作
+3. 检查 CSS 文件中的主题变量定义
+
+### 快应用预览问题
+
+如果快应用预览出现问题：
+
+1. 确认使用了最新版本的快应用预览工具
+2. 检查 `manifest.json` 配置是否正确
+3. 验证 IDE 编译输出中是否有错误或警告
+4. 尝试在不同设备或模拟器上测试
