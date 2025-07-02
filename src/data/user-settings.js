@@ -32,7 +32,6 @@ export let UserSettings = {
     options: [
       { id: "zh-CN", name: "简体中文" },
       { id: "en-US", name: "English" },
-      // TODO: English language support to be implemented
     ],
   },
   chat: {

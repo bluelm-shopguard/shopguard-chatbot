@@ -1,12 +1,27 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="i18n-title" content="settings.title">
     <title>设置 - ShopGuard AI</title>
     <link rel="stylesheet" href="../common/styles/homepage.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <!-- Ensure modules are pre-loaded correctly -->
+    <script type="module">
+        // Pre-load modules to ensure they're available
+        import * as userSettingsModule from '../data/user-settings.js';
+        import * as languageModule from '../data/language-manager.js';
+        import * as themeModule from '../js/theme-manager.js';
+
+        window.modulePreloaded = true;
+        console.log('Modules pre-loaded:', {
+            userSettings: userSettingsModule,
+            language: languageModule,
+            theme: themeModule
+        });
+    </script>
 </head>
 
 <body>
@@ -16,21 +31,21 @@
             <a href="../homepage.html" class="header-button" aria-label="Back to Home">
                 <i data-lucide="arrow-left"></i>
             </a>
-            <h1 class="page-header__title">设置</h1>
+            <h1 class="page-header__title" data-i18n="settings.title">设置</h1>
         </header>
 
         <main class="page-content">
             <div class="setting-group">
-                <h2 class="setting-group__title">通用</h2>
+                <h2 class="setting-group__title" data-i18n="settings.general">通用</h2>
                 <ul class="setting-list">
                     <li class="setting-list__item">
-                        <span class="label">外观模式</span>
+                        <span class="label" data-i18n="settings.theme">外观模式</span>
                         <div class="control">
                             <div class="segmented-control" id="theme-selector"></div>
                         </div>
                     </li>
                     <li class="setting-list__item">
-                        <span class="label">语言</span>
+                        <span class="label" data-i18n="settings.language">语言</span>
                         <div class="control">
                             <div class="segmented-control" id="language-selector"></div>
                         </div>
@@ -39,10 +54,10 @@
             </div>
 
             <div class="setting-group">
-                <h2 class="setting-group__title">聊天</h2>
+                <h2 class="setting-group__title" data-i18n="settings.chat">聊天</h2>
                 <ul class="setting-list">
                     <li class="setting-list__item">
-                        <span class="label">保存聊天记录</span>
+                        <span class="label" data-i18n="settings.chat.saveHistory">保存聊天记录</span>
                         <div class="control">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="save-history-toggle">
@@ -54,65 +69,158 @@
             </div>
 
             <div class="setting-group">
-                <h2 class="setting-group__title">关于</h2>
+                <h2 class="setting-group__title" data-i18n="settings.about">关于</h2>
                 <ul class="setting-list">
                     <!-- TODO make it trigger when list__item click, not when link clicked -->
                     <li class="setting-list__item is-link">
                         <a href="about.html">
-                            <span class="label">关于 ShopGuard AI</span>
+                            <span class="label" data-i18n="settings.about.appInfo">关于 ShopGuard AI</span>
                             <i data-lucide="chevron-right" class="icon"></i>
                         </a>
                     </li>
                 </ul>
             </div>
+
+            <!-- Add debug/error display element -->
+            <div id="settings-error"
+                style="margin: 20px 0; padding: 15px; background-color: #ffebee; color: #c62828; border-radius: 4px; display: none;">
+                <h3>Error Information</h3>
+                <pre id="error-details" style="white-space: pre-wrap; overflow-wrap: break-word;"></pre>
+            </div>
         </main>
     </div>
-
     <script type="module">
-        import { UserSettings, getUserSetting, setUserSetting } from '../data/user-settings.js';
+        // Import settings modules directly
+        import { UserSettings, getUserSetting, setUserSetting, loadUserSettings } from '../data/user-settings.js';
         import { themeManager } from '../js/theme-manager.js';
+        import { languageManager, t } from '../data/language-manager.js';
+
+        // Debug logging
+        console.log('Settings page loaded');
+        console.log('UserSettings:', UserSettings);
+        console.log('Theme options:', UserSettings?.theme?.options);
+        console.log('Language options:', UserSettings?.language?.options);
 
         function initializeSettings() {
+            // Make sure user settings are loaded first
+            loadUserSettings();
+
             // Initialize theme manager
             themeManager.init();
 
-            // Theme Selector
-            const themeSelector = document.getElementById('theme-selector');
-            const currentTheme = getUserSetting('theme.default');
-            UserSettings.theme.options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option.name;
-                button.dataset.value = option.id;
-                if (option.id === currentTheme) {
-                    button.classList.add('active');
-                }
-                button.addEventListener('click', () => {
-                    setUserSetting('theme.default', option.id);
-                    updateActiveButton(themeSelector, button);
+            // Initialize language manager
+            languageManager.init();
 
-                    // Apply theme change immediately
-                    themeManager.applyTheme();
-                    console.log('Theme changed to:', option.id);
+            console.log('Managers initialized');
+
+            // Theme Selector
+            try {
+                console.log('Setting up theme selector');
+                const themeSelector = document.getElementById('theme-selector');
+                console.log('Theme selector element:', themeSelector);
+
+                const currentTheme = getUserSetting('theme.default') || 'light';
+                console.log('Current theme:', currentTheme);
+
+                // Create default theme options as fallback
+                const defaultThemeOptions = [
+                    { id: "light", name: "浅色模式" },
+                    { id: "dark", name: "深色模式" },
+                    { id: "system", name: "跟随系统" },
+                ];
+
+                // Use UserSettings options if available, otherwise use defaults
+                const themeOptions = (UserSettings && UserSettings.theme && UserSettings.theme.options)
+                    ? UserSettings.theme.options
+                    : defaultThemeOptions;
+
+                console.log('Using theme options:', themeOptions);
+
+                console.log('Theme options to process:', themeOptions);
+
+                themeOptions.forEach(option => {
+                    console.log('Processing theme option:', option);
+
+                    const button = document.createElement('button');
+                    const translatedText = t(`settings.theme.${option.id}`);
+                    console.log(`Translation for settings.theme.${option.id}:`, translatedText);
+
+                    button.textContent = translatedText || option.name;
+                    button.dataset.value = option.id;
+                    button.dataset.i18n = `settings.theme.${option.id}`;
+
+                    if (option.id === currentTheme) {
+                        button.classList.add('active');
+                    }
+
+                    button.addEventListener('click', () => {
+                        setUserSetting('theme.default', option.id);
+                        updateActiveButton(themeSelector, button);
+
+                        // Apply theme change immediately
+                        themeManager.applyTheme();
+                        console.log('Theme changed to:', option.id);
+                    });
+
+                    themeSelector.appendChild(button);
+                    console.log('Added button for theme:', option.id);
                 });
-                themeSelector.appendChild(button);
-            });
+            } catch (error) {
+                console.error('Error setting up theme selector:', error);
+                displayError('设置外观模式时出错，请稍后再试。');
+            }
 
             // Language Selector
-            const languageSelector = document.getElementById('language-selector');
-            const currentLanguage = getUserSetting('language.default');
-            UserSettings.language.options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option.name;
-                button.dataset.value = option.id;
-                if (option.id === currentLanguage) {
-                    button.classList.add('active');
-                }
-                button.addEventListener('click', () => {
-                    setUserSetting('language.default', option.id);
-                    updateActiveButton(languageSelector, button);
+            try {
+                console.log('Setting up language selector');
+                const languageSelector = document.getElementById('language-selector');
+                console.log('Language selector element:', languageSelector);
+
+                const currentLanguage = getUserSetting('language.default') || 'zh-CN';
+                console.log('Current language:', currentLanguage);
+
+                // Create default language options as fallback
+                const defaultLanguageOptions = [
+                    { id: "zh-CN", name: "简体中文" },
+                    { id: "en-US", name: "English" }
+                ];
+
+                // Use UserSettings options if available, otherwise use defaults
+                const languageOptions = (UserSettings && UserSettings.language && UserSettings.language.options)
+                    ? UserSettings.language.options
+                    : defaultLanguageOptions;
+
+                console.log('Using language options:', languageOptions);
+
+                console.log('Language options to process:', languageOptions);
+
+                languageOptions.forEach(option => {
+                    console.log('Processing language option:', option);
+
+                    const button = document.createElement('button');
+                    button.textContent = option.name; // Language names are not translated
+                    button.dataset.value = option.id;
+
+                    if (option.id === currentLanguage) {
+                        button.classList.add('active');
+                    }
+
+                    button.addEventListener('click', () => {
+                        setUserSetting('language.default', option.id);
+                        updateActiveButton(languageSelector, button);
+
+                        // Apply language change immediately
+                        languageManager.setLanguage(option.id);
+                        console.log('Language changed to:', option.id);
+                    });
+
+                    languageSelector.appendChild(button);
+                    console.log('Added button for language:', option.id);
                 });
-                languageSelector.appendChild(button);
-            });
+            } catch (error) {
+                console.error('Error setting up language selector:', error);
+                displayError('设置语言时出错，请稍后再试。');
+            }
 
             // Save History Toggle
             const saveHistoryToggle = document.getElementById('save-history-toggle');
@@ -127,13 +235,48 @@
             activeButton.classList.add('active');
         }
 
+        /**
+         * Display error on the page
+         * @param {Error|string} error - The error to display
+         */
+        function displayError(error) {
+            const errorContainer = document.getElementById('settings-error');
+            const errorDetails = document.getElementById('error-details');
+
+            if (errorContainer && errorDetails) {
+                errorContainer.style.display = 'block';
+
+                if (error instanceof Error) {
+                    errorDetails.textContent = `${error.message}\n\n${error.stack || ''}`;
+                } else {
+                    errorDetails.textContent = String(error);
+                }
+            }
+
+            console.error('Settings error:', error);
+        }
+
         // Listen for theme changes to update UI if needed
         document.addEventListener('themechange', (e) => {
             console.log('Theme change detected:', e.detail.theme);
         });
 
+        // Listen for language changes to update UI
+        document.addEventListener('languagechange', (e) => {
+            console.log('Language change detected:', e.detail.language);
+            // Re-apply translations when language changes
+            languageManager.applyTranslations();
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
-            initializeSettings();
+            console.log('DOM loaded, initializing settings');
+            try {
+                initializeSettings();
+                console.log('Settings initialized successfully');
+            } catch (error) {
+                console.error('Error initializing settings:', error);
+                displayError(error);
+            }
             lucide.createIcons();
         });
     </script>

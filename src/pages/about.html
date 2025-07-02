@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="i18n-title" content="about.title">
     <title>关于 - ShopGuard AI</title>
     <link rel="stylesheet" href="../common/styles/homepage.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -16,20 +17,21 @@
                 <!-- BUG respond to click on the left part, don't respond click to the right -->
                 <i data-lucide="arrow-left"></i>
             </a>
-            <h1 class="page-header__title">关于</h1>
+            <h1 class="page-header__title" data-i18n="about.title">关于</h1>
         </header>
 
         <main class="page-content">
             <section class="about-header">
                 <img src="../common/images/logo.jpeg" alt="ShopGuard AI Logo" class="about-logo">
-                <h2 class="about-title">ShopGuard AI</h2>
-                <p class="about-version">版本 1.0.0</p>
+                <h2 class="about-title" data-i18n="app.name">ShopGuard AI</h2>
+                <p class="about-version"><span data-i18n="about.version">版本</span> 1.0.0</p>
             </section>
 
             <section class="content-card">
-                <h3 class="content-card__title">产品介绍</h3>
+                <h3 class="content-card__title" data-i18n="about.title">产品介绍</h3>
                 <div class="content-card__body">
-                    <p>ShopGuard AI 是一款专为保护消费者权益而设计的智能购物助手。我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的虚假宣传、价格欺诈和潜在风险，让每一次消费都安心、放心。</p>
+                    <p data-i18n="about.description">ShopGuard AI
+                        是一款专为保护消费者权益而设计的智能购物助手。我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的虚假宣传、价格欺诈和潜在风险，让每一次消费都安心、放心。</p>
                 </div>
             </section>
 
@@ -70,11 +72,24 @@
 
     <script type="module">
         import { themeManager } from '../js/theme-manager.js';
+        import { languageManager } from '../data/language-manager.js';
 
         // Initialize theme manager
         themeManager.init();
 
-        lucide.createIcons();
+        // Initialize language manager
+        languageManager.init();
+
+        // Listen for language changes
+        document.addEventListener('languagechange', (e) => {
+            console.log('Language change detected:', e.detail.language);
+            // Re-apply translations when language changes
+            languageManager.applyTranslations();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
     </script>
 </body>
 
