@@ -23,6 +23,9 @@
         // Initialize theme manager
         themeManager.init();
 
+        // Explicitly export themeManager to window for direct access
+        window.themeManager = themeManager;
+
         // Make settings available globally for non-module scripts
         window.getSystemSetting = getSystemSetting;
         window.getUserSetting = getUserSetting;
@@ -47,6 +50,9 @@
         // Listen for document ready
         document.addEventListener('DOMContentLoaded', () => {
             console.log('ShopGuard AI initialized');
+
+            // Force initial theme application to ensure correct display
+            themeManager.applyTheme();
         });
     </script>
 </head>
@@ -620,6 +626,20 @@
         // Add event listener for theme changes
         document.addEventListener('themechange', (e) => {
             console.log('Theme changed to:', e.detail.theme);
+            // Update the UI to reflect the theme change
+            const theme = e.detail.theme;
+            document.documentElement.setAttribute('data-theme', theme);
+        });
+
+        // Add event listener for user settings changes
+        document.addEventListener('userSettingsChanged', (e) => {
+            const { key, value } = e.detail;
+            console.log('User setting changed:', key, value);
+
+            // Handle specific setting changes
+            if (key === 'theme.default') {
+                themeManager.applyTheme();
+            }
         });
 
         // Add resize handler for mobile devices

@@ -24,6 +24,23 @@ export class ThemeManager {
 
     // Listen for system theme changes when user has "system" preference
     this.setupSystemThemeListener();
+
+    // Listen for theme changes from user settings
+    this.setupSettingsListener();
+  }
+
+  /**
+   * @method setupSettingsListener
+   * @description Sets up event listener for theme changes from user settings
+   */
+  setupSettingsListener() {
+    document.addEventListener("userSettingsChanged", (event) => {
+      const { key, value } = event.detail;
+      if (key === "theme.default") {
+        console.log("Theme change detected from settings:", value);
+        this.applyTheme();
+      }
+    });
   }
 
   /**

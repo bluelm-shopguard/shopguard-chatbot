@@ -89,6 +89,10 @@
                 button.addEventListener('click', () => {
                     setUserSetting('theme.default', option.id);
                     updateActiveButton(themeSelector, button);
+
+                    // Apply theme change immediately
+                    themeManager.applyTheme();
+                    console.log('Theme changed to:', option.id);
                 });
                 themeSelector.appendChild(button);
             });
@@ -122,6 +126,11 @@
             container.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
             activeButton.classList.add('active');
         }
+
+        // Listen for theme changes to update UI if needed
+        document.addEventListener('themechange', (e) => {
+            console.log('Theme change detected:', e.detail.theme);
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeSettings();
