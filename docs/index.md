@@ -57,13 +57,13 @@ graph TB
 
 ## Community & Support
 
-- **GitHub**: [Repository Link](https://github.com/your-username/shopguard-chatbot)
-- **Issues**: [Report Issues](https://github.com/your-username/shopguard-chatbot/issues)
-- **Discussions**: [Community Discussions](https://github.com/your-username/shopguard-chatbot/discussions)
+- **GitHub**: [Repository Link](https://github.com/bluelm-shopguard/shopguard-chatbot)
+- **Issues**: [Report Issues](https://github.com/bluelm-shopguard/shopguard-chatbot/issues)
+- **Discussions**: [Community Discussions](https://github.com/bluelm-shopguard/shopguard-chatbot/discussions)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/your-username/shopguard-chatbot/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/bluelm-shopguard/shopguard-chatbot/blob/main/LICENSE) file for details.
 
 ---
 

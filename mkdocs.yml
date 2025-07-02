@@ -5,7 +5,7 @@ site_url: https://shopguard-chatbot.readthedocs.io/
 
 # Repository
 repo_name: shopguard-chatbot
-repo_url: https://github.com/your-username/shopguard-chatbot
+repo_url: https://github.com/bluelm-shopguard/shopguard-chatbot
 edit_uri: edit/main/docs/
 
 # Configuration
@@ -108,7 +108,7 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/your-username/shopguard-chatbot
+      link: https://github.com/bluelm-shopguard/shopguard-chatbot
   generator: false
 
 extra_css:

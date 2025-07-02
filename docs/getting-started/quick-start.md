@@ -16,7 +16,7 @@ Before starting, ensure you have completed the [Environment Setup](environment-s
 Clone the ShopGuard chatbot repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/shopguard-chatbot.git
+git clone https://github.com/bluelm-shopguard/shopguard-chatbot.git
 cd shopguard-chatbot
 ```
 
