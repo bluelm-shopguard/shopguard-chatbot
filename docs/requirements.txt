@@ -19,5 +19,5 @@ mkdocs-git-committers-plugin-2>=1.2.0
 # Required for multilingual support
 mkdocs-static-i18n>=0.53
 
-numpy<1.28,!=2.*
-scipy<1.13          # only needed because NLTK sometimes uses SciPy
+# numpy<1.28,!=2.*
+# scipy<1.13          # only needed because NLTK sometimes uses SciPy
