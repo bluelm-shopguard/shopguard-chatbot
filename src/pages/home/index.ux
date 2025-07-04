@@ -1,0 +1,762 @@
+<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-button" onclick="openHistory">
+        <text class="header-icon">≡</text>
+      </div>
+      <text class="chat-header-title">ShopGuard AI</text>
+      <div class="header-button" onclick="startNewChat">
+        <text class="header-icon">+</text>
+      </div>
+    </div>
+
+    <!-- Main chat content -->
+    <list class="chat-content" if="{{!showWelcome}}">
+      <list-item if="{{messages.length === 0}}">
+        <div class="welcome-container">
+          <text class="welcome-logo">SG</text>
+          <text class="welcome-title">购物防诈骗助手</text>
+          <text class="welcome-message">{{welcomeMessage}}</text>
+        </div>
+      </list-item>
+      
+      <!-- User message template -->
+      <list-item for="{{userMessages}}" tid="id">
+        <div class="message-container user-message">
+          <!-- User message content -->
+          <div class="user-message-content">
+            <!-- Show uploaded image if present -->
+            <image if="{{$item.image}}" src="{{$item.image}}" class="message-image" onclick="previewImage($item.image)" />
+            
+            <!-- Show text content -->
+            <text if="{{$item.content && $item.content.length > 0}}">{{$item.content}}</text>
+          </div>
+        </div>
+      </list-item>
+      
+      <!-- AI message template -->
+      <list-item for="{{aiMessages}}" tid="id">
+        <div class="message-container ai-message">
+          <!-- AI message content -->
+          <div class="ai-message-content">
+            <!-- Show AI response text -->
+            <text>{{$item.content}}</text>
+            
+            <!-- Risk rating (if present) -->
+            <div if="{{$item.riskLevel > 0}}" class="risk-rating">
+              <text class="risk-label">风险评级：</text>
+              <text class="risk-stars">{{getRiskStars($item.riskLevel)}}</text>
+            </div>
+          </div>
+          
+          <!-- Loading indicator for waiting AI response -->
+          <div if="{{$item.loading}}" class="loading-indicator">
+            <text>正在思考...</text>
+          </div>
+        </div>
+      </list-item>
+    </list>
+    
+    <!-- Welcome view shown on first visit -->
+    <div class="welcome-full-screen" if="{{showWelcome}}">
+      <text class="welcome-logo-large">SG</text>
+      <text class="welcome-title-large">ShopGuard AI</text>
+      <text class="welcome-description">购物防诈骗助手</text>
+      <text class="welcome-message-large">{{welcomeMessage}}</text>
+      <div class="start-button" onclick="dismissWelcome">
+        <text>开始使用</text>
+      </div>
+    </div>
+
+    <!-- Chat input area -->
+    <div class="chat-input-area">
+      <!-- Input toolbar with buttons -->
+      <div class="input-toolbar">
+        <div class="toolbar-button" onclick="openImagePicker">
+          <text class="toolbar-icon">📷</text>
+          <text>图片</text>
+        </div>
+        <div class="toolbar-button" onclick="toggleWebSearch">
+          <text class="toolbar-icon">🔍</text>
+          <text>搜索</text>
+        </div>
+      </div>
+      
+      <!-- Image preview (shown when image is selected) -->
+      <div class="image-preview-container" if="{{selectedImage !== null}}">
+        <image src="{{selectedImage}}" class="preview-image" />
+        <div class="remove-image-button" onclick="removeSelectedImage">
+          <text class="remove-icon">×</text>
+        </div>
+      </div>
+      
+      <!-- Text input area -->
+      <div class="input-wrapper">
+        <input class="message-input" type="text" placeholder="{{inputPlaceholder}}" value="{{inputText}}" onchange="updateInputText" />
+        <div class="send-button" onclick="sendMessage">
+          <text class="send-icon">↑</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+// Import required modules
+import prompt from '@system.prompt'
+import storage from '@system.storage'
+import media from '@system.media'
+import file from '@system.file'
+
+export default {
+  // Component data
+  data() {
+    return {
+      // UI state
+      showWelcome: false,
+      inputPlaceholder: '发消息给我分析一下...',
+      welcomeMessage: '遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！',
+      
+      // User input
+      inputText: '',
+      selectedImage: null,
+      
+      // Chat data
+      userMessages: [],
+      aiMessages: [],
+      isProcessingMessage: false
+    }
+  },
+  
+  // Lifecycle hooks
+  onInit() {
+    // Check if this is first launch
+    this.checkFirstLaunch()
+    
+    // Load previous chat history if available
+    this.loadChatHistory()
+  },
+  
+  onShow() {
+    // If app settings were updated, refresh UI
+    this.updateFromAppSettings()
+  },
+  
+  // Component methods
+  methods: {
+    // Check if this is the first launch to show welcome screen
+    checkFirstLaunch() {
+      const app = this.$app.$def
+      storage.get({
+        key: 'firstLaunchCompleted',
+        success: (data) => {
+          this.showWelcome = data !== 'true'
+        },
+        fail: () => {
+          // No data found, this is first launch
+          this.showWelcome = true
+        }
+      })
+    },
+    
+    // Dismiss welcome screen
+    dismissWelcome() {
+      this.showWelcome = false
+      
+      // Mark first launch as completed
+      storage.set({
+        key: 'firstLaunchCompleted',
+        value: 'true'
+      })
+    },
+    
+    // Generate risk stars display
+    getRiskStars(riskLevel) {
+      if (!riskLevel || riskLevel <= 0) return ''
+      
+      let stars = ''
+      for (let i = 0; i < 5; i++) {
+        stars += i < riskLevel ? '★' : '☆'
+      }
+      return stars
+    },
+    
+    // Update from app global settings
+    updateFromAppSettings() {
+      const app = this.$app.$def
+      const globalData = app.globalData
+      
+      // Get welcome message from system settings or use default
+      if (globalData.systemSettings && globalData.systemSettings.chat) {
+        this.welcomeMessage = globalData.systemSettings.chat.welcomeMessage || this.welcomeMessage
+      }
+      
+      // Update placeholder based on language
+      this.updatePlaceholder()
+    },
+    
+    // Update input placeholder based on current language
+    updatePlaceholder() {
+      const app = this.$app.$def
+      const languageManager = app.globalData.languageManager
+      
+      if (languageManager) {
+        this.inputPlaceholder = languageManager.translate('home.conversation.inputPlaceholder') || '发消息给我分析一下...'
+      }
+    },
+    
+    // Load previous chat history
+    loadChatHistory() {
+      const app = this.$app.$def
+      const shouldSaveHistory = app.globalData.userSettings?.chat?.history?.save !== false
+      
+      if (shouldSaveHistory) {
+        storage.get({
+          key: 'chatHistory',
+          success: (data) => {
+            try {
+              const history = JSON.parse(data)
+              if (Array.isArray(history) && history.length > 0) {
+                // Process and separate user/AI messages
+                this.processHistoryMessages(history)
+              }
+            } catch (e) {
+              console.error('Failed to parse chat history', e)
+            }
+          }
+        })
+      }
+    },
+    
+    // Process history messages to separate user/AI messages
+    processHistoryMessages(messages) {
+      if (!Array.isArray(messages)) return
+      
+      this.userMessages = messages.filter(msg => msg.role === 'user')
+      this.aiMessages = messages.filter(msg => msg.role === 'assistant')
+    },
+    
+    // Get all messages in sequence
+    getAllMessages() {
+      const combined = [...this.userMessages, ...this.aiMessages]
+      return combined.sort((a, b) => {
+        return new Date(a.timestamp) - new Date(b.timestamp)
+      })
+    },
+    
+    // Save chat history
+    saveChatHistory() {
+      const app = this.$app.$def
+      const shouldSaveHistory = app.globalData.userSettings?.chat?.history?.save !== false
+      
+      if (shouldSaveHistory && (this.userMessages.length > 0 || this.aiMessages.length > 0)) {
+        const allMessages = this.getAllMessages()
+        
+        storage.set({
+          key: 'chatHistory',
+          value: JSON.stringify(allMessages)
+        })
+      }
+    },
+    
+    // Update input text as user types
+    updateInputText(e) {
+      this.inputText = e.value
+    },
+    
+    // Send a message
+    sendMessage() {
+      // Don't send empty messages
+      if (!this.inputText.trim() && !this.selectedImage) {
+        return
+      }
+      
+      // Don't allow sending while processing
+      if (this.isProcessingMessage) {
+        return
+      }
+      
+      // Create user message object
+      const userMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: this.inputText.trim(),
+        image: this.selectedImage,
+        timestamp: new Date().toISOString()
+      }
+      
+      // Add message to chat
+      this.userMessages.push(userMessage)
+      
+      // Clear input field and image selection
+      this.inputText = ''
+      this.selectedImage = null
+      
+      // Process the message
+      this.processMessage(userMessage)
+      
+      // Save chat history
+      this.saveChatHistory()
+    },
+    
+    // Process user message and get AI response
+    processMessage(userMessage) {
+      // Set processing flag
+      this.isProcessingMessage = true
+      
+      // Create placeholder for AI response (loading state)
+      const aiMessageLoading = {
+        id: Date.now().toString() + '-loading',
+        role: 'assistant',
+        content: '',
+        loading: true,
+        timestamp: new Date().toISOString()
+      }
+      
+      // Add loading message
+      this.aiMessages.push(aiMessageLoading)
+      
+      // Mock API call for now (would be replaced by actual API call)
+      setTimeout(() => {
+        // Remove loading message
+        const loadingIndex = this.aiMessages.findIndex(msg => msg.id === aiMessageLoading.id)
+        if (loadingIndex !== -1) {
+          this.aiMessages.splice(loadingIndex, 1)
+        }
+        
+        // Generate a response based on the user message
+        const response = this.generateMockResponse(userMessage)
+        
+        // Create AI message
+        const aiMessage = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: response.content,
+          riskLevel: response.riskLevel,
+          timestamp: new Date().toISOString()
+        }
+        
+        // Add AI message
+        this.aiMessages.push(aiMessage)
+        
+        // Reset processing flag
+        this.isProcessingMessage = false
+        
+        // Save updated chat history
+        this.saveChatHistory()
+      }, 1500)
+    },
+    
+    // Generate a mock response (would be replaced by API call)
+    generateMockResponse(userMessage) {
+      let response = {
+        content: '',
+        riskLevel: 0
+      }
+      
+      // Simple logic to generate mock responses
+      if (userMessage.image) {
+        response.content = '我分析了你提供的商品图片。根据图片信息，这个商品存在一些可疑特征：\n\n1. 价格明显低于市场平均水平\n2. 销售渠道不是官方认证的\n3. 商品描述与图片不完全匹配\n\n建议：请谨慎考虑，最好通过官方渠道购买，或者要求卖家提供更多认证信息。'
+        response.riskLevel = 3 // Medium risk for images
+      } else {
+        const text = userMessage.content.toLowerCase()
+        
+        if (text.includes('链接') || text.includes('网址') || text.includes('http')) {
+          response.content = '我分析了你提供的链接。这个网站存在高风险特征：\n\n1. 域名注册时间很短（不到3个月）\n2. 网站缺少有效的联系方式和退款政策\n3. 使用不安全的支付渠道\n4. 产品价格异常低\n\n强烈建议不要在该网站购物，这很可能是一个诈骗网站。'
+          response.riskLevel = 5 // Highest risk
+        } else if (text.includes('商品') || text.includes('产品') || text.includes('购买')) {
+          response.content = '根据你描述的商品信息，我注意到以下几点：\n\n1. 价格比正常市场价低30%以上\n2. 卖家无法提供清晰的产品认证\n3. 评价数量不合理\n\n风险评估：这个商品交易存在中等风险。建议你：\n- 要求更多实物照片\n- 使用有买家保障的支付方式\n- 货到付款或当面交易'
+          response.riskLevel = 3 // Medium risk
+        } else if (text.includes('聊天') || text.includes('对话') || text.includes('卖家')) {
+          response.content = '分析你提供的聊天记录，我发现以下可疑迹象：\n\n1. 卖家坚持使用非平台提供的支付渠道\n2. 催促快速付款，制造紧迫感\n3. 承诺不合理的低价或优惠\n\n这些都是典型的诈骗手法。建议你终止与该卖家的交易，并向平台举报。'
+          response.riskLevel = 4 // High risk
+        } else {
+          response.content = '感谢你的咨询。要帮你评估购物风险，我需要更多信息：\n\n- 商品截图\n- 购物网站链接\n- 卖家聊天记录\n- 价格和付款方式\n\n请提供更多细节，我会帮你分析可能存在的诈骗风险。'
+          response.riskLevel = 0 // No risk assessment
+        }
+      }
+      
+      return response
+    },
+    
+    // Open image picker
+    openImagePicker() {
+      media.pickImage({
+        success: (data) => {
+          // Set the selected image
+          this.selectedImage = data.uri
+        },
+        fail: (data, code) => {
+          console.error(`Failed to pick image: ${code}`)
+        }
+      })
+    },
+    
+    // Remove selected image
+    removeSelectedImage() {
+      this.selectedImage = null
+    },
+    
+    // Preview image in full screen
+    previewImage(uri) {
+      media.previewImage({
+        current: 0,
+        uris: [uri]
+      })
+    },
+    
+    // Start new chat
+    startNewChat() {
+      // Confirm with user
+      prompt.showDialog({
+        title: '新对话',
+        message: '开始新对话将清除当前对话记录，确定继续吗？',
+        buttons: [
+          {
+            text: '取消',
+            color: '#666666'
+          },
+          {
+            text: '确定',
+            color: '#007aff'
+          }
+        ],
+        success: (data) => {
+          // Check if the user clicked OK (index 1)
+          if (data.index === 1) {
+            this.userMessages = []
+            this.aiMessages = []
+            this.saveChatHistory()
+          }
+        }
+      })
+    },
+    
+    // Open history sidebar
+    openHistory() {
+      // Navigate to history page
+      this.$app.$def.navigateTo('/pages/history/index')
+    },
+    
+    // Toggle web search
+    toggleWebSearch() {
+      // Check if web search feature is enabled
+      const app = this.$app.$def
+      const webSearchEnabled = app.globalData.systemSettings?.features?.webSearch
+      
+      if (webSearchEnabled) {
+        // Show toast for now (would implement actual feature)
+        this.$app.$def.showToast('网络搜索功能正在开发中')
+      } else {
+        this.$app.$def.showToast('网络搜索功能未启用')
+      }
+    }
+  }
+}
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f5f5;
+}
+
+/* Header styles */
+.chat-header {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.chat-header-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333333;
+}
+
+.header-button {
+  width: 70px;
+  height: 70px;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon {
+  font-size: 40px;
+  color: #333333;
+}
+
+.toolbar-icon {
+  font-size: 36px;
+  margin-right: 10px;
+}
+
+/* Main chat content */
+.chat-content {
+  flex: 1;
+  background-color: #f5f5f5;
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+/* Welcome screen */
+.welcome-container {
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.welcome-logo {
+  width: 160px;
+  height: 160px;
+  border-radius: 80px;
+  background-color: #007aff;
+  color: white;
+  font-size: 80px;
+  text-align: center;
+  line-height: 160px;
+  margin-bottom: 20px;
+}
+
+.welcome-title {
+  font-size: 42px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+.welcome-message {
+  font-size: 28px;
+  color: #666666;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Full screen welcome */
+.welcome-full-screen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px;
+  background-color: #ffffff;
+}
+
+.welcome-logo-large {
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color: #007aff;
+  color: white;
+  font-size: 100px;
+  text-align: center;
+  line-height: 200px;
+  margin-bottom: 40px;
+}
+
+.welcome-title-large {
+  font-size: 48px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 10px;
+}
+
+.welcome-description {
+  font-size: 32px;
+  color: #666666;
+  margin-bottom: 40px;
+}
+
+.welcome-message-large {
+  font-size: 28px;
+  color: #666666;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 40px;
+}
+
+.start-button {
+  background-color: #007aff;
+  border-radius: 10px;
+  padding: 30px 60px;
+}
+
+.start-button text {
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+/* Message styles */
+.message-container {
+  flex-direction: column;
+  margin: 20px;
+  margin-bottom: 30px;
+}
+
+.user-message {
+  align-items: flex-end;
+}
+
+.ai-message {
+  align-items: flex-start;
+}
+
+.user-message-content {
+  background-color: #007aff;
+  padding: 20px;
+  border-radius: 20px;
+  border-bottom-right-radius: 5px;
+  max-width: 80%;
+}
+
+.user-message-content text {
+  color: #ffffff;
+  font-size: 32px;
+  line-height: 1.4;
+}
+
+.ai-message-content {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 20px;
+  border-bottom-left-radius: 5px;
+  max-width: 80%;
+  flex-direction: column;
+}
+
+.ai-message-content text {
+  color: #333333;
+  font-size: 32px;
+  line-height: 1.4;
+}
+
+.message-image {
+  width: 400px;
+  max-height: 400px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+}
+
+/* Risk rating */
+.risk-rating {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.risk-label {
+  font-size: 28px;
+  color: #666666;
+  margin-right: 10px;
+}
+
+.risk-stars {
+  color: #ff9500;
+  font-size: 32px;
+}
+
+/* Loading indicator */
+.loading-indicator {
+  padding: 20px;
+  align-items: center;
+}
+
+.loading-indicator text {
+  color: #666666;
+  font-size: 28px;
+}
+
+/* Input area */
+.chat-input-area {
+  flex-direction: column;
+  background-color: #ffffff;
+  border-top-width: 1px;
+  border-top-color: #e0e0e0;
+  width: 100%;
+}
+
+.input-toolbar {
+  flex-direction: row;
+  padding: 20px;
+}
+
+.toolbar-button {
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 20px;
+  margin-right: 20px;
+}
+
+.toolbar-button text {
+  color: #666666;
+  font-size: 28px;
+  margin-left: 10px;
+}
+
+.input-wrapper {
+  flex-direction: row;
+  padding: 10px 20px;
+  padding-top: 0;
+  align-items: center;
+}
+
+.message-input {
+  flex: 1;
+  height: 80px;
+  background-color: #f0f0f0;
+  border-radius: 40px;
+  padding: 0 30px;
+  font-size: 32px;
+  margin-right: 20px;
+}
+
+.send-button {
+  width: 70px;
+  height: 70px;
+  border-radius: 35px;
+  background-color: #007aff;
+  align-items: center;
+  justify-content: center;
+}
+
+.send-icon {
+  font-size: 36px;
+  color: #ffffff;
+}
+
+/* Image preview */
+.image-preview-container {
+  position: relative;
+  margin: 10px 20px;
+}
+
+.preview-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+}
+
+.remove-image-button {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background-color: rgba(0, 0, 0, 0.7);
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-icon {
+  font-size: 28px;
+  color: #ffffff;
+}
+</style>
