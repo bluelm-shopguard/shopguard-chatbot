@@ -8,21 +8,12 @@ import prompt from '@system.prompt'
 import router from '@system.router'
 import storage from '@system.storage'
 import device from '@system.device'
-import { ThemeManager } from './helper/theme-manager'
 
 // Initialize global data outside the component to ensure it's available before onCreate
 const initGlobalData = {
   appName: 'ShopGuard AI',
   version: '1.0.0',
   userSettings: {
-    theme: {
-      default: 'light',
-      options: [
-        { id: 'light', name: '浅色模式' },
-        { id: 'dark', name: '深色模式' },
-        { id: 'system', name: '跟随系统' }
-      ]
-    },
     language: {
       default: 'zh-CN',
       options: [
@@ -36,11 +27,7 @@ const initGlobalData = {
       }
     }
   },
-  themeManager: null,
-  languageManager: null,
-  themeChanged: false,
-  themeUpdated: Date.now(),
-  appliedTheme: 'light'
+  languageManager: null
 };
 
 export default {
@@ -63,127 +50,8 @@ export default {
       }
     }
     
-    // Initialize theme manager
-    this.initializeThemeManager();
-    
     // Initialize user settings - this may override the defaults
     this.loadUserSettings()
-    
-    // Detect system dark mode
-    this.detectSystemDarkMode()
-    
-    // Apply initial theme
-    this.applyThemeFromSettings()
-    
-    // Listen for color scheme changes
-    this.setupSystemThemeDetection()
-  },
-  
-  initializeThemeManager: function() {
-    try {
-      // Make sure ThemeManager is properly imported
-      if (typeof ThemeManager !== 'function') {
-        console.error('ThemeManager is not a constructor')
-        console.log('ThemeManager type:', typeof ThemeManager)
-      } else {
-        // Create new theme manager instance
-        const themeManager = new ThemeManager()
-        
-        // Verify that the theme manager was created successfully
-        if (themeManager && typeof themeManager.getThemeClass === 'function') {
-          this.globalData.themeManager = themeManager
-          console.log('Theme manager initialized successfully')
-        } else {
-          console.error('Theme manager was created but appears invalid')
-        }
-      }
-    } catch (error) {
-      console.error('Failed to initialize theme manager:', error.message)
-      console.error('Error stack:', error.stack)
-    }
-  },
-
-  // Detect system dark mode preference
-  detectSystemDarkMode: function() {
-    try {
-      // Ensure globalData and themeManager exist
-      if (!this.globalData || !this.globalData.themeManager) {
-        console.error('Cannot detect dark mode: globalData or themeManager not initialized')
-        return
-      }
-
-      const self = this
-      device.getInfo({
-        success: function(deviceInfo) {
-          // Check if device has a dark mode indicator
-          // This is a fallback as QuickApp might not directly expose color scheme
-          // We'll make our best guess based on device info
-          
-          // Default to light unless we can detect dark mode
-          let isDark = false
-          
-          // Try to detect dark mode from various device properties
-          if (deviceInfo) {
-            // Check OS version name for dark mode indicators
-            if (deviceInfo.osVersionName && 
-                deviceInfo.osVersionName.toLowerCase().includes('dark')) {
-              isDark = true
-            }
-            
-            // On some devices, we might be able to check screen brightness
-            // Low brightness might indicate user prefers dark mode
-            if (deviceInfo.screenBrightness && 
-                deviceInfo.screenBrightness < 40) { // Arbitrary threshold
-              isDark = true
-            }
-          }
-          
-          // Set the system preference in the theme manager
-          if (self.globalData && self.globalData.themeManager) {
-            self.globalData.themeManager.setSystemPreference(isDark)
-            console.log('System dark mode detected:', isDark)
-            
-            // If using system theme, apply it immediately
-            if (self.globalData.userSettings && 
-                self.globalData.userSettings.theme && 
-                self.globalData.userSettings.theme.default === 'system') {
-              self.applyThemeFromSettings()
-            }
-          }
-        },
-        fail: function(error, code) {
-          console.error('Failed to get device info:', error, code)
-          // Default to light mode on error
-          if (self.globalData && self.globalData.themeManager) {
-            self.globalData.themeManager.setSystemPreference(false)
-          }
-        }
-      })
-    } catch (error) {
-      console.error('Error detecting system theme:', error)
-      // Default to light mode on error
-      if (this.globalData && this.globalData.themeManager) {
-        this.globalData.themeManager.setSystemPreference(false)
-      }
-    }
-  },
-  
-  // Setup system theme detection - poll for changes periodically
-  // Note: QuickApp doesn't have a direct system theme change event
-  setupSystemThemeDetection: function() {
-    const self = this
-    // Check for system theme changes every 5 minutes
-    // This is a workaround since there's no direct way to detect system theme changes
-    setInterval(function() {
-      self.detectSystemDarkMode()
-      
-      // If we're using system theme, apply the changes
-      if (self.globalData && self.globalData.userSettings && 
-          self.globalData.userSettings.theme && 
-          self.globalData.userSettings.theme.default === 'system') {
-        self.applyThemeFromSettings()
-      }
-    }, 300000) // 5 minutes
   },
 
   onDestroy: function() {
@@ -196,14 +64,6 @@ export default {
       // Ensure we have default settings
       if (!this.globalData.userSettings) {
         this.globalData.userSettings = {
-          theme: {
-            default: 'light',
-            options: [
-              { id: 'light', name: '浅色模式' },
-              { id: 'dark', name: '深色模式' },
-              { id: 'system', name: '跟随系统' }
-            ]
-          },
           language: {
             default: 'zh-CN',
             options: [
@@ -228,9 +88,6 @@ export default {
               const settings = JSON.parse(data)
               if (settings) {
                 // Merge saved settings with defaults to ensure all properties exist
-                if (settings.theme) {
-                  self.globalData.userSettings.theme.default = settings.theme.default || 'light'
-                }
                 if (settings.language) {
                   self.globalData.userSettings.language.default = settings.language.default || 'zh-CN'
                 }
@@ -239,11 +96,6 @@ export default {
                 }
                 
                 console.log('User settings loaded:', self.globalData.userSettings)
-                
-                // Apply theme from loaded settings
-                if (self.globalData.userSettings.theme && self.globalData.userSettings.theme.default) {
-                  self.applyThemeFromSettings()
-                }
               }
             } catch (parseError) {
               console.error('Failed to parse user settings:', parseError)
@@ -269,9 +121,6 @@ export default {
     try {
       // Only save the values, not the entire options list
       const settingsToSave = {
-        theme: {
-          default: this.globalData.userSettings.theme.default
-        },
         language: {
           default: this.globalData.userSettings.language.default
         },
@@ -311,239 +160,38 @@ export default {
     router.push({
       uri: page
     })
-  },
-  
-  // Toggle theme
-  toggleTheme: function(themeId) {
-    if (!this.globalData.themeManager) {
-      this.initializeThemeManager();
-    }
-    if (this.globalData.userSettings.theme.default !== themeId) {
-      this.globalData.userSettings.theme.default = themeId;
-      this.applyThemeFromSettings();
-      this.saveUserSettings();
-    }
-  },
-
-  // Apply theme from settings
-  applyThemeFromSettings: function() {
-    try {
-      if (!this.globalData) {
-        console.error('globalData is not initialized yet')
-        return
-      }
-      
-      if (!this.globalData.themeManager) {
-        console.error('themeManager is not initialized yet')
-        return
-      }
-      
-      if (!this.globalData.userSettings || !this.globalData.userSettings.theme) {
-        console.error('userSettings or theme not initialized yet')
-        return
-      }
-      
-      const themeId = this.globalData.userSettings.theme.default || 'light'
-      this.globalData.themeManager.setTheme(themeId)
-      console.log('Applied theme from settings:', themeId)
-      
-      // Store the effective theme in globalData
-      this.globalData.appliedTheme = this.globalData.themeManager.getEffectiveTheme()
-      this.globalData.themeChanged = true
-      
-      console.log('Effective theme:', this.globalData.appliedTheme)
-      
-      // Notify all pages that theme has changed (set a global flag)
-      this.globalData.themeUpdated = Date.now()
-    } catch (error) {
-      console.error('Failed to apply theme from settings:', error)
-    }
-  },
-  
-  // Apply a specific theme
-  applyTheme: function(themeId) {
-    try {
-      if (!this.globalData) {
-        console.error('Cannot apply theme: globalData is not initialized')
-        return
-      }
-      
-      if (!this.globalData.themeManager) {
-        console.error('Cannot apply theme: themeManager is not initialized')
-        return
-      }
-      
-      // Validate themeId
-      if (!themeId || (themeId !== 'light' && themeId !== 'dark' && themeId !== 'system')) {
-        console.error('Invalid theme ID:', themeId)
-        themeId = 'light' // Default to light theme if invalid
-      }
-      
-      this.globalData.themeManager.setTheme(themeId)
-      console.log('Applied theme:', themeId)
-      
-      // Store the effective theme in globalData
-      this.globalData.appliedTheme = this.globalData.themeManager.getEffectiveTheme()
-      
-      // Update CSS variables (not directly possible, but we can use this flag)
-      this.globalData.themeChanged = true
-      this.globalData.themeUpdated = Date.now()
-      
-      console.log('Effective theme after change:', this.globalData.appliedTheme)
-    } catch (error) {
-      console.error('Failed to apply theme:', error)
-    }
-  },
-  
-  // Get current theme colors
-  getThemeColors: function() {
-    if (this.globalData.themeManager) {
-      const effectiveTheme = this.globalData.themeManager.getEffectiveTheme()
-      return {
-        backgroundColor: this.globalData.themeManager.getColor('background'),
-        textColor: this.globalData.themeManager.getColor('text'),
-        cardColor: this.globalData.themeManager.getColor('card'),
-        borderColor: this.globalData.themeManager.getColor('border'),
-        effectiveTheme: effectiveTheme
-      }
-    }
-    return {
-      backgroundColor: '#f5f5f5',
-      textColor: '#333333',
-      cardColor: '#ffffff',
-      borderColor: '#e0e0e0',
-      effectiveTheme: 'light'
-    }
   }
 }
 </script>
 
 <style>
-/* Global styles for the entire app - Theme support added */
-/* These styles will be overridden by the specific theme */
+/* Global styles for the entire app */
 
-/* Light Theme (default) */
-/* Light Theme - Direct property application instead of CSS variables */
-.light-theme .background {
-  background-color: #f3f4f6;
-}
-
-.light-theme .surface {
-  background-color: #ffffff;
-}
-
-.light-theme .card {
-  background-color: #ffffff;
-}
-
-.light-theme .text {
-  color: #111827;
-}
-
-.light-theme .text-secondary {
-  color: #6b7280;
-}
-
-.light-theme .border {
-  border-color: #e5e7eb;
-}
-
-.light-theme .button-primary {
-  background-color: #10a37f;
-}
-
-.light-theme .secondary-bg {
-  background-color: #e5e7eb;
-}
-
-/* Dark Theme - Direct property application */
-.dark-theme .background {
-  background-color: #0f172a;
-}
-
-.dark-theme .surface {
-  background-color: #1e293b;
-}
-
-.dark-theme .card {
-  background-color: #1e293b;
-}
-
-.dark-theme .text {
-  color: #f1f5f9;
-}
-
-.dark-theme .text-secondary {
-  color: #94a3b8;
-}
-
-.dark-theme .border {
-  border-color: #334155;
-}
-
-.dark-theme .button-primary {
-  background-color: #10a37f;
-}
-
-.dark-theme .secondary-bg {
-  background-color: #1e293b;
-}
-
-/* Base Styles */
 .page {
   flex-direction: column;
   width: 100%;
   height: 100%;
-}
-
-/* Apply background color based on theme */
-.page.light-theme {
   background-color: #f3f4f6;
-}
-
-.page.dark-theme {
-  background-color: #0f172a;
 }
 
 .title {
   font-size: 40px;
   text-align: center;
   margin: 20px;
-}
-
-.light-theme .title {
   color: #111827;
-}
-
-.dark-theme .title {
-  color: #f1f5f9;
 }
 
 .subtitle {
   font-size: 30px;
   text-align: center;
   margin-bottom: 20px;
-}
-
-.light-theme .subtitle {
   color: #4b5563;
-}
-
-.dark-theme .subtitle {
-  color: #94a3b8;
 }
 
 .button {
   padding: 20px 30px;
   border-radius: 8px;
   margin: 20px;
-}
-
-.light-theme .button {
-  background-color: #10a37f;
-}
-
-.dark-theme .button {
   background-color: #10a37f;
 }
 

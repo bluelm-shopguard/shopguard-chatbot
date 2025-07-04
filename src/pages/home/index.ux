@@ -1,5 +1,5 @@
 <template>
-  <div class="page {{themeClass}}">
+  <div class="page">
     <!-- Header -->
     <div class="chat-header">
       <div class="header-button" onclick="openSidebar">
@@ -81,23 +81,7 @@ export default {
     message: '',
     isProcessingMessage: false,
     currentImageData: null,
-    sidebarActive: false,
-    themeClass: 'light-theme' // Default theme class
-  },
-  onInit: function() {
-    this.applyCurrentTheme()
-  },
-  
-  onShow: function() {
-    this.applyCurrentTheme()
-  },
-  
-  // Apply the current theme from global settings
-  applyCurrentTheme: function() {
-    if (this.$app.$def.globalData && this.$app.$def.globalData.themeManager) {
-      this.themeClass = this.$app.$def.globalData.themeManager.getThemeClass()
-      console.log(`[HomePage] Applied theme: ${this.themeClass}`)
-    }
+    sidebarActive: false
   },
   handleInputChange: function(e) {
     this.message = e.value
@@ -149,14 +133,7 @@ export default {
   width: 100%;
   height: 100%;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-}
-
-.page.light-theme {
   background-color: #f3f4f6;
-}
-
-.page.dark-theme {
-  background-color: #0f172a;
 }
 
 /* Header Styles */
@@ -165,29 +142,14 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-}
-
-.light-theme .chat-header {
   background-color: #ffffff;
   border-bottom: 1px solid #e5e7eb;
-}
-
-.dark-theme .chat-header {
-  background-color: #1e293b;
-  border-bottom: 1px solid #334155;
 }
 
 .chat-header-title {
   font-size: 32px;
   font-weight: bold;
-}
-
-.light-theme .chat-header-title {
   color: #111827;
-}
-
-.dark-theme .chat-header-title {
-  color: #f1f5f9;
 }
 
 .header-button {
@@ -201,14 +163,7 @@ export default {
   height: 28px;
   text-align: center;
   font-size: 28px;
-}
-
-.light-theme .header-icon {
   color: #6b7280;
-}
-
-.dark-theme .header-icon {
-  color: #94a3b8;
 }
 
 /* Content Area Styles */
@@ -263,27 +218,11 @@ export default {
   max-width: 450px;
 }
 
-.light-theme .welcome-message {
-  color: #4b5563;
-}
-
-.dark-theme .welcome-message {
-  color: #94a3b8;
-}
-
 /* Input Area Styles - Redesigned to match webapp */
 .chat-input-area {
   padding: 16px 20px 20px 20px;
-}
-
-.light-theme .chat-input-area {
   border-top: 1px solid #e5e7eb;
   background-color: #ffffff;
-}
-
-.dark-theme .chat-input-area {
-  border-top: 1px solid #334155;
-  background-color: #1e293b;
 }
 
 .input-area-toolbar {
@@ -298,16 +237,8 @@ export default {
   align-items: center;
   padding: 10px 12px;
   border-radius: 8px;
-}
-
-.light-theme .toolbar-button {
   background-color: #f3f4f6;
   border: 1px solid #e5e7eb;
-}
-
-.dark-theme .toolbar-button {
-  background-color: #334155;
-  border: 1px solid #475569;
 }
 
 .toolbar-icon {
@@ -315,26 +246,12 @@ export default {
   height: 28px;
   margin-right: 8px;
   font-size: 24px;
-}
-
-.light-theme .toolbar-icon {
   color: #6b7280;
-}
-
-.dark-theme .toolbar-icon {
-  color: #94a3b8;
 }
 
 .toolbar-text {
   font-size: 22px;
-}
-
-.light-theme .toolbar-text {
   color: #6b7280;
-}
-
-.dark-theme .toolbar-text {
-  color: #94a3b8;
 }
 
 .input-area-wrapper {
@@ -351,18 +268,9 @@ export default {
   padding: 16px;
   border-radius: 16px;
   font-size: 22px;
-}
-
-.light-theme .text-input {
   border: 1px solid #e5e7eb;
   background-color: #f9fafb;
   color: #111827;
-}
-
-.dark-theme .text-input {
-  border: 1px solid #475569;
-  background-color: #334155;
-  color: #f1f5f9;
 }
 
 .send-button {
@@ -405,14 +313,7 @@ export default {
   transition-duration: 300ms;
   display: flex;
   flex-direction: column;
-}
-
-.light-theme .sidebar {
   background-color: #ffffff;
-}
-
-.dark-theme .sidebar {
-  background-color: #1e293b;
 }
 
 .sidebar-header {
@@ -420,27 +321,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.light-theme .sidebar-header {
   border-bottom: 1px solid #e5e7eb;
-}
-
-.dark-theme .sidebar-header {
-  border-bottom: 1px solid #334155;
 }
 
 .sidebar-title {
   font-size: 24px;
   font-weight: bold;
-}
-
-.light-theme .sidebar-title {
   color: #111827;
-}
-
-.dark-theme .sidebar-title {
-  color: #f1f5f9;
 }
 
 .close-button {
@@ -460,14 +347,7 @@ export default {
   font-size: 18px;
   text-align: center;
   margin-top: 50px;
-}
-
-.light-theme .sidebar-empty-text {
   color: #6b7280;
-}
-
-.dark-theme .sidebar-empty-text {
-  color: #94a3b8;
 }
 
 .sidebar-footer {
@@ -475,14 +355,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.light-theme .sidebar-footer {
   border-top: 1px solid #e5e7eb;
-}
-
-.dark-theme .sidebar-footer {
-  border-top: 1px solid #334155;
 }
 
 .account-info {
@@ -498,14 +371,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.light-theme .account-avatar {
   background-color: #f3f4f6;
-}
-
-.dark-theme .account-avatar {
-  background-color: #1e293b;
 }
 
 .avatar-text {
@@ -515,14 +381,7 @@ export default {
 .account-name {
   font-size: 18px;
   font-weight: bold;
-}
-
-.light-theme .account-name {
   color: #111827;
-}
-
-.dark-theme .account-name {
-  color: #f1f5f9;
 }
 
 .settings-button {
