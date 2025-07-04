@@ -24,6 +24,12 @@
     "pages": {
       "pages/home": {
         "component": "index"
+      },
+      "pages/settings": {
+        "component": "index"
+      },
+      "pages/about": {
+        "component": "index"
       }
     }
   },

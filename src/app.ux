@@ -10,6 +10,8 @@ import router from '@system.router'
 export default {
   onCreate: function() {
     console.info('App created')
+    // Initialize user settings
+    this.loadUserSettings()
   },
 
   onDestroy: function() {
@@ -18,7 +20,53 @@ export default {
 
   globalData: {
     appName: 'ShopGuard AI',
-    version: '1.0.0'
+    version: '1.0.0',
+    userSettings: {
+      theme: {
+        default: 'light',
+        options: [
+          { id: 'light', name: '浅色模式' },
+          { id: 'dark', name: '深色模式' },
+          { id: 'system', name: '跟随系统' }
+        ]
+      },
+      language: {
+        default: 'zh-CN',
+        options: [
+          { id: 'zh-CN', name: '简体中文' },
+          { id: 'en-US', name: 'English' }
+        ]
+      },
+      chat: {
+        history: {
+          save: true
+        }
+      }
+    },
+    themeManager: null,
+    languageManager: null
+  },
+  
+  // Load user settings from storage
+  loadUserSettings: function() {
+    try {
+      // This is just a stub for now
+      // In the future, we'll load settings from storage
+      console.log('Loading user settings...')
+    } catch (error) {
+      console.error('Failed to load user settings:', error)
+    }
+  },
+  
+  // Save user settings to storage
+  saveUserSettings: function() {
+    try {
+      // This is just a stub for now
+      // In the future, we'll save settings to storage
+      console.log('Saving user settings...', this.globalData.userSettings)
+    } catch (error) {
+      console.error('Failed to save user settings:', error)
+    }
   },
 
   // Simple toast utility

@@ -43,8 +43,34 @@
       </div>
     </div>
     
-    <!-- Sidebar Component (Prepared but not fully implemented) -->
+    <!-- Sidebar Component -->
     <div class="sidebar-overlay" show="{{sidebarActive}}" onclick="closeSidebar">
+    </div>
+    
+    <div class="sidebar" style="transform: {{sidebarActive ? 'translateX(0)' : 'translateX(-100%)'}}">
+      <div class="sidebar-header">
+        <text class="sidebar-title">历史对话</text>
+        <div class="header-button close-button" onclick="closeSidebar">
+          <text class="header-icon">✕</text>
+        </div>
+      </div>
+      
+      <div class="sidebar-content">
+        <!-- Conversation history will be implemented later -->
+        <text class="sidebar-empty-text">暂无历史对话</text>
+      </div>
+      
+      <div class="sidebar-footer">
+        <div class="account-info">
+          <div class="account-avatar">
+            <text class="avatar-text">👤</text>
+          </div>
+          <text class="account-name">用户</text>
+        </div>
+        <div class="settings-button" onclick="navigateToSettings">
+          <text class="settings-icon">⚙️</text>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -81,6 +107,13 @@ export default {
   },
   handleWebSearch: function() {
     this.$app.$def.showToast('网页搜索功能即将推出')
+  },
+  navigateToSettings: function() {
+    // Navigate to settings page
+    const router = require('@system.router')
+    router.push({
+      uri: 'pages/settings'
+    })
   },
   sendMessage: function() {
     if (!this.message.trim() && !this.currentImageData) {
@@ -259,7 +292,7 @@ export default {
   font-weight: bold;
 }
 
-/* Sidebar Styles (Prepared but not fully implemented) */
+/* Sidebar Styles */
 .sidebar-overlay {
   position: fixed;
   left: 0;
@@ -268,5 +301,102 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 998;
+}
+
+/* Sidebar Component */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 100%;
+  background-color: #ffffff;
+  z-index: 999;
+  transition-property: transform;
+  transition-duration: 300ms;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #111827;
+}
+
+.close-button {
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: scroll;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-empty-text {
+  color: #6b7280;
+  font-size: 18px;
+  text-align: center;
+  margin-top: 50px;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.account-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-text {
+  font-size: 22px;
+}
+
+.account-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #111827;
+}
+
+.settings-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-icon {
+  font-size: 24px;
 }
 </style>

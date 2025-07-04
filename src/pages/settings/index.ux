@@ -1,55 +1,76 @@
 <template>
   <div class="page">
-    <div class="header">
-      <div class="back-button" onclick="goBack">
-        <text class="back-icon">←</text>
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-button" onclick="goBack">
+        <text class="header-icon">←</text>
       </div>
-      <text class="header-title">设置</text>
+      <text class="page-header-title">设置</text>
     </div>
     
-    <div class="settings-container">
-      <!-- Theme Settings -->
-      <div class="settings-section">
-        <text class="section-title">主题设置</text>
-        <div class="setting-item">
-          <text class="setting-label">显示模式</text>
-          <div class="setting-value">
-            <div 
-              for="{{themeOptions}}" 
-              class="{{currentTheme === $item.id ? 'theme-option-selected' : 'theme-option'}}"
-              onclick="setTheme($item.id)">
-              <text>{{$item.name}}</text>
+    <!-- Settings Content -->
+    <div class="page-content">
+      <!-- General Settings Group -->
+      <div class="setting-group">
+        <text class="setting-group-title">通用</text>
+        <div class="setting-list">
+          <!-- Theme Setting -->
+          <div class="setting-list-item">
+            <text class="setting-label">外观模式</text>
+            <div class="setting-control">
+              <div class="segmented-control">
+                <div 
+                  for="{{themeOptions}}" 
+                  class="{{currentTheme === $item.id ? 'control-option-selected' : 'control-option'}}"
+                  onclick="setTheme($item.id)">
+                  <text class="option-text">{{$item.name}}</text>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Language Setting -->
+          <div class="setting-list-item">
+            <text class="setting-label">语言</text>
+            <div class="setting-control">
+              <div class="segmented-control">
+                <div 
+                  for="{{languageOptions}}" 
+                  class="{{currentLanguage === $item.id ? 'control-option-selected' : 'control-option'}}"
+                  onclick="setLanguage($item.id)">
+                  <text class="option-text">{{$item.name}}</text>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Language Settings -->
-      <div class="settings-section">
-        <text class="section-title">语言设置</text>
-        <div class="setting-item">
-          <text class="setting-label">应用语言</text>
-          <select class="language-select" onchange="changeLanguage">
-            <option for="{{languageOptions}}" value="{{$item.id}}">{{$item.name}}</option>
-          </select>
+      <!-- Chat Settings Group -->
+      <div class="setting-group">
+        <text class="setting-group-title">聊天</text>
+        <div class="setting-list">
+          <!-- Save Chat History Setting -->
+          <div class="setting-list-item">
+            <text class="setting-label">保存聊天记录</text>
+            <div class="setting-control">
+              <div class="toggle-switch">
+                <switch checked="{{saveChatHistory}}" onchange="toggleSaveChatHistory"></switch>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
-      <!-- Chat Settings -->
-      <div class="settings-section">
-        <text class="section-title">聊天设置</text>
-        <div class="setting-item">
-          <text class="setting-label">保存聊天历史</text>
-          <switch checked="{{saveChatHistory}}" onchange="toggleSaveChatHistory"></switch>
-        </div>
-      </div>
-      
-      <!-- About Section -->
-      <div class="settings-section">
-        <text class="section-title">关于</text>
-        <div class="setting-item" onclick="navigateTo('pages/about')">
-          <text class="setting-label">关于我们</text>
-          <text class="arrow">›</text>
+      <!-- About Settings Group -->
+      <div class="setting-group">
+        <text class="setting-group-title">关于</text>
+        <div class="setting-list">
+          <!-- About App Link -->
+          <div class="setting-list-item is-link" onclick="navigateTo('pages/about')">
+            <text class="setting-label">关于 ShopGuard AI</text>
+            <text class="item-icon">›</text>
+          </div>
         </div>
       </div>
     </div>
@@ -74,35 +95,48 @@ export default {
         { id: 'zh-CN', name: '简体中文' },
         { id: 'en-US', name: 'English' }
       ],
-      saveChatHistory: true
+      saveChatHistory: true,
+      errorMessage: null
     }
   },
   
-  onInit() {
-    // Load user settings
-    this.loadUserSettings()
+  onInit: function() {
+    console.log('Settings page loaded')
+    // Load user settings using the direct method
+    this.loadSettings()
   },
   
-  methods: {
-    // Load user settings from storage
-    loadUserSettings() {
+  // Direct methods
+  loadSettings: function() {
+    try {
       const app = this.$app.$def
       const userSettings = app.globalData.userSettings
       
       if (userSettings) {
         // Set theme
         this.currentTheme = userSettings.theme?.default || 'light'
+        console.log('Loaded theme:', this.currentTheme)
         
         // Set language
         this.currentLanguage = userSettings.language?.default || 'zh-CN'
+        console.log('Loaded language:', this.currentLanguage)
         
         // Set chat history setting
         this.saveChatHistory = userSettings.chat?.history?.save !== false
+        console.log('Loaded save chat history:', this.saveChatHistory)
+      } else {
+        console.log('No user settings found, using defaults')
       }
-    },
-    
-    // Set theme
-    setTheme(themeId) {
+    } catch (error) {
+      console.error('Error loading settings:', error)
+      console.log('Using default settings')
+    }
+  },
+  
+  // Set theme - Moved outside methods object
+  setTheme: function(themeId) {
+    try {
+      console.log('Setting theme to:', themeId)
       this.currentTheme = themeId
       
       // Update app global data
@@ -116,12 +150,33 @@ export default {
         if (app.globalData.themeManager) {
           app.globalData.themeManager.setTheme(themeId)
         }
+        
+        // Show toast confirmation
+        app.showToast('主题已更改')
       }
+    } catch (error) {
+      console.error('Error setting theme:', error)
+      this.displayError('设置主题时出错')
+    }
+  },
+  
+  // Methods kept for reference
+  methods: {
+    // Old loadUserSettings - Not used anymore
+    loadUserSettings: function() {
+      console.log('This method is deprecated')
     },
     
-    // Change language
-    changeLanguage(e) {
-      const languageId = e.newValue
+    // Deprecated methods - Not used anymore
+    setLanguage: function() {
+      console.log('This method is deprecated')
+    }
+  },
+  
+  // Set language - Moved outside methods object
+  setLanguage: function(languageId) {
+    try {
+      console.log('Setting language to:', languageId)
       this.currentLanguage = languageId
       
       // Update app global data
@@ -135,11 +190,20 @@ export default {
         if (app.globalData.languageManager) {
           app.globalData.languageManager.setLanguage(languageId)
         }
+        
+        // Show toast confirmation
+        app.showToast('语言已更改')
       }
-    },
-    
-    // Toggle save chat history
-    toggleSaveChatHistory(e) {
+    } catch (error) {
+      console.error('Error setting language:', error)
+      this.displayError('设置语言时出错')
+    }
+  },
+  
+  // Toggle save chat history - Moved outside methods object
+  toggleSaveChatHistory: function(e) {
+    try {
+      console.log('Toggling save chat history to:', e.checked)
       this.saveChatHistory = e.checked
       
       // Update app global data
@@ -149,19 +213,40 @@ export default {
         app.globalData.userSettings.chat.history = app.globalData.userSettings.chat.history || {}
         app.globalData.userSettings.chat.history.save = this.saveChatHistory
         app.saveUserSettings()
+        
+        // Show toast confirmation
+        app.showToast(this.saveChatHistory ? '已开启聊天记录保存' : '已关闭聊天记录保存')
       }
-    },
-    
-    // Navigate to a page
-    navigateTo(page) {
-      router.push({
-        uri: page
-      })
-    },
-    
-    // Go back
-    goBack() {
+    } catch (error) {
+      console.error('Error toggling chat history:', error)
+      this.displayError('设置聊天记录时出错')
+    }
+  },
+  
+  // Display error message - Moved outside methods object
+  displayError: function(message) {
+    this.errorMessage = message
+    // Show toast with error message
+    this.$app.$def.showToast(message)
+  },
+  
+  // Navigate to a page - Moved outside methods object
+  navigateTo: function(page) {
+    router.push({
+      uri: page
+    })
+  },
+  
+  // Go back - Moved outside methods object
+  goBack: function() {
+    // Use home as fallback
+    try {
       router.back()
+    } catch (error) {
+      console.error('Navigation back failed, going to home page')
+      router.push({
+        uri: 'pages/home'
+      })
     }
   }
 }
@@ -170,106 +255,140 @@ export default {
 <style>
 .page {
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-color: #f3f4f6;
   width: 100%;
   height: 100%;
 }
 
-.header {
+/* Header Styles */
+.page-header {
+  display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 20px;
+  padding: 12px 16px;
   background-color: #ffffff;
-  width: 100%;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.back-button {
-  width: 60px;
-  height: 60px;
+.header-button {
+  padding: 10px;
+  width: 48px;
+  height: 48px;
   align-items: center;
   justify-content: center;
+  border-radius: 8px;
 }
 
-.back-icon {
-  font-size: 36px;
-  color: #333333;
+.header-icon {
+  font-size: 28px;
+  color: #6b7280;
+  text-align: center;
 }
 
-.header-title {
+.page-header-title {
   flex: 1;
-  font-size: 36px;
+  font-size: 32px;
   font-weight: bold;
   text-align: center;
-  margin-right: 60px;
-  color: #333333;
+  margin-right: 48px;
+  color: #111827;
 }
 
-.settings-container {
+/* Content Styles */
+.page-content {
   flex: 1;
   flex-direction: column;
   width: 100%;
+  padding: 20px 16px;
 }
 
-.settings-section {
-  margin-bottom: 30px;
+/* Setting Group Styles */
+.setting-group {
+  margin-bottom: 24px;
+}
+
+.setting-group-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+
+.setting-list {
+  flex-direction: column;
   background-color: #ffffff;
-  padding: 0 30px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.section-title {
-  font-size: 28px;
-  color: #999999;
-  padding: 20px 0;
-  margin-bottom: 10px;
-}
-
-.setting-item {
+.setting-list-item {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 0;
-  border-bottom-width: 1px;
-  border-bottom-color: #eeeeee;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.is-link {
+  background-color: #ffffff;
 }
 
 .setting-label {
-  font-size: 32px;
-  color: #333333;
+  font-size: 22px;
+  font-weight: 500;
+  color: #111827;
 }
 
-.setting-value {
+.setting-control {
   flex-direction: row;
+  align-items: center;
+  margin-left: 16px;
 }
 
-.theme-option {
-  padding: 8px 20px;
+/* Segmented Control Styles */
+.segmented-control {
+  flex-direction: row;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.control-option {
+  padding: 8px 16px;
+  margin: 2px;
   border-radius: 6px;
-  margin-left: 10px;
-  background-color: #f0f0f0;
+  background-color: transparent;
 }
 
-.theme-option-selected {
-  padding: 8px 20px;
+.control-option-selected {
+  padding: 8px 16px;
+  margin: 2px;
   border-radius: 6px;
-  margin-left: 10px;
-  background-color: #007aff;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.theme-option-selected text {
-  color: #ffffff;
+.option-text {
+  font-size: 18px;
+  color: #6b7280;
 }
 
-.theme-option text {
-  font-size: 28px;
-  color: #333333;
+.control-option-selected .option-text {
+  color: #10a37f;
+  font-weight: 500;
 }
 
-.language-select {
-  width: 240px;
+/* Toggle Switch Styles */
+.toggle-switch {
+  width: 60px;
 }
 
-.arrow {
-  font-size: 36px;
-  color: #bbbbbb;
+.item-icon {
+  font-size: 24px;
+  color: #9ca3af;
+  margin-left: 8px;
 }
 </style>
