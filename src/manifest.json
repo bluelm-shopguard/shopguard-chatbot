@@ -23,7 +23,7 @@
     "entry": "pages/home",
     "pages": {
       "pages/home": {
-        "component": "debug"
+        "component": "index"
       }
     }
   },
