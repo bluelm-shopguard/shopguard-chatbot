@@ -16,7 +16,7 @@
           <div class="setting-value">
             <div 
               for="{{themeOptions}}" 
-              class="theme-option {{currentTheme === $item.id ? 'selected' : ''}}"
+              class="{{currentTheme === $item.id ? 'theme-option-selected' : 'theme-option'}}"
               onclick="setTheme($item.id)">
               <text>{{$item.name}}</text>
             </div>
@@ -248,11 +248,14 @@ export default {
   background-color: #f0f0f0;
 }
 
-.theme-option.selected {
+.theme-option-selected {
+  padding: 8px 20px;
+  border-radius: 6px;
+  margin-left: 10px;
   background-color: #007aff;
 }
 
-.theme-option.selected text {
+.theme-option-selected text {
   color: #ffffff;
 }
 

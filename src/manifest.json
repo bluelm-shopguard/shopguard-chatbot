@@ -15,6 +15,9 @@
     { "name": "system.file" },
     { "name": "system.fetch" }
   ],
+  "permissions": [
+    { "origin": "*" }
+  ],
   "config": {
     "logLevel": "off",
     "designWidth": 750,

@@ -67,33 +67,34 @@ export default {
   
   // Initialize language settings
   initLanguage() {
-    const userLang = this.globalData.userSettings.language?.default || 'zh-CN'
+    const userLang = (this.globalData.userSettings.language && this.globalData.userSettings.language.default) || 'zh-CN'
     this.globalData.languageManager.setLanguage(userLang)
     this.globalData.currentLanguage = userLang
   },
   
   // Initialize theme settings
   initTheme() {
-    const userTheme = this.globalData.userSettings.theme?.default || 'light'
+    const userTheme = (this.globalData.userSettings.theme && this.globalData.userSettings.theme.default) || 'light'
     this.globalData.themeManager.setTheme(userTheme)
     this.globalData.currentTheme = userTheme
   },
 
   // Load user settings from storage
   loadUserSettings() {
+    var self = this
     storage.get({
       key: 'userSettings',
-      success: (data) => {
+      success: function(data) {
         try {
-          this.globalData.userSettings = JSON.parse(data)
+          self.globalData.userSettings = JSON.parse(data)
         } catch (e) {
           console.error('Failed to parse user settings', e)
-          this.globalData.userSettings = this.getDefaultUserSettings()
+          self.globalData.userSettings = self.getDefaultUserSettings()
         }
       },
-      fail: () => {
+      fail: function() {
         console.info('No saved settings found, using defaults')
-        this.globalData.userSettings = this.getDefaultUserSettings()
+        self.globalData.userSettings = self.getDefaultUserSettings()
       }
     })
   },
@@ -126,14 +127,15 @@ export default {
 
   // Save user settings to storage
   saveUserSettings() {
+    var self = this
     storage.set({
       key: 'userSettings',
       value: JSON.stringify(this.globalData.userSettings),
-      success: () => {
+      success: function() {
         console.info('User settings saved successfully')
       },
-      fail: (data, code) => {
-        console.error(`Failed to save user settings: ${code}`)
+      fail: function(data, code) {
+        console.error('Failed to save user settings: ' + code)
       }
     })
   },
