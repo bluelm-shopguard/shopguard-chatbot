@@ -1,155 +1,36 @@
 <script>
 /**
- * ShopGuard AI - 购物防诈骗助手
+ * ShopGuard AI - Super Simplified Version
  * QuickApp entry point
  */
 
-import storage from '@system.storage'
 import prompt from '@system.prompt'
-import fetch from '@system.fetch'
-import device from '@system.device'
 import router from '@system.router'
 
-// Import helper modules
-import './helper/system-settings'
-import './helper/user-settings'
-import { LanguageManager } from './helper/language-manager'
-import { ThemeManager } from './helper/theme-manager'
-
 export default {
-  // App lifecycle methods
-  onCreate() {
-    console.info('Application onCreate')
-    
-    // Create helper instances
-    this.globalData.languageManager = new LanguageManager()
-    this.globalData.themeManager = new ThemeManager()
-    
-    // Initialize app
-    this.initApp()
+  onCreate: function() {
+    console.info('App created')
   },
 
-  onDestroy() {
-    console.info('Application onDestroy')
+  onDestroy: function() {
+    console.info('App destroyed')
   },
 
-  // Global data accessible throughout the app
   globalData: {
-    // App core services
-    languageManager: null,
-    themeManager: null,
-    
-    // App state
-    currentTheme: 'light',
-    currentLanguage: 'zh-CN',
-    chatHistory: [],
-    userSettings: {},
-    
-    // System-wide references
-    storage: storage,
-    prompt: prompt,
-    fetch: fetch,
-    device: device,
-    router: router
+    appName: 'ShopGuard AI',
+    version: '1.0.0'
   },
 
-  // Initialize app
-  initApp() {
-    // Load user preferences
-    this.loadUserSettings()
-    
-    // Initialize language based on user preference
-    this.initLanguage()
-    
-    // Initialize theme based on user preference
-    this.initTheme()
-  },
-  
-  // Initialize language settings
-  initLanguage() {
-    const userLang = (this.globalData.userSettings.language && this.globalData.userSettings.language.default) || 'zh-CN'
-    this.globalData.languageManager.setLanguage(userLang)
-    this.globalData.currentLanguage = userLang
-  },
-  
-  // Initialize theme settings
-  initTheme() {
-    const userTheme = (this.globalData.userSettings.theme && this.globalData.userSettings.theme.default) || 'light'
-    this.globalData.themeManager.setTheme(userTheme)
-    this.globalData.currentTheme = userTheme
-  },
-
-  // Load user settings from storage
-  loadUserSettings() {
-    var self = this
-    storage.get({
-      key: 'userSettings',
-      success: function(data) {
-        try {
-          self.globalData.userSettings = JSON.parse(data)
-        } catch (e) {
-          console.error('Failed to parse user settings', e)
-          self.globalData.userSettings = self.getDefaultUserSettings()
-        }
-      },
-      fail: function() {
-        console.info('No saved settings found, using defaults')
-        self.globalData.userSettings = self.getDefaultUserSettings()
-      }
-    })
-  },
-  
-  // Get default user settings
-  getDefaultUserSettings() {
-    return {
-      theme: {
-        default: 'light',
-        options: [
-          { id: 'light', name: '浅色模式' },
-          { id: 'dark', name: '深色模式' },
-          { id: 'system', name: '跟随系统' }
-        ]
-      },
-      language: {
-        default: 'zh-CN',
-        options: [
-          { id: 'zh-CN', name: '简体中文' },
-          { id: 'en-US', name: 'English' }
-        ]
-      },
-      chat: {
-        history: {
-          save: true
-        }
-      }
-    }
-  },
-
-  // Save user settings to storage
-  saveUserSettings() {
-    var self = this
-    storage.set({
-      key: 'userSettings',
-      value: JSON.stringify(this.globalData.userSettings),
-      success: function() {
-        console.info('User settings saved successfully')
-      },
-      fail: function(data, code) {
-        console.error('Failed to save user settings: ' + code)
-      }
-    })
-  },
-
-  // Toast utility for the entire app
-  showToast(message) {
+  // Simple toast utility
+  showToast: function(message) {
     prompt.showToast({
       message: message,
       duration: 1500
     })
   },
   
-  // Navigate to a page
-  navigateTo(page) {
+  // Simple navigation utility
+  navigateTo: function(page) {
     router.push({
       uri: page
     })
@@ -158,20 +39,14 @@ export default {
 </script>
 
 <style>
-/* Global styles for the entire app */
+/* Global styles for the entire app - Super simplified */
 .page {
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-color: #ffffff;
   width: 100%;
   height: 100%;
 }
 
-.dark-theme {
-  background-color: #121212;
-  color: #ffffff;
-}
-
-/* Common text styles */
 .title {
   font-size: 40px;
   text-align: center;
@@ -185,41 +60,16 @@ export default {
   margin-bottom: 20px;
 }
 
-/* Button styles */
-.btn {
+.button {
   padding: 20px 30px;
   border-radius: 8px;
   background-color: #007aff;
+  margin: 20px;
+}
+
+.button text {
   color: #ffffff;
   font-size: 28px;
   text-align: center;
-}
-
-.btn:active {
-  opacity: 0.8;
-}
-
-.btn-secondary {
-  background-color: #f0f0f0;
-  color: #333333;
-}
-
-/* List styles */
-.list-item {
-  padding: 20px;
-  border-bottom-width: 1px;
-  border-bottom-color: #e0e0e0;
-  background-color: #ffffff;
-}
-
-/* Input styles */
-.input {
-  flex: 1;
-  padding: 20px;
-  background-color: #ffffff;
-  border-width: 1px;
-  border-color: #e0e0e0;
-  border-radius: 8px;
-  font-size: 28px;
 }
 </style>

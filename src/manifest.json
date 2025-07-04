@@ -3,23 +3,17 @@
   "name": "ShopGuardAI",
   "versionName": "1.0.0",
   "versionCode": 1,
-  "minPlatformVersion": 1070,
+  "minPlatformVersion": 1000,
   "icon": "common/images/logo.jpeg",
   "features": [
-    { "name": "system.network" },
-    { "name": "system.storage" },
-    { "name": "system.device" },
     { "name": "system.prompt" },
-    { "name": "system.router" },
-    { "name": "system.media" },
-    { "name": "system.file" },
-    { "name": "system.fetch" }
+    { "name": "system.router" }
   ],
   "permissions": [
     { "origin": "*" }
   ],
   "config": {
-    "logLevel": "off",
+    "logLevel": "debug",
     "designWidth": 750,
     "data": {
       "theme": "light"
@@ -29,16 +23,7 @@
     "entry": "pages/home",
     "pages": {
       "pages/home": {
-        "component": "index"
-      },
-      "pages/history": {
-        "component": "index"
-      },
-      "pages/settings": {
-        "component": "index"
-      },
-      "pages/about": {
-        "component": "index"
+        "component": "debug"
       }
     }
   },
