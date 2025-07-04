@@ -14,10 +14,7 @@
   ],
   "config": {
     "logLevel": "debug",
-    "designWidth": 750,
-    "data": {
-      "theme": "light"
-    }
+    "designWidth": 750
   },
   "router": {
     "entry": "pages/home",

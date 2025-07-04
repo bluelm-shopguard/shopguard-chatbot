@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page {{themeClass}}">
     <!-- Header -->
     <div class="page-header">
       <div class="header-button" onclick="goBack">
@@ -80,23 +80,18 @@
 <script>
 import router from '@system.router'
 import storage from '@system.storage'
+// Use require instead of import for theme manager
+const ThemeManager = require('../../helper/theme-manager').ThemeManager
 
 export default {
   data() {
     return {
+      themeClass: 'light-theme',
       currentTheme: 'light',
-      themeOptions: [
-        { id: 'light', name: '浅色模式' },
-        { id: 'dark', name: '深色模式' },
-        { id: 'system', name: '跟随系统' }
-      ],
+      saveHistory: true,
       currentLanguage: 'zh-CN',
-      languageOptions: [
-        { id: 'zh-CN', name: '简体中文' },
-        { id: 'en-US', name: 'English' }
-      ],
-      saveChatHistory: true,
-      errorMessage: null
+      themeOptions: [],
+      languageOptions: []
     }
   },
   
@@ -104,73 +99,88 @@ export default {
     console.log('Settings page loaded')
     // Load user settings using the direct method
     this.loadSettings()
+    // Apply current theme
+    this.applyCurrentTheme()
+  },
+  
+  onShow: function() {
+    this.applyCurrentTheme()
+  },
+  
+  // Apply the current theme from global settings
+  applyCurrentTheme: function() {
+    const app = this.$app.$def;
+    if (app && app.globalData && app.globalData.themeManager) {
+      this.themeClass = app.globalData.themeManager.getThemeClass();
+      this.currentTheme = app.globalData.userSettings.theme.default;
+      console.log(`[SettingsPage] Applied theme: ${this.themeClass}`)
+    }
   },
   
   // Direct methods
   loadSettings: function() {
     try {
       const app = this.$app.$def
+      
+      // Check if app is available
+      if (!app) {
+        console.error('App is not available')
+        return
+      }
+      
+      // Diagnose globalData structure
+      console.log('App globalData available:', !!app.globalData)
+      if (app.globalData) {
+        console.log('Available globalData properties:', Object.keys(app.globalData).join(', '))
+        console.log('userSettings available:', !!app.globalData.userSettings)
+        console.log('themeManager available:', !!app.globalData.themeManager)
+      }
+      
+      // Get user settings safely
+      if (!app.globalData || !app.globalData.userSettings) {
+        console.log('Using default settings as app.globalData.userSettings is not available')
+        return
+      }
+      
       const userSettings = app.globalData.userSettings
       
-      if (userSettings) {
-        // Set theme
-        this.currentTheme = userSettings.theme?.default || 'light'
-        console.log('Loaded theme:', this.currentTheme)
-        
-        // Set language
-        this.currentLanguage = userSettings.language?.default || 'zh-CN'
-        console.log('Loaded language:', this.currentLanguage)
-        
-        // Set chat history setting
-        this.saveChatHistory = userSettings.chat?.history?.save !== false
+      // Set theme
+      if (userSettings.theme) {
+        this.currentTheme = userSettings.theme.default || 'light';
+        this.themeOptions = userSettings.theme.options || [];
+        console.log('Loaded theme:', this.currentTheme);
+        console.log('Loaded theme options:', this.themeOptions);
+      } else {
+        console.log('No theme setting found, using default:', this.currentTheme)
+      }
+      
+      // Set language
+      if (userSettings.language) {
+        this.currentLanguage = userSettings.language.default || 'zh-CN';
+        this.languageOptions = userSettings.language.options || [];
+        console.log('Loaded language:', this.currentLanguage);
+      } else {
+        console.log('No language setting found, using default:', this.currentLanguage)
+      }
+      
+      // Set chat history setting
+      if (userSettings.chat && userSettings.chat.history !== undefined) {
+        this.saveChatHistory = userSettings.chat.history.save !== false
         console.log('Loaded save chat history:', this.saveChatHistory)
       } else {
-        console.log('No user settings found, using defaults')
+        console.log('No chat history setting found, using default:', this.saveChatHistory)
       }
     } catch (error) {
-      console.error('Error loading settings:', error)
+      console.error('Error loading settings:', error.message)
+      console.error('Error stack:', error.stack)
       console.log('Using default settings')
     }
   },
   
   // Set theme - Moved outside methods object
   setTheme: function(themeId) {
-    try {
-      console.log('Setting theme to:', themeId)
-      this.currentTheme = themeId
-      
-      // Update app global data
-      const app = this.$app.$def
-      if (app.globalData.userSettings) {
-        app.globalData.userSettings.theme = app.globalData.userSettings.theme || {}
-        app.globalData.userSettings.theme.default = themeId
-        app.saveUserSettings()
-        
-        // Apply theme
-        if (app.globalData.themeManager) {
-          app.globalData.themeManager.setTheme(themeId)
-        }
-        
-        // Show toast confirmation
-        app.showToast('主题已更改')
-      }
-    } catch (error) {
-      console.error('Error setting theme:', error)
-      this.displayError('设置主题时出错')
-    }
-  },
-  
-  // Methods kept for reference
-  methods: {
-    // Old loadUserSettings - Not used anymore
-    loadUserSettings: function() {
-      console.log('This method is deprecated')
-    },
-    
-    // Deprecated methods - Not used anymore
-    setLanguage: function() {
-      console.log('This method is deprecated')
-    }
+    this.$app.$def.toggleTheme(themeId);
+    this.applyCurrentTheme();
   },
   
   // Set language - Moved outside methods object
@@ -255,9 +265,16 @@ export default {
 <style>
 .page {
   flex-direction: column;
-  background-color: #f3f4f6;
   width: 100%;
   height: 100%;
+}
+
+.page.light-theme {
+  background-color: #f3f4f6;
+}
+
+.page.dark-theme {
+  background-color: #0f172a;
 }
 
 /* Header Styles */
@@ -266,8 +283,16 @@ export default {
   flex-direction: row;
   align-items: center;
   padding: 12px 16px;
+}
+
+.light-theme .page-header {
   background-color: #ffffff;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.dark-theme .page-header {
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
 }
 
 .header-button {
@@ -281,8 +306,15 @@ export default {
 
 .header-icon {
   font-size: 28px;
-  color: #6b7280;
   text-align: center;
+}
+
+.light-theme .header-icon {
+  color: #6b7280;
+}
+
+.dark-theme .header-icon {
+  color: #94a3b8;
 }
 
 .page-header-title {
@@ -291,7 +323,14 @@ export default {
   font-weight: bold;
   text-align: center;
   margin-right: 48px;
+}
+
+.light-theme .page-header-title {
   color: #111827;
+}
+
+.dark-theme .page-header-title {
+  color: #f1f5f9;
 }
 
 /* Content Styles */
@@ -310,18 +349,30 @@ export default {
 .setting-group-title {
   font-size: 18px;
   font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
   padding: 0 4px;
   margin-bottom: 8px;
 }
 
+.light-theme .setting-group-title {
+  color: #6b7280;
+}
+
+.dark-theme .setting-group-title {
+  color: #94a3b8;
+}
+
 .setting-list {
   flex-direction: column;
-  background-color: #ffffff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.light-theme .setting-list {
+  background-color: #ffffff;
+}
+
+.dark-theme .setting-list {
+  background-color: #1e293b;
 }
 
 .setting-list-item {
@@ -329,17 +380,35 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
+}
+
+.light-theme .setting-list-item {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.is-link {
+.dark-theme .setting-list-item {
+  border-bottom: 1px solid #334155;
+}
+
+.light-theme .is-link {
   background-color: #ffffff;
+}
+
+.dark-theme .is-link {
+  background-color: #1e293b;
 }
 
 .setting-label {
   font-size: 22px;
   font-weight: 500;
+}
+
+.light-theme .setting-label {
   color: #111827;
+}
+
+.dark-theme .setting-label {
+  color: #f1f5f9;
 }
 
 .setting-control {
@@ -351,9 +420,16 @@ export default {
 /* Segmented Control Styles */
 .segmented-control {
   flex-direction: row;
-  background-color: #f3f4f6;
   border-radius: 8px;
   padding: 2px;
+}
+
+.light-theme .segmented-control {
+  background-color: #e5e7eb;
+}
+
+.dark-theme .segmented-control {
+  background-color: #0f172a;
 }
 
 .control-option {
@@ -361,24 +437,47 @@ export default {
   margin: 2px;
   border-radius: 6px;
   background-color: transparent;
+  border: 2px solid transparent;
 }
 
 .control-option-selected {
   padding: 8px 16px;
   margin: 2px;
   border-radius: 6px;
+}
+
+.light-theme .control-option-selected {
   background-color: #ffffff;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 2px solid #10a37f;
+}
+
+.dark-theme .control-option-selected {
+  background-color: #334155;
+  border: 2px solid #10a37f;
 }
 
 .option-text {
   font-size: 18px;
-  color: #6b7280;
+}
+
+.light-theme .option-text {
+  color: #374151;
+}
+
+.dark-theme .option-text {
+  color: #cbd5e1;
 }
 
 .control-option-selected .option-text {
+  font-weight: 700;
+}
+
+.light-theme .control-option-selected .option-text {
   color: #10a37f;
-  font-weight: 500;
+}
+
+.dark-theme .control-option-selected .option-text {
+  color: #10a37f;
 }
 
 /* Toggle Switch Styles */
@@ -388,7 +487,14 @@ export default {
 
 .item-icon {
   font-size: 24px;
-  color: #9ca3af;
   margin-left: 8px;
+}
+
+.light-theme .item-icon {
+  color: #9ca3af;
+}
+
+.dark-theme .item-icon {
+  color: #94a3b8;
 }
 </style>

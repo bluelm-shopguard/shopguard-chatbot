@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page {{themeClass}}">
     <div class="header">
       <div class="back-button" onclick="goBack">
         <text class="back-icon">←</text>
@@ -66,15 +66,56 @@ import router from '@system.router'
 export default {
   data() {
     return {
-      appVersion: '1.0.0'
+      appVersion: '1.0.0',
+      themeClass: 'light-theme' // Default theme class
     }
   },
   
   onInit() {
-    // Get app version from manifest
-    const app = this.$app.$def
-    if (app.manifest && app.manifest.versionName) {
-      this.appVersion = app.manifest.versionName
+    try {
+      // Apply current theme
+      this.applyCurrentTheme()
+      
+      // Get app version from manifest or globalData
+      const app = this.$app.$def
+      if (app) {
+        if (app.manifest && app.manifest.versionName) {
+          this.appVersion = app.manifest.versionName
+        } else if (app.globalData && app.globalData.version) {
+          this.appVersion = app.globalData.version
+        }
+        console.log('Setting app version:', this.appVersion)
+      }
+    } catch (error) {
+      console.error('Error in about page onInit:', error)
+    }
+  },
+  
+  onShow() {
+    // Check if theme has been changed since last shown
+    this.applyCurrentTheme()
+  },
+  
+  // Apply the current theme from global settings
+  applyCurrentTheme() {
+    try {
+      const app = this.$app.$def
+      if (app && app.globalData && app.globalData.themeManager) {
+        const themeClass = app.globalData.themeManager.getThemeClass()
+        
+        // Only update if theme has changed
+        if (this.themeClass !== themeClass) {
+          console.log(`[AboutPage] Applying theme class to about page: ${themeClass}`)
+          this.themeClass = themeClass
+        }
+      } else {
+        console.log('Theme manager not available, using default theme')
+        this.themeClass = 'light-theme'
+      }
+    } catch (error) {
+      console.error('Error applying current theme to about page:', error)
+      // Default to light theme on error
+      this.themeClass = 'light-theme'
     }
   },
   
@@ -90,7 +131,7 @@ export default {
 <style>
 .page {
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-color: var(--background-color, #f5f5f5);
   width: 100%;
   height: 100%;
 }
@@ -99,7 +140,7 @@ export default {
   flex-direction: row;
   align-items: center;
   padding: 20px;
-  background-color: #ffffff;
+  background-color: var(--header-background-color, #ffffff);
   width: 100%;
 }
 
@@ -112,7 +153,7 @@ export default {
 
 .back-icon {
   font-size: 36px;
-  color: #333333;
+  color: var(--text-color-primary, #333333);
 }
 
 .header-title {
@@ -121,7 +162,7 @@ export default {
   font-weight: bold;
   text-align: center;
   margin-right: 60px;
-  color: #333333;
+  color: var(--text-color-primary, #333333);
 }
 
 .about-container {
@@ -150,13 +191,13 @@ export default {
 .app-name {
   font-size: 40px;
   font-weight: bold;
-  color: #333333;
+  color: var(--text-color-primary, #333333);
   margin-top: 20px;
 }
 
 .app-version {
   font-size: 28px;
-  color: #999999;
+  color: var(--text-color-secondary, #999999);
   margin-top: 10px;
 }
 
@@ -167,13 +208,13 @@ export default {
 .about-title {
   font-size: 36px;
   font-weight: bold;
-  color: #333333;
+  color: var(--text-color-primary, #333333);
   margin-bottom: 20px;
 }
 
 .about-text {
   font-size: 30px;
-  color: #666666;
+  color: var(--text-color-secondary, #666666);
   line-height: 1.5;
 }
 
@@ -190,7 +231,7 @@ export default {
 
 .feature-text {
   font-size: 30px;
-  color: #666666;
+  color: var(--text-color-secondary, #666666);
   flex: 1;
 }
 
@@ -201,6 +242,6 @@ export default {
 
 .copyright text {
   font-size: 26px;
-  color: #999999;
+  color: var(--text-color-tertiary, #999999);
 }
 </style>

@@ -38,11 +38,15 @@ var THEMES = {
 
 // ThemeManager class
 function ThemeManager() {
+  // Ensure themes is initialized
   this.themes = THEMES;
   
   // Default theme
   this.currentTheme = 'light';
   this.systemPrefersDark = false;
+  
+  // Log successful initialization
+  console.log('ThemeManager initialized with themes:', Object.keys(this.themes).join(', '));
 }
 
 /**
@@ -76,6 +80,14 @@ ThemeManager.prototype.getEffectiveTheme = function() {
  */
 ThemeManager.prototype.setSystemPreference = function(prefersDark) {
   this.systemPrefersDark = !!prefersDark;
+  
+  // If we're currently using system theme, we need to update the effective theme
+  if (this.currentTheme === 'system') {
+    console.log('System theme preference changed to:', prefersDark ? 'dark' : 'light');
+    return true; // Signal that theme changed
+  }
+  
+  return false; // Theme didn't change
 };
 
 /**
