@@ -1,0 +1,272 @@
+<template>
+  <div class="page">
+    <div class="header">
+      <div class="back-button" onclick="goBack">
+        <text class="back-icon">←</text>
+      </div>
+      <text class="header-title">设置</text>
+    </div>
+    
+    <div class="settings-container">
+      <!-- Theme Settings -->
+      <div class="settings-section">
+        <text class="section-title">主题设置</text>
+        <div class="setting-item">
+          <text class="setting-label">显示模式</text>
+          <div class="setting-value">
+            <div 
+              for="{{themeOptions}}" 
+              class="theme-option {{currentTheme === $item.id ? 'selected' : ''}}"
+              onclick="setTheme($item.id)">
+              <text>{{$item.name}}</text>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Language Settings -->
+      <div class="settings-section">
+        <text class="section-title">语言设置</text>
+        <div class="setting-item">
+          <text class="setting-label">应用语言</text>
+          <select class="language-select" onchange="changeLanguage">
+            <option for="{{languageOptions}}" value="{{$item.id}}">{{$item.name}}</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Chat Settings -->
+      <div class="settings-section">
+        <text class="section-title">聊天设置</text>
+        <div class="setting-item">
+          <text class="setting-label">保存聊天历史</text>
+          <switch checked="{{saveChatHistory}}" onchange="toggleSaveChatHistory"></switch>
+        </div>
+      </div>
+      
+      <!-- About Section -->
+      <div class="settings-section">
+        <text class="section-title">关于</text>
+        <div class="setting-item" onclick="navigateTo('pages/about')">
+          <text class="setting-label">关于我们</text>
+          <text class="arrow">›</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+
+export default {
+  data() {
+    return {
+      currentTheme: 'light',
+      themeOptions: [
+        { id: 'light', name: '浅色模式' },
+        { id: 'dark', name: '深色模式' },
+        { id: 'system', name: '跟随系统' }
+      ],
+      currentLanguage: 'zh-CN',
+      languageOptions: [
+        { id: 'zh-CN', name: '简体中文' },
+        { id: 'en-US', name: 'English' }
+      ],
+      saveChatHistory: true
+    }
+  },
+  
+  onInit() {
+    // Load user settings
+    this.loadUserSettings()
+  },
+  
+  methods: {
+    // Load user settings from storage
+    loadUserSettings() {
+      const app = this.$app.$def
+      const userSettings = app.globalData.userSettings
+      
+      if (userSettings) {
+        // Set theme
+        this.currentTheme = userSettings.theme?.default || 'light'
+        
+        // Set language
+        this.currentLanguage = userSettings.language?.default || 'zh-CN'
+        
+        // Set chat history setting
+        this.saveChatHistory = userSettings.chat?.history?.save !== false
+      }
+    },
+    
+    // Set theme
+    setTheme(themeId) {
+      this.currentTheme = themeId
+      
+      // Update app global data
+      const app = this.$app.$def
+      if (app.globalData.userSettings) {
+        app.globalData.userSettings.theme = app.globalData.userSettings.theme || {}
+        app.globalData.userSettings.theme.default = themeId
+        app.saveUserSettings()
+        
+        // Apply theme
+        if (app.globalData.themeManager) {
+          app.globalData.themeManager.setTheme(themeId)
+        }
+      }
+    },
+    
+    // Change language
+    changeLanguage(e) {
+      const languageId = e.newValue
+      this.currentLanguage = languageId
+      
+      // Update app global data
+      const app = this.$app.$def
+      if (app.globalData.userSettings) {
+        app.globalData.userSettings.language = app.globalData.userSettings.language || {}
+        app.globalData.userSettings.language.default = languageId
+        app.saveUserSettings()
+        
+        // Apply language
+        if (app.globalData.languageManager) {
+          app.globalData.languageManager.setLanguage(languageId)
+        }
+      }
+    },
+    
+    // Toggle save chat history
+    toggleSaveChatHistory(e) {
+      this.saveChatHistory = e.checked
+      
+      // Update app global data
+      const app = this.$app.$def
+      if (app.globalData.userSettings) {
+        app.globalData.userSettings.chat = app.globalData.userSettings.chat || {}
+        app.globalData.userSettings.chat.history = app.globalData.userSettings.chat.history || {}
+        app.globalData.userSettings.chat.history.save = this.saveChatHistory
+        app.saveUserSettings()
+      }
+    },
+    
+    // Navigate to a page
+    navigateTo(page) {
+      router.push({
+        uri: page
+      })
+    },
+    
+    // Go back
+    goBack() {
+      router.back()
+    }
+  }
+}
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  background-color: #f5f5f5;
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  flex-direction: row;
+  align-items: center;
+  padding: 20px;
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.back-button {
+  width: 60px;
+  height: 60px;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 36px;
+  color: #333333;
+}
+
+.header-title {
+  flex: 1;
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  margin-right: 60px;
+  color: #333333;
+}
+
+.settings-container {
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+  background-color: #ffffff;
+  padding: 0 30px;
+}
+
+.section-title {
+  font-size: 28px;
+  color: #999999;
+  padding: 20px 0;
+  margin-bottom: 10px;
+}
+
+.setting-item {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-bottom-width: 1px;
+  border-bottom-color: #eeeeee;
+}
+
+.setting-label {
+  font-size: 32px;
+  color: #333333;
+}
+
+.setting-value {
+  flex-direction: row;
+}
+
+.theme-option {
+  padding: 8px 20px;
+  border-radius: 6px;
+  margin-left: 10px;
+  background-color: #f0f0f0;
+}
+
+.theme-option.selected {
+  background-color: #007aff;
+}
+
+.theme-option.selected text {
+  color: #ffffff;
+}
+
+.theme-option text {
+  font-size: 28px;
+  color: #333333;
+}
+
+.language-select {
+  width: 240px;
+}
+
+.arrow {
+  font-size: 36px;
+  color: #bbbbbb;
+}
+</style>

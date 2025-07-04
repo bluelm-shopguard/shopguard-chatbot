@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .debug-section {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0069d9;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Settings Debug Test</h1>
+
+    <h2>User Settings</h2>
+    <div class="debug-section">
+        <pre id="userSettings">Loading...</pre>
+    </div>
+
+    <h2>Language Resources</h2>
+    <div class="debug-section">
+        <pre id="languageResources">Loading...</pre>
+    </div>
+
+    <h2>Test Selectors</h2>
+    <div>
+        <div id="theme-test"></div>
+        <h3>Theme Selector</h3>
+        <div id="test-theme-selector"></div>
+
+        <h3>Language Selector</h3>
+        <div id="test-language-selector"></div>
+    </div>
+
+    <script type="module">
+        import * as UserSettingsModule from './data/user-settings.js';
+        import { languageManager, t } from './data/language-manager.js';
+
+        // First, make sure user settings are loaded
+        UserSettingsModule.loadUserSettings();
+
+        const { UserSettings, getUserSetting, setUserSetting } = UserSettingsModule;
+
+        // Display user settings
+        document.getElementById('userSettings').textContent =
+            JSON.stringify(UserSettings, null, 2);
+
+        // Display language resources
+        document.getElementById('languageResources').textContent =
+            JSON.stringify({
+                'currentLanguage': languageManager.currentLanguage,
+                'zh-CN': Object.keys(languageManager.languages['zh-CN'] || {}),
+                'en-US': Object.keys(languageManager.languages['en-US'] || {})
+            }, null, 2);
+
+        // Create test theme selector
+        const themeSelector = document.getElementById('test-theme-selector');
+        const currentTheme = getUserSetting('theme.default');
+
+        if (UserSettings && UserSettings.theme && UserSettings.theme.options) {
+            UserSettings.theme.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.name;
+                button.dataset.value = option.id;
+                if (option.id === currentTheme) {
+                    button.classList.add('active');
+                    button.style.backgroundColor = '#4CAF50';
+                }
+                themeSelector.appendChild(button);
+            });
+        } else {
+            themeSelector.textContent = 'Theme options not available';
+        }
+
+        // Create test language selector
+        const languageSelector = document.getElementById('test-language-selector');
+        const currentLanguage = getUserSetting('language.default');
+
+        if (UserSettings && UserSettings.language && UserSettings.language.options) {
+            UserSettings.language.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.name;
+                button.dataset.value = option.id;
+                if (option.id === currentLanguage) {
+                    button.classList.add('active');
+                    button.style.backgroundColor = '#4CAF50';
+                }
+                languageSelector.appendChild(button);
+            });
+        } else {
+            languageSelector.textContent = 'Language options not available';
+        }
+
+        // Display some test translations
+        document.getElementById('theme-test').innerHTML = `
+            <p>Theme translation test:</p>
+            <ul>
+                <li>Light: ${t('settings.theme.light')}</li>
+                <li>Dark: ${t('settings.theme.dark')}</li>
+                <li>System: ${t('settings.theme.system')}</li>
+            </ul>
+        `;
+    </script>
+</body>
+
+</html>

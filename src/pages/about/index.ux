@@ -1,0 +1,206 @@
+<template>
+  <div class="page">
+    <div class="header">
+      <div class="back-button" onclick="goBack">
+        <text class="back-icon">←</text>
+      </div>
+      <text class="header-title">关于我们</text>
+    </div>
+    
+    <div class="about-container">
+      <div class="logo-container">
+        <text class="logo-text">SG</text>
+        <text class="app-name">ShopGuard AI</text>
+        <text class="app-version">v{{appVersion}}</text>
+      </div>
+      
+      <div class="about-section">
+        <text class="about-title">项目概述</text>
+        <text class="about-text">
+          ShopGuard AI 是一款专为识别购物诈骗风险设计的智能助手应用。用户可以发送商品截图、链接或聊天记录，AI 将分析内容并提供风险评估。
+        </text>
+      </div>
+      
+      <div class="about-section">
+        <text class="about-title">主要功能</text>
+        <div class="feature-item">
+          <text class="feature-icon">🔍</text>
+          <text class="feature-text">图片识别：分析商品图片中的风险信息</text>
+        </div>
+        <div class="feature-item">
+          <text class="feature-icon">🔗</text>
+          <text class="feature-text">链接分析：检测可疑购物链接</text>
+        </div>
+        <div class="feature-item">
+          <text class="feature-icon">💬</text>
+          <text class="feature-text">聊天记录分析：识别卖家聊天中的诈骗迹象</text>
+        </div>
+        <div class="feature-item">
+          <text class="feature-icon">⭐</text>
+          <text class="feature-text">风险评级：提供直观的"诈骗风险星级"评分</text>
+        </div>
+        <div class="feature-item">
+          <text class="feature-icon">🛡️</text>
+          <text class="feature-text">购物建议：针对不同风险提供专业防骗建议</text>
+        </div>
+      </div>
+      
+      <div class="about-section">
+        <text class="about-title">联系我们</text>
+        <text class="about-text">
+          官方网站: https://shopguard.ai
+          邮箱: contact@shopguard.ai
+        </text>
+      </div>
+      
+      <div class="copyright">
+        <text>© 2025 ShopGuard AI Team</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+
+export default {
+  data() {
+    return {
+      appVersion: '1.0.0'
+    }
+  },
+  
+  onInit() {
+    // Get app version from manifest
+    const app = this.$app.$def
+    if (app.manifest && app.manifest.versionName) {
+      this.appVersion = app.manifest.versionName
+    }
+  },
+  
+  methods: {
+    // Go back
+    goBack() {
+      router.back()
+    }
+  }
+}
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  background-color: #f5f5f5;
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  flex-direction: row;
+  align-items: center;
+  padding: 20px;
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.back-button {
+  width: 60px;
+  height: 60px;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 36px;
+  color: #333333;
+}
+
+.header-title {
+  flex: 1;
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  margin-right: 60px;
+  color: #333333;
+}
+
+.about-container {
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  padding: 30px;
+}
+
+.logo-container {
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.logo-text {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  background-color: #007aff;
+  color: #ffffff;
+  font-size: 60px;
+  text-align: center;
+  line-height: 120px;
+}
+
+.app-name {
+  font-size: 40px;
+  font-weight: bold;
+  color: #333333;
+  margin-top: 20px;
+}
+
+.app-version {
+  font-size: 28px;
+  color: #999999;
+  margin-top: 10px;
+}
+
+.about-section {
+  margin-bottom: 30px;
+}
+
+.about-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+.about-text {
+  font-size: 30px;
+  color: #666666;
+  line-height: 1.5;
+}
+
+.feature-item {
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.feature-icon {
+  font-size: 32px;
+  margin-right: 15px;
+}
+
+.feature-text {
+  font-size: 30px;
+  color: #666666;
+  flex: 1;
+}
+
+.copyright {
+  margin-top: 40px;
+  align-items: center;
+}
+
+.copyright text {
+  font-size: 26px;
+  color: #999999;
+}
+</style>

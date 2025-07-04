@@ -13,49 +13,46 @@
 
     <!-- Main chat content -->
     <list class="chat-content" if="{{!showWelcome}}">
-      <list-item if="{{messages.length === 0}}">
-        <div class="welcome-container">
-          <text class="welcome-logo">SG</text>
-          <text class="welcome-title">购物防诈骗助手</text>
-          <text class="welcome-message">{{welcomeMessage}}</text>
-        </div>
-      </list-item>
-      
-      <!-- User message template -->
-      <list-item for="{{userMessages}}" tid="id">
-        <div class="message-container user-message">
-          <!-- User message content -->
-          <div class="user-message-content">
-            <!-- Show uploaded image if present -->
-            <image if="{{$item.image}}" src="{{$item.image}}" class="message-image" onclick="previewImage($item.image)" />
-            
-            <!-- Show text content -->
-            <text if="{{$item.content && $item.content.length > 0}}">{{$item.content}}</text>
+      <!-- Welcome message when no chats -->
+      <block if="{{userMessages.length === 0 && aiMessages.length === 0}}">
+        <list-item type="welcome-item">
+          <div class="welcome-container">
+            <text class="welcome-logo">SG</text>
+            <text class="welcome-title">购物防诈骗助手</text>
+            <text class="welcome-message">{{welcomeMessage}}</text>
           </div>
-        </div>
-      </list-item>
+        </list-item>
+      </block>
       
-      <!-- AI message template -->
-      <list-item for="{{aiMessages}}" tid="id">
-        <div class="message-container ai-message">
-          <!-- AI message content -->
-          <div class="ai-message-content">
-            <!-- Show AI response text -->
-            <text>{{$item.content}}</text>
-            
-            <!-- Risk rating (if present) -->
-            <div if="{{$item.riskLevel > 0}}" class="risk-rating">
-              <text class="risk-label">风险评级：</text>
-              <text class="risk-stars">{{getRiskStars($item.riskLevel)}}</text>
+      <!-- All messages in combined view -->
+      <block for="{{getAllMessages()}}" tid="id">
+        <list-item type="{{$item.role === 'user' ? 'user-message-item' : 'ai-message-item'}}">
+          <div class="message-container {{$item.role === 'user' ? 'user-message' : 'ai-message'}}">
+            <!-- User message content - we'll show this for both types but conditionally style -->
+            <div class="{{$item.role === 'user' ? 'user-message-content' : 'ai-message-content'}}">
+              <!-- For user messages - image and text -->
+              <block if="{{$item.role === 'user'}}">
+                <image show="{{$item.image}}" src="{{$item.image || ''}}" class="message-image" onclick="previewImage($item.image)" />
+                <text show="{{$item.content && $item.content.length > 0}}">{{$item.content || ''}}</text>
+              </block>
+              
+              <!-- For AI messages - text and risk rating -->
+              <block if="{{$item.role === 'assistant'}}">
+                <text>{{$item.content || ''}}</text>
+                <div show="{{$item.riskLevel > 0}}" class="risk-rating">
+                  <text class="risk-label">风险评级：</text>
+                  <text class="risk-stars">{{getRiskStars($item.riskLevel)}}</text>
+                </div>
+              </block>
+              
+              <!-- Loading indicator shown for both types -->
+              <div show="{{$item.loading}}" class="loading-indicator">
+                <text>正在思考...</text>
+              </div>
             </div>
           </div>
-          
-          <!-- Loading indicator for waiting AI response -->
-          <div if="{{$item.loading}}" class="loading-indicator">
-            <text>正在思考...</text>
-          </div>
-        </div>
-      </list-item>
+        </list-item>
+      </block>
     </list>
     
     <!-- Welcome view shown on first visit -->
@@ -436,7 +433,9 @@ export default {
     // Open history sidebar
     openHistory() {
       // Navigate to history page
-      this.$app.$def.navigateTo('/pages/history/index')
+      this.$app.$def.router.push({
+        uri: 'pages/history'
+      })
     },
     
     // Toggle web search

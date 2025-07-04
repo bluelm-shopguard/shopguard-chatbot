@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="i18n-title" content="app.title">
+    <title>ShopGuard AI - 购物防诈骗助手</title>
+    <link rel="stylesheet" href="common/styles/homepage.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <!-- App initialization script -->
+    <script type="module">
+        /**
+         * @file App initialization
+         * @description Loads user settings and initializes core services
+         */
+        import { getSystemSetting } from './data/system-settings.js';
+        import { loadUserSettings, getUserSetting } from './data/user-settings.js';
+        import { themeManager } from './js/theme-manager.js';
+        import { languageManager, t } from './data/language-manager.js';
+
+        // Load user settings
+        loadUserSettings();
+
+        // Initialize theme manager
+        themeManager.init();
+
+        // Initialize language manager and set document language attribute
+        languageManager.init();
+        document.documentElement.lang = getUserSetting('language.default') || 'zh-CN';
+
+        // Explicitly export managers to window for direct access
+        window.themeManager = themeManager;
+        window.languageManager = languageManager;
+        window.t = t; // Make translation function globally available
+
+        // Make settings available globally for non-module scripts
+        window.getSystemSetting = getSystemSetting;
+        window.getUserSetting = getUserSetting;
+
+        // Create global event bus for component communication
+        window.eventBus = {
+            events: {},
+            on: function (event, callback) {
+                if (!this.events[event]) {
+                    this.events[event] = [];
+                }
+                this.events[event].push(callback);
+            },
+            emit: function (event, data) {
+                const callbacks = this.events[event];
+                if (callbacks) {
+                    callbacks.forEach(callback => callback(data));
+                }
+            }
+        };
+
+        // Listen for document ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('ShopGuard AI initialized');
+
+            // Force initial theme application to ensure correct display
+            themeManager.applyTheme();
+
+            // Force initial language translation to ensure correct text display
+            languageManager.applyTranslations();
+        });
+    </script>
+</head>
+
+<body>
+    <!-- Sidebar overlay -->
+    <div class="sidebar-overlay" role="presentation"></div>
+
+    <!-- Sidebar component -->
+    <aside class="sidebar" role="complementary" aria-label="Conversation History">
+        <header class="sidebar__header">
+            <h2 class="sidebar__title" data-i18n="home.history.title">历史对话</h2>
+            <button class="header-button close-sidebar-button" aria-label="Close sidebar">
+                <i data-lucide="x"></i>
+            </button>
+        </header>
+        <div class="sidebar__content">
+            <!-- Conversation history will be implemented later -->
+        </div>
+        <footer class="sidebar__footer">
+            <div class="account-info">
+                <div class="account-info__avatar">
+                    <i data-lucide="user-circle"></i>
+                </div>
+                <span class="account-info__name">Username</span>
+            </div>
+            <a href="pages/setting.html" class="settings-button" aria-label="Settings">
+                <i data-lucide="settings"></i>
+            </a>
+        </footer>
+    </aside>
+
+    <!-- Main chat application -->
+    <div class="chat-app">
+        <header class="chat-header">
+            <button class="header-button open-sidebar-button" aria-label="Open sidebar">
+                <i data-lucide="panel-left"></i>
+            </button>
+            <h1 class="chat-header__title" data-i18n="app.name">ShopGuard AI</h1>
+            <button class="header-button" aria-label="New conversation">
+                <i data-lucide="square-plus"></i>
+            </button>
+        </header>
+
+        <main class="chat-content">
+            <div class="chat-content__welcome">
+                <img src="common/images/logo.jpeg" alt="ShopGuard AI Logo" class="welcome-logo">
+                <h2 class="welcome-title" data-i18n="app.description">购物防诈骗助手</h2>
+                <p class="welcome-message" data-i18n="home.conversation.placeholder">
+                    遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！
+                </p>
+            </div>
+            <!-- Chat messages will be dynamically added here -->
+        </main>
+
+        <footer class="chat-input-area">
+            <div class="input-area__toolbar">
+                <button class="toolbar-button image-upload-button" aria-label="Upload image">
+                    <i data-lucide="image"></i>
+                    <span data-i18n="home.conversation.image">图片</span>
+                </button>
+                <button class="toolbar-button" aria-label="Web search">
+                    <i data-lucide="globe"></i>
+                    <span data-i18n="home.conversation.search">搜索</span>
+                </button>
+            </div>
+            <div class="input-area__input-wrapper">
+                <div class="image-preview-container" style="display: none;">
+                    <div class="image-preview">
+                        <img id="preview-image" src="" alt="Image preview">
+                        <button class="remove-image-button" aria-label="Remove image">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-area__text-input" contenteditable="true" role="textbox"
+                    data-placeholder-i18n="home.conversation.placeholder"></div>
+                <button class="send-button" aria-label="Send message">
+                    <i data-lucide="arrow-up"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        /**
+         * @file Main application script
+         * @description Handles UI interactions, chat functionality and API calls
+         */
+
+        // Initialize UI components
+        lucide.createIcons();
+
+        // DOM element references
+        const elements = {
+            sidebar: document.querySelector('.sidebar'),
+            sidebarOverlay: document.querySelector('.sidebar-overlay'),
+            openSidebarButton: document.querySelector('.open-sidebar-button'),
+            closeSidebarButton: document.querySelector('.close-sidebar-button'),
+            newChatButton: document.querySelector('.header-button[aria-label="New conversation"]'),
+            chatContent: document.querySelector('.chat-content'),
+            inputArea: document.querySelector('.input-area__text-input'),
+            sendButton: document.querySelector('.send-button'),
+            welcomeView: document.querySelector('.chat-content__welcome'),
+            imageUploadButton: document.querySelector('.image-upload-button'),
+            imagePreviewContainer: document.querySelector('.image-preview-container'),
+            previewImage: document.getElementById('preview-image'),
+            removeImageButton: document.querySelector('.remove-image-button')
+        };
+
+        // App state
+        const state = {
+            currentImageData: null,
+            isProcessingMessage: false,
+            chatHistory: []
+        };
+
+        /**
+         * Apply placeholder to input area using i18n
+         */
+        function applyInputPlaceholder() {
+            const inputArea = elements.inputArea;
+            if (inputArea) {
+                const placeholder = window.t ? window.t('home.conversation.placeholder') : '发消息给我分析一下...';
+                inputArea.setAttribute('data-placeholder', placeholder);
+            }
+        }
+
+        /**
+         * Open sidebar
+         */
+        function openSidebar() {
+            elements.sidebar.classList.add('active');
+            elements.sidebarOverlay.classList.add('active');
+            // Improve accessibility
+            elements.sidebar.setAttribute('aria-hidden', 'false');
+        }
+
+        /**
+         * Close sidebar
+         */
+        function closeSidebar() {
+            elements.sidebar.classList.remove('active');
+            elements.sidebarOverlay.classList.remove('active');
+            // Improve accessibility
+            elements.sidebar.setAttribute('aria-hidden', 'true');
+        }
+
+        /**
+         * Start a new chat conversation
+         */
+        function startNewChat() {
+            // Clear all chat messages except welcome screen
+            const chatMessages = elements.chatContent.querySelectorAll('.chat-message');
+            chatMessages.forEach(message => message.remove());
+
+            // Show welcome screen again
+            if (elements.welcomeView) {
+                elements.welcomeView.style.display = 'block';
+            }
+
+            // Clear input area
+            elements.inputArea.textContent = '';
+
+            // Clear any uploaded image
+            if (state.currentImageData) {
+                state.currentImageData = null;
+                elements.imagePreviewContainer.style.display = 'none';
+                elements.previewImage.src = '';
+            }
+
+            // Reset chat history
+            state.chatHistory = [];
+
+            // Focus on input area
+            elements.inputArea.focus();
+
+            // Dispatch event for other components
+            window.eventBus.emit('chat:new', {});
+        }
+
+        /**
+         * Handle image upload
+         * @param {Event} event - The change event from file input
+         */
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file size (limit to 10MB)
+            const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+            if (file.size > MAX_FILE_SIZE) {
+                showErrorNotification('图片大小不能超过10MB');
+                return;
+            }
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                showErrorNotification('请选择图片文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                state.currentImageData = e.target.result; // This is a data URL with base64
+                elements.previewImage.src = state.currentImageData;
+                elements.imagePreviewContainer.style.display = 'block';
+                // Focus back to input area for better UX
+                elements.inputArea.focus();
+            };
+            reader.onerror = () => {
+                showErrorNotification('无法读取图片文件');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /**
+         * Send message to chatbot API
+         */
+        async function sendMessage() {
+            const prompt = elements.inputArea.textContent.trim();
+            if (!prompt && !state.currentImageData) return;
+
+            // Prevent multiple submissions
+            if (state.isProcessingMessage) return;
+            state.isProcessingMessage = true;
+
+            if (elements.welcomeView) {
+                elements.welcomeView.style.display = 'none';
+            }
+
+            // Display user message (with image if present)
+            appendMessage('user', prompt, state.currentImageData);
+
+            // Clear input and image preview
+            elements.inputArea.textContent = '';
+            const imageDataToSend = state.currentImageData; // Store before clearing
+            state.currentImageData = null;
+            elements.imagePreviewContainer.style.display = 'none';
+            elements.previewImage.src = '';
+
+            const botMessageElement = appendMessage('bot', '...');
+            const botMessageContentElement = botMessageElement.querySelector('.chat-message__content');
+
+            try {
+                const botMessage = await callChatbotAPI(prompt, imageDataToSend);
+                botMessageContentElement.textContent = botMessage;
+
+                // Add message to chat history
+                state.chatHistory.push({
+                    role: 'user',
+                    content: prompt,
+                    image: imageDataToSend ? true : false
+                });
+                state.chatHistory.push({
+                    role: 'bot',
+                    content: botMessage
+                });
+
+                // Save chat history if enabled
+                if (window.getUserSetting('chat.history.save')) {
+                    saveChatHistory();
+                }
+            } catch (error) {
+                console.error("API error:", error);
+
+                // Differentiate between different types of errors
+                let errorMessage;
+                if (error.name === 'AbortError') {
+                    errorMessage = '请求超时，请稍后再试';
+                } else if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
+                    errorMessage = '网络连接错误，请检查您的网络连接';
+                } else if (error.response && error.response.status) {
+                    // Handle HTTP error statuses
+                    switch (error.response.status) {
+                        case 401:
+                            errorMessage = 'API 认证失败';
+                            break;
+                        case 429:
+                            errorMessage = 'API 请求次数过多，请稍后再试';
+                            break;
+                        case 500:
+                            errorMessage = '服务器错误，请稍后再试';
+                            break;
+                        default:
+                            errorMessage = window.getSystemSetting('chat.errorMessage');
+                    }
+                } else {
+                    errorMessage = window.getSystemSetting('chat.errorMessage');
+                }
+
+                botMessageContentElement.textContent = errorMessage;
+                botMessageContentElement.classList.add('error');
+                showErrorNotification(errorMessage);
+            } finally {
+                state.isProcessingMessage = false;
+            }
+        }
+
+        /**
+         * Append a message to the chat
+         * @param {string} sender - Message sender ('user' or 'bot')
+         * @param {string} text - Message text content
+         * @param {string|null} imageData - Optional base64 image data
+         * @returns {HTMLElement} The created message element
+         */
+        function appendMessage(sender, text, imageData = null) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('chat-message', `chat-message--${sender}`);
+            // Add proper ARIA roles for accessibility
+            messageWrapper.setAttribute('role', sender === 'bot' ? 'status' : 'none');
+
+            // Add timestamp
+            const timestamp = document.createElement('div');
+            timestamp.classList.add('chat-message__timestamp');
+            const now = new Date();
+            timestamp.textContent = now.toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            messageWrapper.appendChild(timestamp);
+
+            // Add image if present (for user messages)
+            if (imageData && sender === 'user') {
+                const imageElement = document.createElement('div');
+                imageElement.classList.add('chat-message__image');
+                const img = document.createElement('img');
+                img.src = imageData;
+                img.alt = '上传的图片';
+                img.loading = 'lazy'; // Improve performance
+                imageElement.appendChild(img);
+                messageWrapper.appendChild(imageElement);
+            }
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('chat-message__content');
+            messageContent.textContent = text;
+
+            messageWrapper.appendChild(messageContent);
+            elements.chatContent.appendChild(messageWrapper);
+            elements.chatContent.scrollTop = elements.chatContent.scrollHeight;
+
+            // Reinitialize Lucide icons after DOM changes
+            lucide.createIcons();
+
+            return messageWrapper;
+        }
+
+        /**
+         * Call chatbot API with text and/or image
+         * @param {string} userInput - User text input
+         * @param {string|null} imageData - Optional base64 image data
+         * @param {Array} history - Optional message history
+         * @returns {Promise<string>} Bot response text
+         * @throws {Error} API errors
+         */
+        async function callChatbotAPI(userInput, imageData = null, history = []) {
+            const API_ENDPOINT = window.getSystemSetting('api.endpoint');
+            const MODEL = window.getSystemSetting('api.model');
+            const TIMEOUT = window.getSystemSetting('api.timeout') || 30000;
+            const MAX_RETRIES = window.getSystemSetting('api.maxRetries') || 3;
+
+            let messages = [...history];
+
+            // Create user message with text and/or image
+            if (imageData && userInput) {
+                // Both text and image
+                messages.push({
+                    role: "user",
+                    content: [
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: imageData
+                            }
+                        },
+                        {
+                            type: "text",
+                            text: userInput
+                        }
+                    ]
+                });
+            } else if (imageData) {
+                // Only image
+                messages.push({
+                    role: "user",
+                    content: [
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: imageData
+                            }
+                        }
+                    ]
+                });
+            } else {
+                // Only text
+                messages.push({ role: "user", content: userInput });
+            }
+
+            const requestBody = {
+                model: MODEL,
+                messages: messages,
+            };
+
+            // Implement timeout and retries
+            let retries = 0;
+            let lastError = null;
+
+            while (retries <= MAX_RETRIES) {
+                try {
+                    // Create AbortController for timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
+
+                    const response = await fetch(API_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody),
+                        signal: controller.signal
+                    });
+
+                    // Clear timeout
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw {
+                            name: 'APIError',
+                            message: `API Error: ${response.status} ${response.statusText}`,
+                            response
+                        };
+                    }
+
+                    const data = await response.json();
+
+                    if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                        return data.choices[0].message.content;
+                    } else {
+                        throw new Error("API response did not contain a valid choice.");
+                    }
+                } catch (error) {
+                    lastError = error;
+                    console.warn(`API request failed (attempt ${retries + 1}/${MAX_RETRIES + 1}):`, error);
+
+                    // Don't retry on user abort or if we've hit max retries
+                    if (error.name === 'AbortError' || retries >= MAX_RETRIES) {
+                        break;
+                    }
+
+                    // Exponential backoff
+                    const backoffTime = Math.min(1000 * Math.pow(2, retries), 10000);
+                    await new Promise(resolve => setTimeout(resolve, backoffTime));
+                    retries++;
+                }
+            }
+
+            // If all retries failed
+            throw lastError;
+        }
+
+        /**
+         * Show error notification
+         * @param {string} message - Error message to display
+         */
+        function showErrorNotification(message) {
+            const notification = document.createElement('div');
+            notification.classList.add('error-notification');
+            notification.textContent = message;
+
+            // Add proper ARIA role for accessibility
+            notification.setAttribute('role', 'alert');
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after delay
+            setTimeout(() => {
+                notification.classList.add('fade-out');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        /**
+         * Save chat history to localStorage
+         */
+        function saveChatHistory() {
+            try {
+                // Get existing histories
+                const savedHistories = JSON.parse(
+                    localStorage.getItem('shopguard-chat-histories') || '[]'
+                );
+
+                // Create new history entry
+                const historyEntry = {
+                    id: Date.now().toString(),
+                    timestamp: new Date().toISOString(),
+                    title: getHistoryTitle(),
+                    messages: state.chatHistory
+                };
+
+                // Add to histories and save
+                savedHistories.unshift(historyEntry); // Add to beginning
+
+                // Limit number of saved histories
+                const MAX_HISTORIES = 50;
+                if (savedHistories.length > MAX_HISTORIES) {
+                    savedHistories.length = MAX_HISTORIES;
+                }
+
+                localStorage.setItem(
+                    'shopguard-chat-histories',
+                    JSON.stringify(savedHistories)
+                );
+            } catch (error) {
+                console.warn('Failed to save chat history:', error);
+            }
+        }
+
+        /**
+         * Generate a title for chat history based on first message
+         * @returns {string} Generated title
+         */
+        function getHistoryTitle() {
+            if (state.chatHistory.length === 0) return "新对话";
+
+            const firstMessage = state.chatHistory.find(msg => msg.role === 'user');
+            if (!firstMessage) return "新对话";
+
+            // Use text content for title
+            let title = firstMessage.content;
+
+            // If first message was an image
+            if (typeof firstMessage.content !== 'string' || firstMessage.content.trim() === '') {
+                title = firstMessage.image ? "图片分析" : "新对话";
+            }
+
+            // Limit length
+            return title.length > 20 ? title.substring(0, 20) + '...' : title;
+        }
+
+        // Attach event listeners
+        elements.openSidebarButton.addEventListener('click', openSidebar);
+        elements.closeSidebarButton.addEventListener('click', closeSidebar);
+        elements.sidebarOverlay.addEventListener('click', closeSidebar);
+        elements.newChatButton.addEventListener('click', startNewChat);
+        elements.sendButton.addEventListener('click', sendMessage);
+        elements.removeImageButton.addEventListener('click', () => {
+            state.currentImageData = null;
+            elements.imagePreviewContainer.style.display = 'none';
+            elements.previewImage.src = '';
+        });
+
+        // Image upload functionality
+        elements.imageUploadButton.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = handleImageUpload;
+            input.click();
+        });
+
+        // Enter key to send message
+        elements.inputArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Focus input area on page load
+        window.addEventListener('load', () => {
+            elements.inputArea.focus();
+
+            // Set sidebar to aria-hidden by default
+            elements.sidebar.setAttribute('aria-hidden', 'true');
+
+            // Apply input placeholder based on current language
+            applyInputPlaceholder();
+        });
+
+        // Add event listener for theme changes
+        document.addEventListener('themechange', (e) => {
+            console.log('Theme changed to:', e.detail.theme);
+            // Update the UI to reflect the theme change
+            const theme = e.detail.theme;
+            document.documentElement.setAttribute('data-theme', theme);
+        });
+
+        // Add event listener for user settings changes
+        document.addEventListener('userSettingsChanged', (e) => {
+            const { key, value } = e.detail;
+            console.log('User setting changed:', key, value);
+
+            // Handle specific setting changes
+            if (key === 'theme.default') {
+                themeManager.applyTheme();
+            } else if (key === 'language.default') {
+                // Language changes are handled by the languagechange event
+            }
+        });
+
+        // Add event listener for language changes
+        document.addEventListener('languagechange', (e) => {
+            console.log('Language changed to:', e.detail.language);
+            // Apply translations when language changes
+            if (window.languageManager) {
+                window.languageManager.applyTranslations();
+                // Update input placeholder
+                applyInputPlaceholder();
+            }
+        });
+
+        // Add resize handler for mobile devices
+        window.addEventListener('resize', () => {
+            // Adjust UI based on screen size
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+        });
+    </script>
+</body>
+
+</html>

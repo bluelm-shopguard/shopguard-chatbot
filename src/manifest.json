@@ -1,13 +1,61 @@
 {
-    "package": "com.shopguard.chatbot",
-    "name": "bluelm shopguard chatbot",
-    "versionName": "1.0.0",
-    "versionCode": 1,
-    "minPlatformVersion": 1070,
-    "icon": "common/images/logo.png",
-    "features": [
-      { "name": "system.network" },
-      { "name": "system.storage" },
-      { "name": "system.device" }
-    ]
+  "package": "com.shopguard.chatbot",
+  "name": "ShopGuardAI",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1070,
+  "icon": "common/images/logo.jpeg",
+  "features": [
+    { "name": "system.network" },
+    { "name": "system.storage" },
+    { "name": "system.device" },
+    { "name": "system.prompt" },
+    { "name": "system.router" },
+    { "name": "system.media" },
+    { "name": "system.file" },
+    { "name": "system.fetch" }
+  ],
+  "config": {
+    "logLevel": "off",
+    "designWidth": 750,
+    "data": {
+      "theme": "light"
+    }
+  },
+  "router": {
+    "entry": "pages/home",
+    "pages": {
+      "pages/home": {
+        "component": "index"
+      },
+      "pages/history": {
+        "component": "index"
+      },
+      "pages/settings": {
+        "component": "index"
+      },
+      "pages/about": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "titleBarBackgroundColor": "#ffffff",
+    "titleBarTextColor": "#333333",
+    "menu": true,
+    "pages": {
+      "pages/home": {
+        "titleBarText": "ShopGuard AI"
+      },
+      "pages/history": {
+        "titleBarText": "历史记录"
+      },
+      "pages/settings": {
+        "titleBarText": "设置"
+      },
+      "pages/about": {
+        "titleBarText": "关于我们"
+      }
+    }
   }
+}
