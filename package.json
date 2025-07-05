@@ -1,0 +1,24 @@
+{
+  "name": "shopguard-chatbot",
+  "version": "0.1.0",
+  "description": "ShopGuard AI - A smart assistant for detecting shopping fraud",
+  "main": "src/homepage.html",
+  "scripts": {
+    "start": "http-server -c-1 -p 8080 .",
+    "serve": "http-server -c-1 -p 8080 .",
+    "open": "http-server -c-1 -p 8080 . -o src/homepage.html"
+  },
+  "keywords": [
+    "webapp",
+    "shopping",
+    "fraud detection",
+    "chatbot",
+    "AI assistant"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {}
+}

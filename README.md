@@ -35,6 +35,8 @@ ShopGuard AI 是一款专为识别购物诈骗风险设计的智能助手应用�
 
 ### 安装运行
 
+#### 网页版
+
 1. 克隆仓库：
 
 ```bash
@@ -62,35 +64,49 @@ export let SystemSettings = {
 };
 ```
 
-4. 启动开发服务器：
+4. 运行网页应用：
 
 ```bash
+# 启动服务器
 npm run serve
+
+# 或者自动打开浏览器访问应用
+npm run open
 ```
 
-5. 构建生产版本：
+服务启动后，访问 http://localhost:8080/ 即可打开应用。
 
-```bash
-npm run build
-```
+#### 快应用版本
+
+快应用版本需要使用快应用开发工具编译运行：
+
+1. 安装快应用开发者工具
+2. 执行构建命令
+3. 在模拟器或真机上测试
 
 ## 📁 项目结构
 
 ```
 shopguard-chatbot/
 ├── docs/                 # 项目文档
+├── index.html            # 网页版入口（重定向到 homepage.html）
 ├── src/                  # 源代码
-│   ├── app.ux            # 快应用入口文件
-│   ├── manifest.json     # 快应用配置文件
+│   ├── app.ux            # 快应用入口文件（快应用分支）
+│   ├── manifest.json     # 应用配置文件
 │   ├── homepage.html     # 网页版主页面
 │   ├── common/           # 共享资源
 │   │   ├── images/       # 图片资源
 │   │   └── styles/       # 样式文件
 │   ├── data/             # 数据管理
 │   │   ├── system-settings.js  # 系统设置
+│   │   ├── language-manager.js # 多语言支持
 │   │   └── user-settings.js    # 用户设置
 │   ├── js/               # JavaScript 模块
+│   │   └── theme-manager.js    # 主题管理
 │   └── pages/            # 子页面
+│       ├── about.html    # 关于页面
+│       ├── setting.html  # 设置页面
+│       └── draft.html    # 草稿页面
 └── mkdocs.yml            # 文档配置
 ```
 
@@ -118,19 +134,36 @@ export let SystemSettings = {
 ### 用户设置
 
 `src/data/user-settings.js` 存储用户首选项：
+
 - 主题设置
 - 语言选择
 - 历史记录保存选项
 
-这些设置会自动保存到 localStorage。
+这些设置会自动保存到浏览器的 localStorage 中。
+
+### 运行与部署
+
+本项目为纯前端应用，可以通过以下方式运行和部署：
+
+1. **本地开发服务器**：
+   ```bash
+   npm run serve   # 启动本地服务器
+   npm run open    # 启动并自动打开浏览器
+   ```
+
+2. **部署到静态网站托管**：
+   - 将整个项目目录部署到静态网站服务器
+   - 或部署到 GitHub Pages, Netlify, Vercel 等静态网站托管服务
 
 ## 🛠️ 开发指南
 
 完整的开发文档请访问 [在线文档](https://shopguard-chatbot.readthedocs.io/)
 
-### 网页版到快应用转换
+### 分支说明
 
-本项目正在从网页版向快应用迁移，详细转换指南请参考：[从网页版迁移到快应用](docs/getting-started/web-to-quickapp.md)
+本仓库包含两个主要分支：
+- `main`/`master`: 网页版应用（当前分支）
+- `quickapp`: 快应用版本开发分支
 
 ### 组件开发
 
@@ -146,9 +179,10 @@ export let SystemSettings = {
 - [x] 网页版原型实现
 - [x] 聊天功能实现
 - [x] 图片上传功能
-- [ ] 完善快应用页面
-- [ ] 快应用程序实现
-- [ ] 在真机上测试
+- [x] 本地开发环境配置
+- [ ] 完善网页版功能
+- [ ] 多语言支持改进
+- [ ] 性能优化
 
 ## 🌍 浏览器兼容性
 
@@ -157,10 +191,10 @@ export let SystemSettings = {
 - Safari (最近2个版本)
 - Edge (最近2个版本)
 
-## 📱 快应用兼容性
+## 📱 设备兼容性
 
-- 兼容华为、OPPO、VIVO、小米等支持快应用标准的设备
-- 最低平台版本：1070
+- 桌面端：Windows、macOS、Linux
+- 移动端：通过响应式设计支持各尺寸屏幕
 
 ## 👥 贡献指南
 
