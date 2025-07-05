@@ -20,7 +20,7 @@
         </div>
         <text class="welcome-title">蓝心购物防诈骗助手</text>
         <div class="welcome-message-container">
-          <textarea class="welcome-message-textarea" disabled="true">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</textarea>
+          <text class="welcome-message">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</text>
         </div>
       </div>
     </div>
@@ -226,17 +226,13 @@ export default {
   margin-top: 8px;
 }
 
-.welcome-message-textarea {
+.welcome-message {
   font-size: @font-size-medium;
   color: @text-color-secondary;
   text-align: center;
-  line-height: 1.6;
+  height: 140px;
+  margin-bottom: 10px;
   width: 100%;
-  padding: 16px;
-  border: none;
-  background-color: transparent;
-  resize: none;
-  height: 160px;
 }
 
 /* Input Area Styles - Redesigned to match webapp */
