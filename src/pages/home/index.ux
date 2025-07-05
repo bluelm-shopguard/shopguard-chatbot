@@ -18,8 +18,10 @@
           <!-- TODO use logo icon instead of text -->
           <text class="logo-text">SG</text>
         </div>
-        <text class="welcome-title">购物防诈骗助手</text>
-        <text class="welcome-message">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</text>
+        <text class="welcome-title">蓝心购物防诈骗助手</text>
+        <div class="welcome-message-container">
+          <textarea class="welcome-message-textarea" disabled="true">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</textarea>
+        </div>
       </div>
     </div>
     
@@ -183,8 +185,10 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 32px;
   margin: auto;
+  width: 100%;
+  max-width: 600px;
 }
 
 .logo-container {
@@ -213,13 +217,26 @@ export default {
   margin-bottom: 12px;
 }
 
-.welcome-message {
+.welcome-message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 16px 0;
+  margin-top: 8px;
+}
+
+.welcome-message-textarea {
   font-size: @font-size-medium;
   color: @text-color-secondary;
   text-align: center;
-  line-height: 1.8;
-  max-width: 450px;
-  white-space: normal; /* Allow text to wrap */
+  line-height: 1.6;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background-color: transparent;
+  resize: none;
+  height: 160px;
 }
 
 /* Input Area Styles - Redesigned to match webapp */
