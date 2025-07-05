@@ -231,16 +231,17 @@ export default {
 }
 
 .header-button {
-  padding: 10px;
-  width: 48px;
-  height: 48px;
+  padding: @spacing-medium;
+  width: 72px;
+  height: 72px;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 12px;
+  display: flex;
 }
 
 .header-icon {
-  font-size: @font-size-large;
+  font-size: @font-size-xxlarge;
   text-align: center;
   color: @text-color-tertiary;
 }
@@ -286,7 +287,7 @@ export default {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: @spacing-large @spacing-xlarge;
   border-bottom: 1px solid @border-color;
 }
 
@@ -295,7 +296,7 @@ export default {
 }
 
 .setting-label {
-  font-size: @font-size-small;
+  font-size: @font-size-medium;
   font-weight: 500;
   color: @text-color-primary;
 }
@@ -315,23 +316,23 @@ export default {
 }
 
 .control-option {
-  padding: 8px 16px;
-  margin: 2px;
-  border-radius: 6px;
+  padding: @spacing-medium @spacing-large;
+  margin: 4px;
+  border-radius: 8px;
   background-color: transparent;
   border: 2px solid transparent;
 }
 
 .control-option-selected {
-  padding: 8px 16px;
-  margin: 2px;
-  border-radius: 6px;
+  padding: @spacing-medium @spacing-large;
+  margin: 4px;
+  border-radius: 8px;
   background-color: @component-background;
   border: 2px solid @primary-color;
 }
 
 .option-text {
-  font-size: @font-size-xsmall;
+  font-size: @font-size-medium;
   color: @text-color-secondary;
 }
 
@@ -342,12 +343,16 @@ export default {
 
 /* Toggle Switch Styles */
 .toggle-switch {
-  width: 60px;
+  width: 96px;
+  height: 56px;
 }
 
 .item-icon {
-  font-size: @font-size-medium;
-  margin-left: 8px;
+  font-size: @font-size-xxlarge;
+  margin-left: @spacing-medium;
   color: @text-color-tertiary;
+  width: 48px;
+  height: 48px;
+  text-align: center;
 }
 </style>

@@ -27,13 +27,18 @@
     
     <!-- Input Area - Redesigned to match webapp -->
     <div class="chat-input-area">
-      <div class="input-area-toolbar">
+      <!-- Toolbar now positioned above the input area -->
+      <div class="toolbar-row">
         <div class="toolbar-button" onclick="handleImageUpload">
-          <text class="toolbar-icon">🖼</text>
+          <div class="icon-container">
+            <text class="toolbar-icon">📷</text>
+          </div>
           <text class="toolbar-text">图片</text>
         </div>
         <div class="toolbar-button" onclick="handleWebSearch">
-          <text class="toolbar-icon">🔍</text>
+          <div class="icon-container">
+            <text class="toolbar-icon">🔍</text>
+          </div>
           <text class="toolbar-text">搜索</text>
         </div>
       </div>
@@ -158,16 +163,21 @@ export default {
 }
 
 .header-button {
-  padding: 10px;
-  border-radius: 8px;
+  padding: @spacing-small;
+  border-radius: 12px;
   background: none;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .header-icon {
-  width: 28px;
-  height: 28px;
+  width: 48px;
+  height: 48px;
   text-align: center;
-  font-size: @font-size-large;
+  font-size: @font-size-xxlarge;
   color: @text-color-tertiary;
 }
 
@@ -240,10 +250,13 @@ export default {
   padding: 16px 20px 20px 20px;
   border-top: 1px solid @border-color;
   background-color: @component-background;
+  flex-direction: column;
 }
 
-.input-area-toolbar {
+/* Toolbar now in a horizontal row above the input */
+.toolbar-row {
   display: flex;
+  flex-direction: row;
   gap: 16px;
   margin-bottom: 16px;
   padding: 0 4px;
@@ -251,28 +264,36 @@ export default {
 
 .toolbar-button {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: @spacing-medium @spacing-large;
+  border-radius: 12px;
   background-color: @background-color;
   border: 1px solid @border-color;
 }
 
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  margin-right: @spacing-medium;
+}
+
 .toolbar-icon {
-  width: 28px;
-  height: 28px;
-  margin-right: 8px;
-  font-size: @font-size-medium;
+  font-size: @font-size-xxlarge;
   color: @text-color-tertiary;
 }
 
 .toolbar-text {
-  font-size: @font-size-small;
+  font-size: @font-size-medium;
   color: @text-color-tertiary;
 }
 
 .input-area-wrapper {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 16px;
   width: 100%;
@@ -280,11 +301,11 @@ export default {
 
 .text-input {
   flex: 1;
-  min-height: 56px;
+  min-height: 64px;
   max-height: 120px;
-  padding: 16px;
+  padding: @spacing-medium @spacing-large;
   border-radius: 16px;
-  font-size: @font-size-small;
+  font-size: @font-size-medium;
   border: 1px solid @border-color;
   background-color: #f9fafb;
   color: @text-color-primary;
@@ -292,18 +313,18 @@ export default {
 
 .send-button {
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 28px;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
   background-color: @primary-color;
   flex-shrink: 0;
 }
 
 .send-icon {
   color: @text-color-inverse;
-  font-size: @font-size-large;
+  font-size: @font-size-xxlarge;
   font-weight: bold;
 }
 
@@ -348,8 +369,13 @@ export default {
 }
 
 .close-button {
-  padding: 8px;
-  border-radius: 8px;
+  padding: @spacing-small;
+  border-radius: 12px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .sidebar-content {
@@ -382,9 +408,9 @@ export default {
 }
 
 .account-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  width: 64px;
+  height: 64px;
+  border-radius: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -392,25 +418,25 @@ export default {
 }
 
 .avatar-text {
-  font-size: @font-size-small;
+  font-size: @font-size-large;
 }
 
 .account-name {
-  font-size: @font-size-xsmall;
+  font-size: @font-size-small;
   font-weight: bold;
   color: @text-color-primary;
 }
 
 .settings-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .settings-icon {
-  font-size: @font-size-medium;
+  font-size: @font-size-xxlarge;
 }
 </style>

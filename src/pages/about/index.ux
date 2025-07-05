@@ -1,57 +1,64 @@
-<!-- TODO rewrite about page -->
 <template>
   <div class="page-container">
-    <div class="header">
-      <div class="back-button" onclick="goBack">
-        <text class="back-icon">←</text>
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-button" onclick="goBack">
+        <text class="header-icon">←</text>
       </div>
-      <text class="header-title">关于我们</text>
+      <text class="page-header-title">关于</text>
     </div>
     
-    <div class="about-container">
-      <div class="logo-container">
-        <text class="logo-text">SG</text>
-        <text class="app-name">ShopGuard AI</text>
-        <text class="app-version">v{{appVersion}}</text>
+    <!-- Content -->
+    <div class="page-content">
+      <!-- About Header Section -->
+      <div class="about-header">
+        <div class="about-logo-container">
+          <text class="about-logo-text">SG</text>
+        </div>
+        <text class="about-title">ShopGuard AI</text>
+        <text class="about-version">版本 {{appVersion}}</text>
       </div>
       
-      <div class="about-section">
-        <text class="about-title">项目概述</text>
-        <text class="about-text">
-          ShopGuard AI 是一款专为识别购物诈骗风险设计的智能助手应用。用户可以发送商品截图、链接或聊天记录，AI 将分析内容并提供风险评估。
-        </text>
-      </div>
-      
-      <div class="about-section">
-        <text class="about-title">主要功能</text>
-        <div class="feature-item">
-          <text class="feature-icon">🔍</text>
-          <text class="feature-text">图片识别：分析商品图片中的风险信息</text>
-        </div>
-        <div class="feature-item">
-          <text class="feature-icon">🔗</text>
-          <text class="feature-text">链接分析：检测可疑购物链接</text>
-        </div>
-        <div class="feature-item">
-          <text class="feature-icon">💬</text>
-          <text class="feature-text">聊天记录分析：识别卖家聊天中的诈骗迹象</text>
-        </div>
-        <div class="feature-item">
-          <text class="feature-icon">⭐</text>
-          <text class="feature-text">风险评级：提供直观的"诈骗风险星级"评分</text>
-        </div>
-        <div class="feature-item">
-          <text class="feature-icon">🛡️</text>
-          <text class="feature-text">购物建议：针对不同风险提供专业防骗建议</text>
+      <!-- Product Introduction -->
+      <div class="content-card">
+        <text class="content-card-title">产品介绍</text>
+        <div class="content-card-body">
+          <text class="description-text">
+            ShopGuard AI 是一款专为保护消费者权益而设计的智能购物助手。
+            我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的虚假宣传、
+            价格欺诈和潜在风险，让每一次消费都安心、放心。
+          </text>
         </div>
       </div>
       
-      <div class="about-section">
-        <text class="about-title">联系我们</text>
-        <text class="about-text">
-          官方网站: https://shopguard.ai
-          邮箱: contact@shopguard.ai
-        </text>
+      <!-- Links Section -->
+      <div class="content-card">
+        <text class="content-card-title">相关链接</text>
+        <div class="link-list">
+          <!-- Team Homepage -->
+          <div class="link-list-item" onclick="openExternalUrl('https://github.com/bluelm-shopguard')">
+            <text class="link-label">团队主页</text>
+            <text class="link-icon">›</text>
+          </div>
+          
+          <!-- Project Website -->
+          <div class="link-list-item" onclick="openExternalUrl('https://bluelm-shopguard.github.io/bluelm-shopguard/')">
+            <text class="link-label">项目网站</text>
+            <text class="link-icon">›</text>
+          </div>
+          
+          <!-- GitHub Repository -->
+          <div class="link-list-item" onclick="openExternalUrl('https://github.com/bluelm-shopguard/bluelm-shopguard')">
+            <text class="link-label">项目仓库</text>
+            <text class="link-icon">›</text>
+          </div>
+          
+          <!-- AIGC Competition -->
+          <div class="link-list-item" onclick="openExternalUrl('https://aigc.vivo.com.cn/#/home')">
+            <text class="link-label">中国高校计算机大赛 AIGC 创新赛</text>
+            <text class="link-icon">›</text>
+          </div>
+        </div>
       </div>
       
       <div class="copyright">
@@ -63,6 +70,7 @@
 
 <script>
 import router from '@system.router'
+import system from '@system.device'
 
 export default {
   data() {
@@ -88,10 +96,21 @@ export default {
     }
   },
   
-  methods: {
-    // Go back
-    goBack() {
-      router.back()
+  goBack() {
+    router.back()
+  },
+  
+  openExternalUrl(url) {
+    try {
+      system.setClipboard({
+        text: url,
+        success: () => {
+          this.$app.$def.showToast('链接已复制到剪贴板')
+        }
+      })
+    } catch (error) {
+      console.error('Failed to copy URL:', error)
+      this.$app.$def.showToast('无法打开链接')
     }
   }
 }
@@ -107,108 +126,147 @@ export default {
   height: 100%;
 }
 
-.header {
+/* Header Styles */
+.page-header {
+  display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 20px;
+  padding: @spacing-medium @spacing-large;
   background-color: @component-background;
-  width: 100%;
   border-bottom: 1px solid @border-color;
+  justify-content: space-between;
 }
 
-.back-button {
-  width: 60px;
-  height: 60px;
-  align-items: center;
+.header-button {
+  width: 72px;
+  height: 72px;
+  padding: @spacing-medium;
+  border-radius: 12px;
+  display: flex;
   justify-content: center;
+  align-items: center;
 }
 
-.back-icon {
-  font-size: @font-size-xlarge;
-  color: @text-color-primary;
+.header-icon {
+  font-size: @font-size-xxlarge;
+  color: @text-color-tertiary;
 }
 
-.header-title {
-  flex: 1;
+.page-header-title {
   font-size: @font-size-xlarge;
   font-weight: bold;
-  text-align: center;
-  margin-right: 60px;
   color: @text-color-primary;
+  text-align: center;
+  flex: 1;
+  margin-right: 72px; /* Balance with header-button width */
 }
 
-.about-container {
+/* Content Styles */
+.page-content {
   flex: 1;
   flex-direction: column;
   width: 100%;
-  padding: 30px;
+  padding: @spacing-large @spacing-medium;
 }
 
-.logo-container {
+/* About Header Section Styles */
+.about-header {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: @spacing-xlarge;
+  padding: @spacing-large 0;
 }
 
-.logo-text {
-  width: 120px;
-  height: 120px;
-  border-radius: 60px;
+.about-logo-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
   background-color: @primary-color;
-  color: @text-color-inverse;
-  font-size: 60px;
-  text-align: center;
-  line-height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: @spacing-medium;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
-.app-name {
+.about-logo-text {
   font-size: @font-size-xxlarge;
   font-weight: bold;
-  color: @text-color-primary;
-  margin-top: 20px;
-}
-
-.app-version {
-  font-size: @font-size-large;
-  color: @text-color-tertiary;
-  margin-top: 10px;
-}
-
-.about-section {
-  margin-bottom: 30px;
+  color: @text-color-inverse;
+  text-align: center;
 }
 
 .about-title {
   font-size: @font-size-xlarge;
   font-weight: bold;
+  color: @primary-color;
+  margin-bottom: @spacing-small;
+}
+
+.about-version {
+  font-size: @font-size-medium;
+  color: @text-color-tertiary;
+}
+
+/* Content Card Styles */
+.content-card {
+  background-color: @component-background;
+  border-radius: 16px;
+  padding: @spacing-large;
+  margin-bottom: @spacing-large;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.content-card-title {
+  font-size: @font-size-large;
+  font-weight: bold;
   color: @text-color-primary;
-  margin-bottom: 20px;
+  margin-bottom: @spacing-medium;
 }
 
-.about-text {
+.content-card-body {
+  flex-direction: column;
+}
+
+.description-text {
   font-size: @font-size-medium;
   color: @text-color-secondary;
-  line-height: 1.5;
+  line-height: 1.7;
 }
 
-.feature-item {
+/* Link List Styles */
+.link-list {
+  flex-direction: column;
+}
+
+.link-list-item {
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  padding: @spacing-medium 0;
+  border-bottom: 1px solid @border-color;
 }
 
-.feature-icon {
-  font-size: @font-size-xlarge;
-  margin-right: 15px;
+.link-list-item:last-child {
+  border-bottom: none;
 }
 
-.feature-text {
+.link-label {
   font-size: @font-size-medium;
-  color: @text-color-secondary;
-  flex: 1;
+  color: @text-color-primary;
+  font-weight: 500;
 }
 
+.link-icon {
+  font-size: @font-size-xlarge;
+  color: @text-color-tertiary;
+  margin-left: @spacing-medium;
+}
+
+/* Copyright Section */
 .copyright {
-  margin-top: 40px;
+  margin-top: @spacing-large;
   align-items: center;
 }
 
