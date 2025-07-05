@@ -20,7 +20,6 @@
         </div>
         <text class="welcome-title">购物防诈骗助手</text>
         <text class="welcome-message">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</text>
-        <!-- BUG welcome message, which should be a paragraph, now overlaps in oneline -->
       </div>
     </div>
     
@@ -220,6 +219,7 @@ export default {
   text-align: center;
   line-height: 1.8;
   max-width: 450px;
+  white-space: normal; /* Allow text to wrap */
 }
 
 /* Input Area Styles - Redesigned to match webapp */
