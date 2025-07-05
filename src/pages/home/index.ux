@@ -62,7 +62,7 @@
       </div>
       
       <div class="input-area-wrapper">
-        <input id="chat-input" class="text-input" type="text" placeholder="发消息给我分析一下..." onchange="handleInputChange" disabled="{{isProcessingMessage}}"/>
+        <input id="chat-input" class="text-input" type="text" placeholder="发消息给我分析一下..." value="{{message}}" onchange="handleInputChange" disabled="{{isProcessingMessage}}"/>
         <div class="send-button" onclick="sendMessage" style="opacity: {{isProcessingMessage ? '0.5' : '1'}}">
           <text class="send-icon">↑</text>
         </div>
@@ -145,15 +145,12 @@ export default {
     this.showWelcome = true
     this.messages = []
     
-    // Get the input element and clear it directly
-    try {
-      const inputElement = this.$element('chat-input')
-      if (inputElement) {
-        inputElement.setValue('')
-      }
-    } catch (error) {
-      console.error('Failed to clear input element:', error)
-    }
+    // Get the input element and clear it
+    // Don't use setValue() as it's not supported in this QuickApp environment
+    // Instead, rely on the data binding between the message variable and the input field
+    
+    // Make sure the input field is properly updated through data binding
+    this.$forceUpdate && this.$forceUpdate()
     
     this.$app.$def.showToast('开始新的对话')
   },
