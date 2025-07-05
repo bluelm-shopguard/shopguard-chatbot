@@ -7,7 +7,10 @@
   "icon": "common/images/logo.jpeg",
   "features": [
     { "name": "system.prompt" },
-    { "name": "system.router" }
+    { "name": "system.router" },
+    { "name": "system.fetch" },
+    { "name": "system.storage" },
+    { "name": "system.device" }
   ],
   "permissions": [
     { "origin": "*" }

@@ -13,7 +13,7 @@
     
     <!-- Main Content Area -->
     <div class="chat-content">
-      <div class="chat-welcome">
+      <div class="chat-welcome" show="{{showWelcome}}">
         <div class="logo-container">
           <!-- TODO use logo icon instead of text -->
           <text class="logo-text">SG</text>
@@ -23,6 +23,24 @@
           <text class="welcome-message">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</text>
         </div>
       </div>
+      
+      <!-- Chat Messages Area -->
+      <list class="chat-messages-list" id="chat-content-list" show="{{!showWelcome}}">
+        <block for="{{messages}}">
+          <list-item type="message">
+            <div class="{{$item.role === 'user' ? 'user-message' : 'bot-message'}}">
+              <div class="message-timestamp">
+                <text class="timestamp-text">{{$item.timestamp}}</text>
+              </div>
+              <div class="message-content-container">
+                <div class="message-text-wrapper">
+                  <text class="message-text-content">{{$item.content}}</text>
+                </div>
+              </div>
+            </div>
+          </list-item>
+        </block>
+      </list>
     </div>
     
     <!-- Input Area - Redesigned to match webapp -->
@@ -44,10 +62,15 @@
       </div>
       
       <div class="input-area-wrapper">
-        <input class="text-input" type="text" placeholder="发消息给我分析一下..." onchange="handleInputChange"/>
-        <div class="send-button" onclick="sendMessage">
+        <input id="chat-input" class="text-input" type="text" placeholder="发消息给我分析一下..." onchange="handleInputChange" disabled="{{isProcessingMessage}}"/>
+        <div class="send-button" onclick="sendMessage" style="opacity: {{isProcessingMessage ? '0.5' : '1'}}">
           <text class="send-icon">↑</text>
         </div>
+      </div>
+      
+      <!-- Loading indicator -->
+      <div class="loading-indicator" show="{{isProcessingMessage}}">
+        <text class="loading-text">正在处理...</text>
       </div>
     </div>
     
@@ -84,35 +107,65 @@
 </template>
 
 <script>
+import { callChatbotAPI } from '../../helper/api-service'
+import SYSTEM from '../../helper/system-settings'
+
 export default {
   data: {
     message: '',
+    messages: [], // Array to store chat messages
+    showWelcome: true, // Whether to show welcome screen
     isProcessingMessage: false,
     currentImageData: null,
     sidebarActive: false
   },
+  
+  onInit() {
+    // Initialize chat state
+    this.showWelcome = true
+    this.messages = []
+  },
+  
   handleInputChange: function(e) {
     this.message = e.value
   },
+  
   openSidebar: function() {
-    // In the future, this will activate sidebar
-    this.$app.$def.showToast('侧边栏功能即将推出')
     this.sidebarActive = true
   },
+  
   closeSidebar: function() {
     this.sidebarActive = false
   },
+  
   startNewChat: function() {
+    // Reset chat state
     this.message = ''
     this.currentImageData = null
+    this.showWelcome = true
+    this.messages = []
+    
+    // Get the input element and clear it directly
+    try {
+      const inputElement = this.$element('chat-input')
+      if (inputElement) {
+        inputElement.setValue('')
+      }
+    } catch (error) {
+      console.error('Failed to clear input element:', error)
+    }
+    
     this.$app.$def.showToast('开始新的对话')
   },
+  
   handleImageUpload: function() {
     this.$app.$def.showToast('图片上传功能即将推出')
   },
+  
   handleWebSearch: function() {
     this.$app.$def.showToast('网页搜索功能即将推出')
   },
+  
   navigateToSettings: function() {
     // Navigate to settings page
     const router = require('@system.router')
@@ -120,7 +173,43 @@ export default {
       uri: 'pages/settings'
     })
   },
-  sendMessage: function() {
+  
+  /**
+   * Format message content for display
+   * This ensures long text is displayed properly
+   * @param {string} content - The message content
+   * @return {string} - The formatted content
+   */
+  formatMessageContent: function(content) {
+    // Trim the message
+    content = content.trim()
+    
+    // Insert line breaks every ~40 characters at word boundaries for better display
+    // This helps prevent horizontal scrolling issues in QuickApp text elements
+    let result = ''
+    const words = content.split(' ')
+    let currentLine = ''
+    
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i]
+      // If adding this word would make the line too long, add a line break
+      if (currentLine.length + word.length > 40 && currentLine.length > 0) {
+        result += currentLine.trim() + '\n'
+        currentLine = word + ' '
+      } else {
+        currentLine += word + ' '
+      }
+    }
+    
+    // Add the final line
+    if (currentLine.length > 0) {
+      result += currentLine.trim()
+    }
+    
+    return result
+  },
+  
+  sendMessage: async function() {
     if (!this.message.trim() && !this.currentImageData) {
       return
     }
@@ -129,8 +218,88 @@ export default {
       return
     }
     
-    this.$app.$def.showToast('消息发送功能即将推出')
+    // Hide welcome screen
+    this.showWelcome = false
+    
+    // Set processing state
+    this.isProcessingMessage = true
+    
+    // Format timestamp
+    const now = new Date()
+    const timestamp = now.getHours().toString().padStart(2, '0') + ':' + 
+                      now.getMinutes().toString().padStart(2, '0')
+    
+    // Save the user message to display
+    const userMessage = this.message.trim()
+    
+    // Add user message to messages array
+    this.messages.push({
+      role: 'user',
+      content: this.formatMessageContent(userMessage),
+      timestamp: timestamp
+    })
+    
+    // Clear input
     this.message = ''
+    
+    try {
+      // Add temporary bot message
+      this.messages.push({
+        role: 'bot',
+        content: '...',
+        timestamp: timestamp
+      })
+      
+      // Prepare conversation history for the API
+      // Exclude the temporary bot message we just added
+      const conversationHistory = this.messages.slice(0, -1);
+      
+      // Call the API with message history
+      const botResponse = await callChatbotAPI(userMessage, conversationHistory)
+      
+      // Replace the temporary message with the actual response
+      this.messages.pop() // Remove temporary message
+      this.messages.push({
+        role: 'bot',
+        content: this.formatMessageContent(botResponse),
+        timestamp: timestamp
+      })
+      
+      // Scroll to the bottom to show new message
+      try {
+        this.$element('chat-content-list').scrollTo({
+          index: this.messages.length - 1
+        })
+      } catch (error) {
+        console.error('Failed to scroll to bottom:', error)
+      }
+    } catch (error) {
+      console.error('API call failed:', error)
+      
+      // Replace loading message with error
+      this.messages.pop() // Remove temporary message
+      this.messages.push({
+        role: 'bot',
+        content: this.formatMessageContent(SYSTEM.CHAT.errorMessage),
+        timestamp: timestamp,
+        isError: true
+      })
+      
+      // Show error toast
+      this.$app.$def.showToast('无法连接到服务器')
+      
+      // Scroll to the bottom to show error message
+      try {
+        this.$element('chat-content-list').scrollTo({
+          index: this.messages.length - 1
+        })
+      } catch (error) {
+        console.error('Failed to scroll to bottom:', error)
+      }
+    } finally {
+      // Reset processing state
+      this.isProcessingMessage = false
+    }
   }
 }
 </script>
@@ -243,6 +412,83 @@ export default {
   height: 140px;
   margin-bottom: 10px;
   width: 100%;
+}
+
+/* Chat Messages Styles */
+.chat-messages-list {
+  flex-direction: column;
+  width: 100%;
+}
+
+.user-message, .bot-message {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0;
+  padding: 12px 16px;
+  border-radius: 16px;
+  width: 90%;
+}
+
+.user-message {
+  background-color: @primary-color-light;
+  align-self: flex-end;
+  margin-left: 10%;
+}
+
+.bot-message {
+  background-color: @component-background;
+  border: 1px solid @border-color;
+  align-self: flex-start;
+  margin-right: 10%;
+}
+
+.message-timestamp {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.timestamp-text {
+  font-size: @font-size-xsmall;
+  color: @text-color-tertiary;
+}
+
+.message-content-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.message-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.message-text-content {
+  font-size: @font-size-medium;
+  color: @text-color-primary;
+  margin: 4px 0;
+  padding: 4px 0;
+  width: 100%;
+  text-align: left;
+  /* Ensure text breaks at appropriate points */
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  width: 100%;
+}
+
+.loading-text {
+  font-size: @font-size-small;
+  color: @text-color-tertiary;
 }
 
 /* Input Area Styles - Redesigned to match webapp */
