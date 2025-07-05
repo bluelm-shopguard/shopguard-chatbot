@@ -7,7 +7,7 @@
       </div>
       <text class="page-header-title">关于</text>
     </div>
-    
+
     <!-- Content -->
     <div class="page-content">
       <!-- About Header Section -->
@@ -16,51 +16,59 @@
           <text class="about-logo-text">SG</text>
         </div>
         <text class="about-title">ShopGuard AI</text>
-        <text class="about-version">版本 {{appVersion}}</text>
+        <text class="about-version">版本 {{ appVersion }}</text>
       </div>
-      
+
       <!-- Product Introduction -->
       <div class="content-card">
         <text class="content-card-title">产品介绍</text>
-        <div class="content-card-body">
-          <text class="description-text">
-            ShopGuard AI 是一款专为保护消费者权益而设计的智能购物助手。
-            我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的虚假宣传、
-            价格欺诈和潜在风险，让每一次消费都安心、放心。
-          </text>
+        <div class="description-container">
+          <text class="description-text">ShopGuard AI 是一款专为保护消费者权益而设计的智能购物助手。我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的虚假宣传、价格欺诈和潜在风险，让每一次消费都安心、放心。</text>
         </div>
       </div>
-      
+
       <!-- Links Section -->
       <div class="content-card">
         <text class="content-card-title">相关链接</text>
         <div class="link-list">
           <!-- Team Homepage -->
           <div class="link-list-item" onclick="openExternalUrl('https://github.com/bluelm-shopguard')">
-            <text class="link-label">团队主页</text>
+            <div class="link-content">
+              <text class="link-label">团队主页</text>
+              <text class="link-url">github.com/bluelm-shopguard</text>
+            </div>
             <text class="link-icon">›</text>
           </div>
-          
+
           <!-- Project Website -->
           <div class="link-list-item" onclick="openExternalUrl('https://bluelm-shopguard.github.io/bluelm-shopguard/')">
-            <text class="link-label">项目网站</text>
+            <div class="link-content">
+              <text class="link-label">项目网站</text>
+              <text class="link-url">bluelm-shopguard.github.io/bluelm-shopguard</text>
+            </div>
             <text class="link-icon">›</text>
           </div>
-          
+
           <!-- GitHub Repository -->
           <div class="link-list-item" onclick="openExternalUrl('https://github.com/bluelm-shopguard/bluelm-shopguard')">
-            <text class="link-label">项目仓库</text>
+            <div class="link-content">
+              <text class="link-label">项目仓库</text>
+              <text class="link-url">github.com/bluelm-shopguard/bluelm-shopguard</text>
+            </div>
             <text class="link-icon">›</text>
           </div>
-          
+
           <!-- AIGC Competition -->
           <div class="link-list-item" onclick="openExternalUrl('https://aigc.vivo.com.cn/#/home')">
-            <text class="link-label">中国高校计算机大赛 AIGC 创新赛</text>
+            <div class="link-content">
+              <text class="link-label">中国高校计算机大赛 AIGC 创新赛</text>
+              <text class="link-url">aigc.vivo.com.cn/#/home</text>
+            </div>
             <text class="link-icon">›</text>
           </div>
         </div>
       </div>
-      
+
       <div class="copyright">
         <text>© 2025 ShopGuard AI Team</text>
       </div>
@@ -69,209 +77,273 @@
 </template>
 
 <script>
-import router from '@system.router'
-import system from '@system.device'
+import router from "@system.router";
 
 export default {
-  data() {
-    return {
-      appVersion: '1.0.0'
-    }
-  },
-  
-  onInit() {
-    try {
-      // Get app version from manifest or globalData
-      const app = this.$app.$def
-      if (app) {
-        if (app.manifest && app.manifest.versionName) {
-          this.appVersion = app.manifest.versionName
-        } else if (app.globalData && app.globalData.version) {
-          this.appVersion = app.globalData.version
-        }
-        console.log('Setting app version:', this.appVersion)
-      }
-    } catch (error) {
-      console.error('Error in about page onInit:', error)
-    }
-  },
-  
-  goBack() {
-    router.back()
-  },
-  
-  openExternalUrl(url) {
-    try {
-      system.setClipboard({
-        text: url,
-        success: () => {
-          this.$app.$def.showToast('链接已复制到剪贴板')
-        }
-      })
-    } catch (error) {
-      console.error('Failed to copy URL:', error)
-      this.$app.$def.showToast('无法打开链接')
-    }
-  }
-}
+	data() {
+		return {
+			appVersion: "1.0.0",
+		};
+	},
+
+	onInit() {
+		try {
+			// Get app version from manifest or globalData
+			const app = this.$app.$def;
+			if (app) {
+				if (app.manifest && app.manifest.versionName) {
+					this.appVersion = app.manifest.versionName;
+				} else if (app.globalData && app.globalData.version) {
+					this.appVersion = app.globalData.version;
+				}
+				console.log("Setting app version:", this.appVersion);
+			}
+		} catch (error) {
+			console.error("Error in about page onInit:", error);
+		}
+	},
+
+	goBack() {
+		router.back();
+	},
+
+	openExternalUrl(url) {
+		try {
+			// Import router for external navigation
+			const webview = require('@system.webview');
+			// Open URL in browser
+			webview.loadUrl({
+				url: url,
+				success: () => {
+					console.log('Successfully opened URL:', url);
+				},
+				fail: (error) => {
+					console.error('Failed to open URL:', error);
+					// Fallback to clipboard if webview fails
+					this.copyToClipboard(url);
+				}
+			});
+		} catch (error) {
+			console.error("Failed to open URL:", error);
+			// Fallback to clipboard
+			this.copyToClipboard(url);
+		}
+	},
+	
+	copyToClipboard(text) {
+		try {
+			const clipboard = require('@system.clipboard');
+			clipboard.set({
+				text: text,
+				success: () => {
+					this.$app.$def.showToast("链接已复制到剪贴板");
+				},
+				fail: (error) => {
+					console.error('Failed to copy to clipboard:', error);
+					this.$app.$def.showToast("无法复制链接");
+				}
+			});
+		} catch (error) {
+			console.error('Clipboard error:', error);
+			this.$app.$def.showToast("无法处理链接");
+		}
+	},
+};
 </script>
 
 <style lang="less">
-@import '../../common/styles/theme.less';
+@import "../../common/styles/theme.less";
 
 .page-container {
-  flex-direction: column;
-  background-color: @background-color;
-  width: 100%;
-  height: 100%;
+	flex-direction: column;
+	background-color: @background-color;
+	width: 100%;
+	height: 100%;
 }
 
 /* Header Styles */
 .page-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: @spacing-medium @spacing-large;
-  background-color: @component-background;
-  border-bottom: 1px solid @border-color;
-  justify-content: space-between;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: @spacing-medium @spacing-large;
+	background-color: @component-background;
+	border-bottom: 1px solid @border-color;
+	justify-content: space-between;
 }
 
 .header-button {
-  width: 72px;
-  height: 72px;
-  padding: @spacing-medium;
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	width: 72px;
+	height: 72px;
+	padding: @spacing-medium;
+	border-radius: 12px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .header-icon {
-  font-size: @font-size-xxlarge;
-  color: @text-color-tertiary;
+	font-size: @font-size-xxlarge;
+	color: @text-color-tertiary;
 }
 
 .page-header-title {
-  font-size: @font-size-xlarge;
-  font-weight: bold;
-  color: @text-color-primary;
-  text-align: center;
-  flex: 1;
-  margin-right: 72px; /* Balance with header-button width */
+	font-size: @font-size-xlarge;
+	font-weight: bold;
+	color: @text-color-primary;
+	text-align: center;
+	flex: 1;
+	margin-right: 72px; /* Balance with header-button width */
 }
 
 /* Content Styles */
 .page-content {
-  flex: 1;
-  flex-direction: column;
-  width: 100%;
-  padding: @spacing-large @spacing-medium;
+	flex: 1;
+	flex-direction: column;
+	width: 100%;
+	padding: @spacing-large @spacing-medium;
 }
 
 /* About Header Section Styles */
 .about-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: @spacing-xlarge;
-  padding: @spacing-large 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: @spacing-xlarge;
+	padding: @spacing-large 0;
 }
 
 .about-logo-container {
-  width: 100px;
-  height: 100px;
-  border-radius: 50px;
-  background-color: @primary-color;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: @spacing-medium;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+	width: 100px;
+	height: 100px;
+	border-radius: 50px;
+	background-color: @primary-color;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: @spacing-medium;
+	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+		0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
 .about-logo-text {
-  font-size: @font-size-xxlarge;
-  font-weight: bold;
-  color: @text-color-inverse;
-  text-align: center;
+	font-size: @font-size-xxlarge;
+	font-weight: bold;
+	color: @text-color-inverse;
+	text-align: center;
 }
 
 .about-title {
-  font-size: @font-size-xlarge;
-  font-weight: bold;
-  color: @primary-color;
-  margin-bottom: @spacing-small;
+	font-size: @font-size-xlarge;
+	font-weight: bold;
+	color: @primary-color;
+	margin-bottom: @spacing-small;
 }
 
 .about-version {
-  font-size: @font-size-medium;
-  color: @text-color-tertiary;
+	font-size: @font-size-medium;
+	color: @text-color-tertiary;
 }
 
 /* Content Card Styles */
 .content-card {
-  background-color: @component-background;
-  border-radius: 16px;
-  padding: @spacing-large;
-  margin-bottom: @spacing-large;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	background-color: @component-background;
+	border-radius: 16px;
+	padding: @spacing-large;
+	margin-bottom: @spacing-large;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .content-card-title {
-  font-size: @font-size-large;
-  font-weight: bold;
-  color: @text-color-primary;
-  margin-bottom: @spacing-medium;
+	font-size: @font-size-large;
+	font-weight: bold;
+	color: @text-color-primary;
+	margin-bottom: @spacing-medium;
 }
 
 .content-card-body {
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	padding: 16px 0;
+	margin-top: 8px;
+}
+
+.description-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	padding: 16px 0;
+	margin-top: 8px;
 }
 
 .description-text {
-  font-size: @font-size-medium;
-  color: @text-color-secondary;
-  line-height: 1.7;
+	font-size: @font-size-medium;
+	color: @text-color-secondary;
+	text-align: center;
+	height: 140px;
+	margin-bottom: 10px;
+	width: 100%;
 }
 
 /* Link List Styles */
 .link-list {
-  flex-direction: column;
+	flex-direction: column;
+	width: 100%;
 }
 
 .link-list-item {
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: @spacing-medium 0;
-  border-bottom: 1px solid @border-color;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-start;
+	padding: @spacing-medium 0;
+	border-bottom: 1px solid @border-color;
+	min-height: 80px;  /* Minimum height to ensure visibility */
+	width: 100%;
 }
 
 .link-list-item:last-child {
-  border-bottom: none;
+	border-bottom: none;
+}
+
+.link-content {
+	flex-direction: column;
+	flex: 1;
+	min-height: 60px; /* Ensure minimum height for content */
 }
 
 .link-label {
-  font-size: @font-size-medium;
-  color: @text-color-primary;
-  font-weight: 500;
+	font-size: @font-size-medium;
+	color: @text-color-primary;
+	font-weight: 500;
+	margin-bottom: 8px;
+	text-overflow: ellipsis;
+}
+
+.link-url {
+	font-size: @font-size-small;
+	color: @text-color-tertiary;
+	font-weight: normal;
+	text-overflow: ellipsis;
+	max-lines: 2; /* Limit to 2 lines with ellipsis - QuickApp syntax */
 }
 
 .link-icon {
-  font-size: @font-size-xlarge;
-  color: @text-color-tertiary;
-  margin-left: @spacing-medium;
+	font-size: @font-size-xlarge;
+	color: @text-color-tertiary;
+	margin-left: @spacing-medium;
 }
 
 /* Copyright Section */
 .copyright {
-  margin-top: @spacing-large;
-  align-items: center;
+	margin-top: @spacing-large;
+	align-items: center;
 }
 
 .copyright text {
-  font-size: @font-size-small;
-  color: @text-color-tertiary;
+	font-size: @font-size-small;
+	color: @text-color-tertiary;
 }
 </style>
