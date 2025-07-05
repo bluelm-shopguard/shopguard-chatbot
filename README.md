@@ -76,6 +76,29 @@ npm run open
 
 服务启动后，访问 http://localhost:8080/ 即可打开应用。
 
+### 解决 CORS 问题
+
+如果您在前端网页与后端 API 交互时遇到 CORS（跨域资源共享）错误，可以使用项目中提供的代理服务器解决：
+
+1. 确保后端 API 服务器正在运行（默认为 `http://localhost:8000`）
+
+2. 启动代理服务器：
+
+   ```bash
+   # 运行代理服务器
+   node server.js
+   ```
+
+3. 使用以下 URL 访问应用：
+
+   ```text
+   http://localhost:8080/src/homepage.html
+   ```
+
+代理服务器将自动处理所有到 `/v1` 端点的请求，并添加必要的 CORS 头信息，使前端能够正常与后端通信。
+
+更多详细信息请查看 [CORS 代理服务器使用指南](docs/cors-proxy-guide.md)。
+
 #### 快应用版本
 
 快应用版本需要使用快应用开发工具编译运行：
