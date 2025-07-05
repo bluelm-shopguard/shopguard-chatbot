@@ -77,10 +77,12 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less">
+@import '../../common/styles/theme.less';
+
 .page-container {
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-color: @background-color;
   width: 100%;
   height: 100%;
 }
@@ -89,9 +91,9 @@ export default {
   flex-direction: row;
   align-items: center;
   padding: 20px;
-  background-color: #ffffff;
+  background-color: @component-background;
   width: 100%;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid @border-color;
 }
 
 .back-button {
@@ -102,17 +104,17 @@ export default {
 }
 
 .back-icon {
-  font-size: 36px;
-  color: #333333;
+  font-size: @font-size-xlarge;
+  color: @text-color-primary;
 }
 
 .header-title {
   flex: 1;
-  font-size: 36px;
+  font-size: @font-size-xlarge;
   font-weight: bold;
   text-align: center;
   margin-right: 60px;
-  color: #333333;
+  color: @text-color-primary;
 }
 
 .history-list {
@@ -128,16 +130,16 @@ export default {
 }
 
 .empty-text {
-  color: #999999;
-  font-size: 32px;
+  color: @text-color-tertiary;
+  font-size: @font-size-xlarge;
 }
 
 .history-item {
   flex-direction: column;
   padding: 30px;
-  background-color: #ffffff;
+  background-color: @component-background;
   border-bottom-width: 1px;
-  border-bottom-color: #eeeeee;
+  border-bottom-color: @border-color;
 }
 
 .history-date {
@@ -145,8 +147,8 @@ export default {
 }
 
 .history-date text {
-  font-size: 28px;
-  color: #666666;
+  font-size: @font-size-large;
+  color: @text-color-secondary;
 }
 
 .history-preview {
@@ -157,18 +159,18 @@ export default {
 
 .preview-text {
   flex: 1;
-  font-size: 32px;
-  color: #333333;
+  font-size: @font-size-xlarge;
+  color: @text-color-primary;
 }
 
 .message-count {
-  font-size: 28px;
-  color: #999999;
+  font-size: @font-size-large;
+  color: @text-color-tertiary;
   margin-right: 10px;
 }
 
 .arrow {
-  font-size: 36px;
-  color: #bbbbbb;
+  font-size: @font-size-xlarge;
+  color: @text-color-tertiary;
 }
 </style>

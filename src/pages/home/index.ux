@@ -15,10 +15,12 @@
     <div class="chat-content">
       <div class="chat-welcome">
         <div class="logo-container">
+          <!-- TODO use logo icon instead of text -->
           <text class="logo-text">SG</text>
         </div>
         <text class="welcome-title">购物防诈骗助手</text>
         <text class="welcome-message">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</text>
+        <!-- BUG welcome message, which should be a paragraph, now overlaps in oneline -->
       </div>
     </div>
     
@@ -127,13 +129,15 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less">
+@import '../../common/styles/theme.less';
+
 .page {
   flex-direction: column;
   width: 100%;
   height: 100%;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  background-color: #f3f4f6;
+  background-color: @background-color;
 }
 
 /* Header Styles */
@@ -142,14 +146,14 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: @component-background;
+  border-bottom: 1px solid @border-color;
 }
 
 .chat-header-title {
-  font-size: 32px;
+  font-size: @font-size-xlarge;
   font-weight: bold;
-  color: #111827;
+  color: @text-color-primary;
 }
 
 .header-button {
@@ -162,8 +166,8 @@ export default {
   width: 28px;
   height: 28px;
   text-align: center;
-  font-size: 28px;
-  color: #6b7280;
+  font-size: @font-size-large;
+  color: @text-color-tertiary;
 }
 
 /* Content Area Styles */
@@ -190,29 +194,29 @@ export default {
   align-items: center;
   width: 100px;
   height: 100px;
-  background-color: #10a37f;
+  background-color: @primary-color;
   border-radius: 50px;
   margin-bottom: 20px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
 .logo-text {
-  font-size: 40px;
+  font-size: @font-size-xxlarge;
   font-weight: bold;
-  color: #ffffff;
+  color: @text-color-inverse;
   text-align: center;
 }
 
 .welcome-title {
-  font-size: 32px;
+  font-size: @font-size-xlarge;
   font-weight: bold;
-  color: #10a37f;
+  color: @primary-color;
   margin-bottom: 12px;
 }
 
 .welcome-message {
-  font-size: 24px;
-  color: #4b5563;
+  font-size: @font-size-medium;
+  color: @text-color-secondary;
   text-align: center;
   line-height: 1.8;
   max-width: 450px;
@@ -221,8 +225,8 @@ export default {
 /* Input Area Styles - Redesigned to match webapp */
 .chat-input-area {
   padding: 16px 20px 20px 20px;
-  border-top: 1px solid #e5e7eb;
-  background-color: #ffffff;
+  border-top: 1px solid @border-color;
+  background-color: @component-background;
 }
 
 .input-area-toolbar {
@@ -237,21 +241,21 @@ export default {
   align-items: center;
   padding: 10px 12px;
   border-radius: 8px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background-color: @background-color;
+  border: 1px solid @border-color;
 }
 
 .toolbar-icon {
   width: 28px;
   height: 28px;
   margin-right: 8px;
-  font-size: 24px;
-  color: #6b7280;
+  font-size: @font-size-medium;
+  color: @text-color-tertiary;
 }
 
 .toolbar-text {
-  font-size: 22px;
-  color: #6b7280;
+  font-size: @font-size-small;
+  color: @text-color-tertiary;
 }
 
 .input-area-wrapper {
@@ -267,10 +271,10 @@ export default {
   max-height: 120px;
   padding: 16px;
   border-radius: 16px;
-  font-size: 22px;
-  border: 1px solid #e5e7eb;
+  font-size: @font-size-small;
+  border: 1px solid @border-color;
   background-color: #f9fafb;
-  color: #111827;
+  color: @text-color-primary;
 }
 
 .send-button {
@@ -280,13 +284,13 @@ export default {
   width: 56px;
   height: 56px;
   border-radius: 28px;
-  background-color: #10a37f;
+  background-color: @primary-color;
   flex-shrink: 0;
 }
 
 .send-icon {
-  color: #ffffff;
-  font-size: 28px;
+  color: @text-color-inverse;
+  font-size: @font-size-large;
   font-weight: bold;
 }
 
@@ -313,7 +317,7 @@ export default {
   transition-duration: 300ms;
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
+  background-color: @component-background;
 }
 
 .sidebar-header {
@@ -321,13 +325,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid @border-color;
 }
 
 .sidebar-title {
-  font-size: 24px;
+  font-size: @font-size-medium;
   font-weight: bold;
-  color: #111827;
+  color: @text-color-primary;
 }
 
 .close-button {
@@ -344,10 +348,10 @@ export default {
 }
 
 .sidebar-empty-text {
-  font-size: 18px;
+  font-size: @font-size-xsmall;
   text-align: center;
   margin-top: 50px;
-  color: #6b7280;
+  color: @text-color-tertiary;
 }
 
 .sidebar-footer {
@@ -355,7 +359,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid @border-color;
 }
 
 .account-info {
@@ -371,17 +375,17 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f3f4f6;
+  background-color: @background-color;
 }
 
 .avatar-text {
-  font-size: 22px;
+  font-size: @font-size-small;
 }
 
 .account-name {
-  font-size: 18px;
+  font-size: @font-size-xsmall;
   font-weight: bold;
-  color: #111827;
+  color: @text-color-primary;
 }
 
 .settings-button {
@@ -394,6 +398,6 @@ export default {
 }
 
 .settings-icon {
-  font-size: 24px;
+  font-size: @font-size-medium;
 }
 </style>
