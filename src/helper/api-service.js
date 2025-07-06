@@ -137,10 +137,25 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
       }
       
       // Format message history for API
-      const apiMessages = messageHistory.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
+      const apiMessages = messageHistory.map(msg => {
+        // Check if this message has an image
+        if (msg.imageData) {
+          // Message with both text and image
+          return {
+            role: msg.role,
+            content: [
+              { type: "text", text: msg.content },
+              { type: "image_url", image_url: { url: msg.imageData } }
+            ]
+          };
+        } else {
+          // Text-only message
+          return {
+            role: msg.role,
+            content: msg.content
+          };
+        }
+      });
       
       // Check if the last message in history is already from the user
       const lastMessage = messageHistory.length > 0 ? messageHistory[messageHistory.length - 1] : null;
@@ -163,11 +178,12 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
             ]
           });
         } else if (imageData) {
-          // If only image is present
-          console.log('Adding only image to message');
+          // If only image is present (OpenAI requires at least minimal text)
+          console.log('Adding only image to message with minimal text');
           apiMessages.push({
             role: "user",
             content: [
+              { type: "text", text: "分析这个图片" },
               { type: "image_url", image_url: { url: imageData } }
             ]
           });
@@ -185,6 +201,11 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
         messages: apiMessages,
       };
 
+      // Add OpenAI API compatibility parameters
+      // These are important for services that emulate the OpenAI API
+      if (API_CONFIG.maxTokens) requestBody.max_tokens = API_CONFIG.maxTokens;
+      if (API_CONFIG.temperature !== undefined) requestBody.temperature = API_CONFIG.temperature;
+      
       const requestBodyString = JSON.stringify(requestBody);
       console.log('Sending API request with payload:', requestBody);
 

@@ -629,8 +629,17 @@ export default {
 		const formattedContent = this.formatMessageContent(userMessage);
 		
 		// Store image data properly in messages
-		// For backward compatibility and storage efficiency, only store the URI in the messages array
-		const imageUri = imageDataToSend && (typeof imageDataToSend === 'object' ? imageDataToSend.uri : imageDataToSend);
+		// For backend compatibility, we need to use the data URL in API calls
+		let imageUri = null;
+		
+		if (imageDataToSend) {
+			if (typeof imageDataToSend === 'object' && imageDataToSend.uri) {
+				imageUri = imageDataToSend.uri;
+			} else {
+				imageUri = imageDataToSend;
+			}
+			console.log('Image URI for storage:', imageUri.substring(0, 30) + '...');
+		}
 		
 		this.messages.push({
 			role: "user",
@@ -658,12 +667,21 @@ export default {
 
 			// Call the API with message history and image data
 			// Extract the URI if imageDataToSend is an object
-			const imageUri = imageDataToSend && (typeof imageDataToSend === 'object' ? imageDataToSend.uri : imageDataToSend);
+			let imageUriForApi = null;
+			
+			if (imageDataToSend) {
+				if (typeof imageDataToSend === 'object' && imageDataToSend.uri) {
+					imageUriForApi = imageDataToSend.uri;
+				} else {
+					imageUriForApi = imageDataToSend;
+				}
+				console.log('Image URI for API:', imageUriForApi.substring(0, 30) + '...');
+			}
 			
 			const botResponse = await callChatbotAPI(
 				userMessage,
 				conversationHistory,
-				imageUri
+				imageUriForApi
 			);
 
 			// Replace the temporary message with the actual response
