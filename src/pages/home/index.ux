@@ -171,14 +171,19 @@ export default {
 	},
 
 	handleImageUpload: function () {
-		// Use the imported media module
+		// Use QuickApp's media module to pick an image
 		media.pickImage({
 			success: (data) => {
 				if (data && data.uri) {
 					console.log("Image selected:", data.uri);
+					console.log("Image details:", JSON.stringify(data));
+					
 					// Store the image URI
 					this.currentImageData = data.uri;
 					this.$app.$def.showToast("图片已选择");
+					
+					// Log the stored data
+					console.log("Image data stored in currentImageData:", this.currentImageData);
 				}
 			},
 			fail: (data, code) => {
@@ -192,28 +197,27 @@ export default {
 	},
 
 	handleTakePhoto: function() {
-		// Use the camera to take a photo
+		// Use the device camera to take a photo
 		media.takePhoto({
 			success: (data) => {
 				if (data && data.uri) {
 					console.log("Photo taken:", data.uri);
-					// Store the photo URI
+					console.log("Photo details:", JSON.stringify(data));
+					
+					// Store the image URI
 					this.currentImageData = data.uri;
-					this.$app.$def.showToast("已拍摄照片");
+					this.$app.$def.showToast("照片已拍摄");
+					
+					// Log the stored data
+					console.log("Photo data stored in currentImageData:", this.currentImageData);
 				}
 			},
 			fail: (data, code) => {
-				console.log(`Taking photo failed, code = ${code}, data = ${data}`);
-				if (code === 201) {
-					this.$app.$def.showToast("需要相机权限");
-				} else if (code === 207) {
-					this.$app.$def.showToast("相机权限被拒绝，请在设置中开启");
-				} else {
-					this.$app.$def.showToast("拍照失败");
-				}
+				console.log(`Take photo failed, code = ${code}, data = ${data}`);
+				this.$app.$def.showToast("拍照失败");
 			},
 			cancel: () => {
-				console.log("Taking photo cancelled");
+				console.log("Take photo cancelled");
 			}
 		});
 	},
@@ -296,6 +300,17 @@ export default {
 		
 		// Store image data before clearing it
 		const imageDataToSend = this.currentImageData;
+		
+		console.log('---------- SENDING MESSAGE ----------');
+		if (userMessage) {
+			console.log('Text message:', userMessage);
+		}
+		
+		if (imageDataToSend) {
+			console.log('Image data available for sending:', imageDataToSend);
+			console.log('Image data type:', typeof imageDataToSend);
+			console.log('Is internal URI?', imageDataToSend.startsWith('internal://'));
+		}
 
 		// Add user message to messages array (including image if present)
 		this.messages.push({
@@ -662,5 +677,137 @@ export default {
 	align-items: center;
 	gap: 16px;
 	width: 100%;
+}
+
+.text-input {
+	flex: 1;
+	padding: 16px;
+	font-size: @font-size-medium;
+	background-color: @background-color;
+	border: 1px solid @border-color;
+	border-radius: 12px;
+	color: @text-color-primary;
+}
+
+.send-button {
+	width: 80px;
+	height: 80px;
+	border-radius: 40px;
+	background-color: @primary-color;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.send-icon {
+	color: @text-color-inverse;
+	font-size: @font-size-xlarge;
+}
+
+/* Add sidebar overlay styles */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 75%;
+  height: 100%;
+  background-color: @component-background;
+  z-index: 1000;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px;
+	border-bottom: 1px solid @border-color;
+}
+
+.sidebar-title {
+	font-size: @font-size-large;
+	font-weight: bold;
+	color: @text-color-primary;
+}
+
+.sidebar-content {
+	flex: 1;
+	padding: 16px;
+	overflow-y: scroll;
+}
+
+.sidebar-empty-text {
+	color: @text-color-tertiary;
+	font-size: @font-size-medium;
+	text-align: center;
+	margin-top: 32px;
+}
+
+.sidebar-footer {
+	padding: 16px;
+	border-top: 1px solid @border-color;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.account-info {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.account-avatar {
+	width: 60px;
+	height: 60px;
+	border-radius: 30px;
+	background-color: @primary-color;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-right: 12px;
+}
+
+.avatar-text {
+	color: @text-color-inverse;
+	font-size: @font-size-large;
+}
+
+.account-name {
+	font-size: @font-size-medium;
+	color: @text-color-primary;
+}
+
+.settings-button {
+	width: 60px;
+	height: 60px;
+	border-radius: 30px;
+	background-color: @background-color;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.settings-icon {
+	font-size: @font-size-large;
+	color: @text-color-tertiary;
+}
+
+.close-button {
+	border-radius: 50%;
 }
 </style>

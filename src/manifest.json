@@ -11,11 +11,13 @@
     { "name": "system.fetch" },
     { "name": "system.storage" },
     { "name": "system.device" },
-    { "name": "system.media" }
+    { "name": "system.media" },
+    { "name": "system.file" }
   ],
   "permissions": [
     { "origin": "*" },
     { "name": "android.permission.READ_EXTERNAL_STORAGE" },
+    { "name": "android.permission.WRITE_EXTERNAL_STORAGE" },
     { "name": "android.permission.CAMERA" }
   ],
   "config": {
