@@ -13,8 +13,8 @@
       <!-- About Header Section -->
       <div class="about-header">
         <div class="about-logo-container">
-			<!-- TODO change to actual logo -->
-          <text class="about-logo-text">SG</text>
+          <!-- Replaced text logo with actual logo image -->
+          <image class="about-logo-image" src="/common/images/logo.jpeg"></image>
         </div>
         <text class="about-title">BlueLM Shopguard</text>
         <text class="about-version">版本 {{ appVersion }}</text>
@@ -244,11 +244,11 @@ export default {
 		0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
-.about-logo-text {
-	font-size: @font-size-xxlarge;
-	font-weight: bold;
-	color: @text-color-inverse;
-	text-align: center;
+.about-logo-image {
+	width: 90px;
+	height: 90px;
+	border-radius: 45px;
+	object-fit: cover;
 }
 
 .about-title {

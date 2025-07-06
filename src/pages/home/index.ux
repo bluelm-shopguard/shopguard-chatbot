@@ -17,8 +17,8 @@
     <div class="chat-content">
       <div class="chat-welcome" show="{{showWelcome}}">
         <div class="logo-container">
-          <!-- TODO use logo icon instead of text -->
-          <text class="logo-text">SG</text>
+          <!-- Replaced text logo with image logo -->
+          <image class="logo-image" src="/common/images/logo.jpeg"></image>
         </div>
         <text class="welcome-title">蓝心购物防诈骗助手</text>
         <div class="welcome-message-container">
@@ -844,11 +844,11 @@ export default {
 		0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
-.logo-text {
-	font-size: @font-size-xxlarge;
-	font-weight: bold;
-	color: @text-color-inverse;
-	text-align: center;
+.logo-image {
+	width: 90px;
+	height: 90px;
+	border-radius: 45px;
+	object-fit: cover;
 }
 
 .welcome-title {

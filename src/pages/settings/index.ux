@@ -13,7 +13,6 @@
     <!-- Settings Content -->
     <div class="page-content">
       <!-- General Settings Group -->
-       <!-- TODO change layout from left and top align -->
       <div class="setting-group">
         <text class="setting-group-title">通用</text>
         <div class="setting-list">
@@ -41,6 +40,7 @@
         <div class="setting-list">
           <!-- Save Chat History Setting -->
            <!-- TODO make saving chat history enabled by default and provide option to turn off it -->
+            <!-- if not saving, never save data when clicking new chat button, keep history chat list cleam -->
           <div class="setting-list-item">
             <text class="setting-label">保存聊天记录</text>
             <div class="setting-control">
@@ -261,20 +261,25 @@ export default {
   flex: 1;
   flex-direction: column;
   width: 100%;
-  padding: 20px 16px;
+  padding: 24px 16px;
+  align-items: center; /* Center the settings groups */
 }
 
 /* Setting Group Styles */
 .setting-group {
-  margin-bottom: 24px;
+  margin-bottom: 48px; /* Increased vertical spacing */
+  width: 100%;
+  max-width: 600px; /* Make settings even more compact */
+  align-items: center; /* Center content */
 }
 
 .setting-group-title {
-  font-size: @font-size-xsmall;
+  font-size: @font-size-large; /* Make title larger */
   font-weight: 600;
   padding: 0 4px;
-  margin-bottom: 8px;
-  color: @text-color-tertiary;
+  margin-bottom: 16px;
+  color: @text-color-primary; /* Make title more prominent */
+  align-self: flex-start; /* Align title to the left */
 }
 
 .setting-list {
@@ -282,14 +287,17 @@ export default {
   border-radius: 16px;
   overflow: hidden;
   background-color: @component-background;
+  width: 100%;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1); /* Add subtle shadow for card-like appearance */
 }
 
 .setting-list-item {
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  padding: @spacing-large @spacing-xlarge;
+  padding: @spacing-xlarge @spacing-xlarge;
   border-bottom: 1px solid @border-color;
+  width: 100%;
+  margin-bottom: 4px; /* Increased margin between items */
 }
 
 .is-link {
@@ -300,12 +308,12 @@ export default {
   font-size: @font-size-medium;
   font-weight: 500;
   color: @text-color-primary;
+  margin-right: 24px; /* Fixed spacing between label and control */
 }
 
 .setting-control {
   flex-direction: row;
   align-items: center;
-  margin-left: 16px;
 }
 
 /* Segmented Control Styles */
@@ -346,6 +354,8 @@ export default {
 .toggle-switch {
   width: 96px;
   height: 56px;
+  align-items: flex-end;
+  justify-content: flex-end;
 }
 
 /* Using SVG icons instead of text characters */
