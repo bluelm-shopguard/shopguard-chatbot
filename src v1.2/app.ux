@@ -1,0 +1,203 @@
+<script>
+/**
+ * ShopGuard AI - Super Simplified Version
+ * QuickApp entry point
+ */
+
+import prompt from '@system.prompt'
+import router from '@system.router'
+import storage from '@system.storage'
+import device from '@system.device'
+
+// Initialize global data outside the component to ensure it's available before onCreate
+const initGlobalData = {
+  appName: 'ShopGuard AI',
+  version: '1.0.0',
+  userSettings: {
+    language: {
+      default: 'zh-CN',
+      options: [
+        { id: 'zh-CN', name: '简体中文' },
+        { id: 'en-US', name: 'English' }
+      ]
+    },
+    chat: {
+      history: {
+        save: true
+      }
+    }
+  },
+  languageManager: null
+};
+
+export default {
+  globalData: initGlobalData,
+  
+  onCreate: function() {
+    console.info('App created')
+    
+    // Ensure globalData exists and has all required properties
+    if (!this.globalData) {
+      console.error('GlobalData was not initialized properly, creating it now')
+      this.globalData = JSON.parse(JSON.stringify(initGlobalData))
+    } else {
+      // Ensure all required properties exist
+      for (const key in initGlobalData) {
+        if (!this.globalData.hasOwnProperty(key)) {
+          console.log(`Adding missing globalData property: ${key}`)
+          this.globalData[key] = JSON.parse(JSON.stringify(initGlobalData[key]))
+        }
+      }
+    }
+    
+    // Initialize user settings - this may override the defaults
+    this.loadUserSettings()
+  },
+
+  onDestroy: function() {
+    console.info('App destroyed')
+  },
+  
+  // Load user settings from storage
+  loadUserSettings: function() {
+    try {
+      // Ensure we have default settings
+      if (!this.globalData.userSettings) {
+        this.globalData.userSettings = {
+          language: {
+            default: 'zh-CN',
+            options: [
+              { id: 'zh-CN', name: '简体中文' },
+              { id: 'en-US', name: 'English' }
+            ]
+          },
+          chat: {
+            history: {
+              save: true
+            }
+          }
+        }
+      }
+
+      const self = this
+      storage.get({
+        key: 'user_settings',
+        success: function(data) {
+          if (data && data !== '') {
+            try {
+              const settings = JSON.parse(data)
+              if (settings) {
+                // Merge saved settings with defaults to ensure all properties exist
+                if (settings.language) {
+                  self.globalData.userSettings.language.default = settings.language.default || 'zh-CN'
+                }
+                if (settings.chat && settings.chat.history) {
+                  self.globalData.userSettings.chat.history.save = settings.chat.history.save !== false
+                }
+                
+                console.log('User settings loaded:', self.globalData.userSettings)
+              }
+            } catch (parseError) {
+              console.error('Failed to parse user settings:', parseError)
+              console.log('Using default settings instead')
+            }
+          } else {
+            console.log('No saved settings found, using defaults')
+          }
+        },
+        fail: function(data, code) {
+          console.error(`Failed to load user settings: ${code}`)
+          console.log('Using default settings instead')
+        }
+      })
+    } catch (error) {
+      console.error('Failed to load user settings:', error)
+      console.log('Using default settings instead')
+    }
+  },
+  
+  // Save user settings to storage
+  saveUserSettings: function() {
+    try {
+      // Only save the values, not the entire options list
+      const settingsToSave = {
+        language: {
+          default: this.globalData.userSettings.language.default
+        },
+        chat: {
+          history: {
+            save: this.globalData.userSettings.chat.history.save
+          }
+        }
+      };
+
+      const settingsStr = JSON.stringify(settingsToSave)
+      storage.set({
+        key: 'user_settings',
+        value: settingsStr,
+        success: () => {
+          console.log('User settings saved')
+        },
+        fail: (data, code) => {
+          console.error(`Failed to save user settings: ${code}`)
+        }
+      })
+    } catch (error) {
+      console.error('Failed to save user settings:', error)
+    }
+  },
+
+  // Simple toast utility
+  showToast: function(message) {
+    prompt.showToast({
+      message: message,
+      duration: 1500
+    })
+  },
+  
+  // Simple navigation utility
+  navigateTo: function(page) {
+    router.push({
+      uri: page
+    })
+  }
+}
+</script>
+
+<style>
+/* Global styles for the entire app */
+
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #f3f4f6;
+}
+
+.title {
+  font-size: 40px;
+  text-align: center;
+  margin: 20px;
+  color: #111827;
+}
+
+.subtitle {
+  font-size: 30px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #4b5563;
+}
+
+.button {
+  padding: 20px 30px;
+  border-radius: 8px;
+  margin: 20px;
+  background-color: #10a37f;
+}
+
+.button text {
+  color: #ffffff;
+  font-size: 28px;
+  text-align: center;
+}
+</style>

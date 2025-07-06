@@ -1,5 +1,5 @@
 /**
- * API Service for BlueLM Shopguard
+ * API Service for ShopGuard AI
  * Handles API communication with the backend
  */
 
@@ -12,8 +12,6 @@ const API_CONFIG = {
   endpoint: getSystemSetting('API.endpoint') || 'http://localhost:8000/v1/chat/completions',
   model: getSystemSetting('API.model') || 'vivo-BlueLM-TB-Pro',
   timeout: SYSTEM.API_TIMEOUT,
-  timeoutImage: SYSTEM.API_TIMEOUT_IMAGE,
-  timeoutMax: SYSTEM.API_TIMEOUT_MAX,
   maxRetries: SYSTEM.MAX_RETRY,
 }
 
@@ -58,15 +56,7 @@ export function fileUriToBase64DataUrl(uri) {
       uri: uri,
       success: function(data) {
         try {
-          const fileSizeBytes = data.buffer.length;
-          const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
-          console.log(`File read success, buffer size: ${fileSizeBytes} bytes (${fileSizeMB} MB)`);
-          
-          // Warn about large files
-          if (fileSizeBytes > 5 * 1024 * 1024) { // 5MB
-            console.warn(`Large image detected: ${fileSizeMB}MB. This may cause slower processing.`);
-          }
-          
+          console.log('File read success, buffer size:', data.buffer.length);
           // Convert ArrayBuffer to base64
           const uint8Array = new Uint8Array(data.buffer);
           let binary = '';
@@ -142,43 +132,31 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
         content: msg.content
       }));
       
-      // Check if the last message in history is already from the user
-      const lastMessage = messageHistory.length > 0 ? messageHistory[messageHistory.length - 1] : null;
-      const shouldAddUserMessage = !lastMessage || lastMessage.role !== 'user';
-      
-      console.log('Should add user message:', shouldAddUserMessage);
-      
-      // Only add the current user message if it's not already the last message in history
-      if (shouldAddUserMessage) {
-        console.log('Adding current message to API messages');
-        // Add current user message (with or without image)
-        if (imageData && userInput) {
-          // If both text and image are present
-          console.log('Adding both text and image to message');
-          apiMessages.push({
-            role: "user",
-            content: [
-              { type: "text", text: userInput },
-              { type: "image_url", image_url: { url: imageData } }
-            ]
-          });
-        } else if (imageData) {
-          // If only image is present (OpenAI requires at least minimal text)
-          console.log('Adding only image to message with minimal text');
-          apiMessages.push({
-            role: "user",
-            content: [
-              { type: "text", text: "分析这个图片" },
-              { type: "image_url", image_url: { url: imageData } }
-            ]
-          });
-        } else {
-          // If only text is present
-          console.log('Adding only text to message');
-          apiMessages.push({ role: "user", content: userInput });
-        }
+      console.log('Adding current message to API messages');
+      // Add current user message (with or without image)
+      if (imageData && userInput) {
+        // If both text and image are present
+        console.log('Adding both text and image to message');
+        apiMessages.push({
+          role: "user",
+          content: [
+            { type: "text", text: userInput },
+            { type: "image_url", image_url: { url: imageData } }
+          ]
+        });
+      } else if (imageData) {
+        // If only image is present
+        console.log('Adding only image to message');
+        apiMessages.push({
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: imageData } }
+          ]
+        });
       } else {
-        console.log('User message already in history, not adding again');
+        // If only text is present
+        console.log('Adding only text to message');
+        apiMessages.push({ role: "user", content: userInput });
       }
       
       const requestBody = {
@@ -186,39 +164,8 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
         messages: apiMessages,
       };
 
-      // Add OpenAI API compatibility parameters
-      // These are important for services that emulate the OpenAI API
-      if (API_CONFIG.maxTokens) requestBody.max_tokens = API_CONFIG.maxTokens;
-      if (API_CONFIG.temperature !== undefined) requestBody.temperature = API_CONFIG.temperature;
-      
       const requestBodyString = JSON.stringify(requestBody);
       console.log('Sending API request with payload:', requestBody);
-
-      // Determine timeout based on whether image is present and its size
-      let requestTimeout = imageData ? API_CONFIG.timeoutImage : API_CONFIG.timeout;
-      
-      // For large images, increase timeout dynamically
-      if (imageData) {
-        const imageSizeKB = imageData.length / 1024;
-        if (imageSizeKB > 5000) { // More than 5MB
-          // Add extra time for very large images: 2 minutes per MB over 5MB
-          const extraMB = (imageSizeKB - 5000) / 1024;
-          const extraTime = Math.ceil(extraMB) * 120000; // 2 minutes per MB
-          requestTimeout = Math.min(requestTimeout + extraTime, API_CONFIG.timeoutMax); // Max 15 minutes
-          console.log(`Large image detected (${(imageSizeKB/1024).toFixed(2)}MB), extending timeout to ${(requestTimeout/1000/60).toFixed(1)} minutes`);
-        }
-      }
-      
-      console.log(`Using timeout: ${requestTimeout}ms (${imageData ? 'image' : 'text'} request)`);
-      console.log(`Platform timeouts: connectTimeout=30s, readTimeout=15min, writeTimeout=3min`);
-      
-      // Log request size information
-      const requestSize = (requestBodyString.length / 1024).toFixed(2);
-      console.log(`Request size: ${requestSize} KB`);
-      if (imageData) {
-        const imageSize = (imageData.length / 1024).toFixed(2);
-        console.log(`Image data size: ${imageSize} KB`);
-      }
 
       // Using system.fetch to make the API call
       fetch.fetch({
@@ -228,7 +175,7 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
         header: {
           'Content-Type': 'application/json'
         },
-        timeout: requestTimeout,
+        timeout: API_CONFIG.timeout,
         success: function(response) {
           console.log(`API response status: ${response.code}`);
           

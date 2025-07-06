@@ -468,12 +468,12 @@ export default {
 						}
 					}
 					
-					// Store the entire image data object (not just URI)
-					this.currentImageData = data;
+					// Store only the URI string (like in v1.2), not the entire data object
+					this.currentImageData = data.uri;
 					this.$app.$def.showToast("图片已选择");
 					
 					// Log the stored data
-					console.log("Image data stored in currentImageData:", JSON.stringify(this.currentImageData));
+					console.log("Image data stored in currentImageData:", this.currentImageData);
 				}
 			},
 			fail: (data, code) => {
@@ -504,12 +504,12 @@ export default {
 						}
 					}
 					
-					// Store the entire image data object (not just URI)
-					this.currentImageData = data;
+					// Store only the URI string (like in v1.2), not the entire data object
+					this.currentImageData = data.uri;
 					this.$app.$def.showToast("照片已拍摄");
 					
 					// Log the stored data
-					console.log("Photo data stored in currentImageData:", JSON.stringify(this.currentImageData));
+					console.log("Photo data stored in currentImageData:", this.currentImageData);
 				}
 			},
 			fail: (data, code) => {

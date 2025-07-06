@@ -1,0 +1,60 @@
+{
+  "package": "com.shopguard.chatbot",
+  "name": "ShopGuardAI",
+  "versionName": "1.2.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1000,
+  "icon": "common/images/logo.jpeg",
+  "features": [
+    { "name": "system.prompt" },
+    { "name": "system.router" },
+    { "name": "system.fetch" },
+    { "name": "system.storage" },
+    { "name": "system.device" },
+    { "name": "system.media" },
+    { "name": "system.file" }
+  ],
+  "permissions": [
+    { "origin": "*" },
+    { "name": "android.permission.READ_EXTERNAL_STORAGE" },
+    { "name": "android.permission.WRITE_EXTERNAL_STORAGE" },
+    { "name": "android.permission.CAMERA" }
+  ],
+  "config": {
+    "logLevel": "debug",
+    "designWidth": 750
+  },
+  "router": {
+    "entry": "pages/home",
+    "pages": {
+      "pages/home": {
+        "component": "index"
+      },
+      "pages/settings": {
+        "component": "index"
+      },
+      "pages/about": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "titleBarBackgroundColor": "#ffffff",
+    "titleBarTextColor": "#333333",
+    "menu": true,
+    "pages": {
+      "pages/home": {
+        "titleBarText": "ShopGuard AI"
+      },
+      "pages/history": {
+        "titleBarText": "历史记录"
+      },
+      "pages/settings": {
+        "titleBarText": "设置"
+      },
+      "pages/about": {
+        "titleBarText": "关于我们"
+      }
+    }
+  }
+}

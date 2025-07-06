@@ -1,0 +1,360 @@
+j<template>
+  <div class="page">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-button" onclick="goBack">
+        <text class="header-icon">←</text>
+      </div>
+      <text class="page-header-title">设置</text>
+    </div>
+    
+    <!-- Settings Content -->
+    <div class="page-content">
+      <!-- General Settings Group -->
+      <div class="setting-group">
+        <text class="setting-group-title">通用</text>
+        <div class="setting-list">
+          <!-- Language Setting -->
+           <!-- TODO add English UI language mode -->
+          <div class="setting-list-item">
+            <text class="setting-label">语言</text>
+            <div class="setting-control">
+              <div class="segmented-control">
+                <div 
+                  for="{{languageOptions}}" 
+                  class="{{currentLanguage === $item.id ? 'control-option-selected' : 'control-option'}}"
+                  onclick="setLanguage($item.id)">
+                  <text class="option-text">{{$item.name}}</text>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chat Settings Group -->
+      <div class="setting-group">
+        <text class="setting-group-title">聊天</text>
+        <div class="setting-list">
+          <!-- Save Chat History Setting -->
+           <!-- TODO make saving chat history enabled by default and provide option to turn off it -->
+          <div class="setting-list-item">
+            <text class="setting-label">保存聊天记录</text>
+            <div class="setting-control">
+              <div class="toggle-switch">
+                <switch checked="{{saveChatHistory}}" onchange="toggleSaveChatHistory"></switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- About Settings Group -->
+      <div class="setting-group">
+        <text class="setting-group-title">关于</text>
+        <div class="setting-list">
+          <!-- About App Link -->
+          <div class="setting-list-item is-link" onclick="navigateTo('pages/about')">
+            <text class="setting-label">关于 ShopGuard AI</text>
+            <text class="item-icon">›</text>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+
+export default {
+  data() {
+    return {
+      saveHistory: true,
+      currentLanguage: 'zh-CN',
+      languageOptions: []
+    }
+  },
+  
+  onInit: function() {
+    console.log('Settings page loaded')
+    // Load user settings using the direct method
+    this.loadSettings()
+  },
+  
+  // Direct methods
+  loadSettings: function() {
+    try {
+      const app = this.$app.$def
+      
+      // Check if app is available
+      if (!app) {
+        console.error('App is not available')
+        return
+      }
+      
+      // Diagnose globalData structure
+      console.log('App globalData available:', !!app.globalData)
+      if (app.globalData) {
+        console.log('Available globalData properties:', Object.keys(app.globalData).join(', '))
+        console.log('userSettings available:', !!app.globalData.userSettings)
+        console.log('themeManager available:', !!app.globalData.themeManager)
+      }
+      
+      // Get user settings safely
+      if (!app.globalData || !app.globalData.userSettings) {
+        console.log('Using default settings as app.globalData.userSettings is not available')
+        return
+      }
+      
+      const userSettings = app.globalData.userSettings
+      
+      // Set language
+      if (userSettings.language) {
+        this.currentLanguage = userSettings.language.default || 'zh-CN';
+        this.languageOptions = userSettings.language.options || [];
+        console.log('Loaded language:', this.currentLanguage);
+      } else {
+        console.log('No language setting found, using default:', this.currentLanguage)
+      }
+      
+      // Set chat history setting
+      if (userSettings.chat && userSettings.chat.history !== undefined) {
+        this.saveChatHistory = userSettings.chat.history.save !== false
+        console.log('Loaded save chat history:', this.saveChatHistory)
+      } else {
+        console.log('No chat history setting found, using default:', this.saveChatHistory)
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error.message)
+      console.error('Error stack:', error.stack)
+      console.log('Using default settings')
+    }
+  },
+  
+  // Set language - Moved outside methods object
+  setLanguage: function(languageId) {
+    try {
+      console.log('Setting language to:', languageId)
+      this.currentLanguage = languageId
+      
+      // Update app global data
+      const app = this.$app.$def
+      if (app.globalData.userSettings) {
+        app.globalData.userSettings.language = app.globalData.userSettings.language || {}
+        app.globalData.userSettings.language.default = languageId
+        app.saveUserSettings()
+        
+        // Apply language
+        if (app.globalData.languageManager) {
+          app.globalData.languageManager.setLanguage(languageId)
+        }
+        
+        // Show toast confirmation
+        app.showToast('语言已更改')
+      }
+    } catch (error) {
+      console.error('Error setting language:', error)
+      this.displayError('设置语言时出错')
+    }
+  },
+  
+  // Toggle save chat history - Moved outside methods object
+  toggleSaveChatHistory: function(e) {
+    try {
+      console.log('Toggling save chat history to:', e.checked)
+      this.saveChatHistory = e.checked
+      
+      // Update app global data
+      const app = this.$app.$def
+      if (app.globalData.userSettings) {
+        app.globalData.userSettings.chat = app.globalData.userSettings.chat || {}
+        app.globalData.userSettings.chat.history = app.globalData.userSettings.chat.history || {}
+        app.globalData.userSettings.chat.history.save = this.saveChatHistory
+        app.saveUserSettings()
+        
+        // Show toast confirmation
+        app.showToast(this.saveChatHistory ? '已开启聊天记录保存' : '已关闭聊天记录保存')
+      }
+    } catch (error) {
+      console.error('Error toggling chat history:', error)
+      this.displayError('设置聊天记录时出错')
+    }
+  },
+  
+  // Display error message - Moved outside methods object
+  displayError: function(message) {
+    this.errorMessage = message
+    // Show toast with error message
+    this.$app.$def.showToast(message)
+  },
+  
+  // Navigate to a page - Moved outside methods object
+  navigateTo: function(page) {
+    router.push({
+      uri: page
+    })
+  },
+  
+  // Go back - Moved outside methods object
+  goBack: function() {
+    // Use home as fallback
+    try {
+      router.back()
+    } catch (error) {
+      console.error('Navigation back failed, going to home page')
+      router.push({
+        uri: 'pages/home'
+      })
+    }
+  }
+}
+</script>
+
+<style lang="less">
+@import '../../common/styles/theme.less';
+
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: @background-color;
+}
+
+/* Header Styles */
+.page-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: @component-background;
+  border-bottom: 1px solid @border-color;
+}
+
+.header-button {
+  padding: @spacing-medium;
+  width: 72px;
+  height: 72px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  display: flex;
+}
+
+.header-icon {
+  font-size: @font-size-xxlarge;
+  text-align: center;
+  color: @text-color-tertiary;
+}
+
+.page-header-title {
+  flex: 1;
+  font-size: @font-size-xlarge;
+  font-weight: bold;
+  text-align: center;
+  margin-right: 48px;
+  color: @text-color-primary;
+}
+
+/* Content Styles */
+.page-content {
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px 16px;
+}
+
+/* Setting Group Styles */
+.setting-group {
+  margin-bottom: 24px;
+}
+
+.setting-group-title {
+  font-size: @font-size-xsmall;
+  font-weight: 600;
+  padding: 0 4px;
+  margin-bottom: 8px;
+  color: @text-color-tertiary;
+}
+
+.setting-list {
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: @component-background;
+}
+
+.setting-list-item {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: @spacing-large @spacing-xlarge;
+  border-bottom: 1px solid @border-color;
+}
+
+.is-link {
+  background-color: @component-background;
+}
+
+.setting-label {
+  font-size: @font-size-medium;
+  font-weight: 500;
+  color: @text-color-primary;
+}
+
+.setting-control {
+  flex-direction: row;
+  align-items: center;
+  margin-left: 16px;
+}
+
+/* Segmented Control Styles */
+.segmented-control {
+  flex-direction: row;
+  border-radius: 8px;
+  padding: 2px;
+  background-color: @border-color;
+}
+
+.control-option {
+  padding: @spacing-medium @spacing-large;
+  margin: 4px;
+  border-radius: 8px;
+  background-color: transparent;
+  border: 2px solid transparent;
+}
+
+.control-option-selected {
+  padding: @spacing-medium @spacing-large;
+  margin: 4px;
+  border-radius: 8px;
+  background-color: @component-background;
+  border: 2px solid @primary-color;
+}
+
+.option-text {
+  font-size: @font-size-medium;
+  color: @text-color-secondary;
+}
+
+.control-option-selected .option-text {
+  font-weight: 700;
+  color: @primary-color;
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  width: 96px;
+  height: 56px;
+}
+
+.item-icon {
+  font-size: @font-size-xxlarge;
+  margin-left: @spacing-medium;
+  color: @text-color-tertiary;
+  width: 48px;
+  height: 48px;
+  text-align: center;
+}
+</style>

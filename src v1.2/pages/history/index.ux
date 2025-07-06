@@ -1,0 +1,176 @@
+<template>
+  <div class="page-container">
+    <div class="header">
+      <div class="back-button" onclick="goBack">
+        <text class="back-icon">←</text>
+      </div>
+      <text class="header-title">历史记录</text>
+    </div>
+    
+    <list class="history-list">
+      <block if="{{historyItems.length === 0}}">
+        <list-item type="empty-item">
+          <div class="empty-container">
+            <text class="empty-text">暂无历史记录</text>
+          </div>
+        </list-item>
+      </block>
+      
+      <block for="{{historyItems}}" tid="date">
+        <list-item type="history-item">
+          <div class="history-item" onclick="viewHistory($item)">
+            <div class="history-date">
+              <text>{{formatDate($item.date)}}</text>
+            </div>
+            <div class="history-preview">
+              <text class="preview-text">{{$item.preview}}</text>
+              <text class="message-count">{{$item.messageCount}}条消息</text>
+            </div>
+            <text class="arrow">›</text>
+          </div>
+        </list-item>
+      </block>
+    </list>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+
+export default {
+  data() {
+    return {
+      historyItems: []
+    }
+  },
+  
+  onInit() {
+    // Initialize data
+    this.loadHistoryItems()
+  },
+
+  methods: {
+    // Load history items
+    loadHistoryItems() {
+      // This would normally load from storage
+      // For now, we'll just have an empty list
+      this.historyItems = []
+    },
+    
+    // Format date
+    formatDate(dateString) {
+      const date = new Date(dateString)
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+    },
+    
+    // View a specific history item
+    viewHistory(item) {
+      // Would navigate to a detail view
+      console.log('View history item:', item)
+    },
+    
+    // Go back to home
+    goBack() {
+      router.back()
+    }
+  }
+}
+</script>
+
+<style lang="less">
+@import '../../common/styles/theme.less';
+
+.page-container {
+  flex-direction: column;
+  background-color: @background-color;
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  flex-direction: row;
+  align-items: center;
+  padding: 20px;
+  background-color: @component-background;
+  width: 100%;
+  border-bottom: 1px solid @border-color;
+}
+
+.back-button {
+  width: 60px;
+  height: 60px;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: @font-size-xlarge;
+  color: @text-color-primary;
+}
+
+.header-title {
+  flex: 1;
+  font-size: @font-size-xlarge;
+  font-weight: bold;
+  text-align: center;
+  margin-right: 60px;
+  color: @text-color-primary;
+}
+
+.history-list {
+  flex: 1;
+  width: 100%;
+}
+
+.empty-container {
+  width: 100%;
+  padding: 100px 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-text {
+  color: @text-color-tertiary;
+  font-size: @font-size-xlarge;
+}
+
+.history-item {
+  flex-direction: column;
+  padding: 30px;
+  background-color: @component-background;
+  border-bottom-width: 1px;
+  border-bottom-color: @border-color;
+}
+
+.history-date {
+  margin-bottom: 10px;
+}
+
+.history-date text {
+  font-size: @font-size-large;
+  color: @text-color-secondary;
+}
+
+.history-preview {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-text {
+  flex: 1;
+  font-size: @font-size-xlarge;
+  color: @text-color-primary;
+}
+
+.message-count {
+  font-size: @font-size-large;
+  color: @text-color-tertiary;
+  margin-right: 10px;
+}
+
+.arrow {
+  font-size: @font-size-xlarge;
+  color: @text-color-tertiary;
+}
+</style>
