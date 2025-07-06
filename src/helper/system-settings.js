@@ -10,6 +10,8 @@ const SYSTEM = {
   BUILD_NUMBER: 1,
   DEBUG_MODE: false,
   API_TIMEOUT: 30000, // 30 seconds
+  API_TIMEOUT_IMAGE: 840000, // 14 minutes for image processing (slightly less than platform readTimeout)
+  API_TIMEOUT_MAX: 840000, // 14 minutes maximum timeout
   MAX_RETRY: 3,
   
   // API configuration

@@ -15,5 +15,8 @@
   },
   "dependencies": {},
   "author": "ShopGuard AI Team",
-  "license": "MIT"
+  "license": "MIT",
+  "browserslist": [
+    "chrome 65"
+  ]
 }

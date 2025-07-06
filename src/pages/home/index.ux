@@ -83,7 +83,7 @@
 
       <!-- Loading indicator -->
       <div class="loading-indicator" show="{{isProcessingMessage}}">
-        <text class="loading-text">正在处理...</text>
+        <text class="loading-text">{{loadingText}}</text>
       </div>
     </div>
 
@@ -133,12 +133,18 @@ export default {
 		isProcessingMessage: false,
 		currentImageData: null,
 		sidebarActive: false,
+		loadingText: "正在处理...", // Dynamic loading text
+		processingProgress: 0, // Progress indicator for long operations
 	},
 
 	onInit() {
 		// Initialize chat state
 		this.showWelcome = true;
 		this.messages = [];
+		this.isProcessingMessage = false;
+		this.currentImageData = null;
+		this.sidebarActive = false;
+		this.loadingText = "正在处理...";
 	},
 
 	handleInputChange: function (e) {
@@ -154,18 +160,14 @@ export default {
 	},
 
 	startNewChat: function () {
-		// Reset chat state
+		// Reset chat state completely
 		this.message = "";
 		this.currentImageData = null;
 		this.showWelcome = true;
 		this.messages = [];
-
-		// Get the input element and clear it
-		// Don't use setValue() as it's not supported in this QuickApp environment
-		// Instead, rely on the data binding between the message variable and the input field
-
-		// Make sure the input field is properly updated through data binding
-		this.$forceUpdate && this.$forceUpdate();
+		
+		// Reset UI state properly
+		this.resetUIState();
 
 		this.$app.$def.showToast("开始新的对话");
 	},
@@ -177,6 +179,16 @@ export default {
 				if (data && data.uri) {
 					console.log("Image selected:", data.uri);
 					console.log("Image details:", JSON.stringify(data));
+					
+					// Check file size if available
+					if (data.size) {
+						const fileSizeMB = (data.size / (1024 * 1024)).toFixed(2);
+						console.log(`Image size: ${fileSizeMB}MB`);
+						
+						if (data.size > 5 * 1024 * 1024) { // 5MB
+							this.$app.$def.showToast(`图片较大(${fileSizeMB}MB)，处理可能需要更长时间`);
+						}
+					}
 					
 					// Store the image URI
 					this.currentImageData = data.uri;
@@ -204,6 +216,16 @@ export default {
 					console.log("Photo taken:", data.uri);
 					console.log("Photo details:", JSON.stringify(data));
 					
+					// Check file size if available
+					if (data.size) {
+						const fileSizeMB = (data.size / (1024 * 1024)).toFixed(2);
+						console.log(`Photo size: ${fileSizeMB}MB`);
+						
+						if (data.size > 5 * 1024 * 1024) { // 5MB
+							this.$app.$def.showToast(`照片较大(${fileSizeMB}MB)，处理可能需要更长时间`);
+						}
+					}
+					
 					// Store the image URI
 					this.currentImageData = data.uri;
 					this.$app.$def.showToast("照片已拍摄");
@@ -224,6 +246,10 @@ export default {
 	
 	removeSelectedImage: function() {
 		this.currentImageData = null;
+		// Ensure UI is not stuck in processing state when image is removed
+		if (this.isProcessingMessage) {
+			this.resetUIState();
+		}
 	},
 
 	handleWebSearch: function () {
@@ -285,8 +311,36 @@ export default {
 		// Hide welcome screen
 		this.showWelcome = false;
 
-		// Set processing state
+		// Save the user message and image data before setting processing state
+		const userMessage = this.message.trim();
+		const imageDataToSend = this.currentImageData;
+
+		// Set processing state with appropriate loading text
 		this.isProcessingMessage = true;
+		this.processingProgress = 0;
+		
+		if (imageDataToSend) {
+			// Estimate processing time based on image data size
+			const imageSizeKB = imageDataToSend.length / 1024;
+			const imageSizeMB = imageSizeKB / 1024;
+			let estimatedTime = "3-5分钟";
+			
+			if (imageSizeMB > 5) {
+				estimatedTime = "5-10分钟";
+			}
+			if (imageSizeMB > 8) {
+				estimatedTime = "10-15分钟";
+			}
+			
+			this.loadingText = `正在分析图片(${imageSizeMB.toFixed(1)}MB)，预计需要${estimatedTime}，请耐心等待...`;
+			
+			// Start a progress indicator for large images
+			if (imageSizeMB > 3) {
+				this.startProgressIndicator();
+			}
+		} else {
+			this.loadingText = "正在处理...";
+		}
 
 		// Format timestamp
 		const now = new Date();
@@ -294,12 +348,6 @@ export default {
 			now.getHours().toString().padStart(2, "0") +
 			":" +
 			now.getMinutes().toString().padStart(2, "0");
-
-		// Save the user message to display
-		const userMessage = this.message.trim();
-		
-		// Store image data before clearing it
-		const imageDataToSend = this.currentImageData;
 		
 		console.log('---------- SENDING MESSAGE ----------');
 		if (userMessage) {
@@ -325,10 +373,11 @@ export default {
 		this.currentImageData = null;
 
 		try {
-			// Add temporary bot message
+			// Add temporary bot message with appropriate loading text
+			const loadingMessage = imageDataToSend ? "正在分析图片，请稍候..." : "...";
 			this.messages.push({
 				role: "bot",
-				content: "...",
+				content: loadingMessage,
 				timestamp: timestamp,
 			});
 
@@ -364,15 +413,30 @@ export default {
 
 			// Replace loading message with error
 			this.messages.pop(); // Remove temporary message
+			
+			// Provide more specific error messages based on the error
+			let errorMessage = SYSTEM.CHAT.errorMessage;
+			if (error.message && error.message.includes('2001')) {
+				// Code 2001 is typically timeout
+				if (imageDataToSend) {
+					const imageSizeKB = imageDataToSend.length / 1024;
+					const imageSizeMB = imageSizeKB / 1024;
+					errorMessage = `图片分析超时(${imageSizeMB.toFixed(1)}MB)。建议：1) 重试一次 2) 使用更小的图片 3) 检查网络连接。注意：平台已配置15分钟超时。`;
+				} else {
+					errorMessage = "请求超时，请检查网络连接后重试";
+				}
+			}
+			
 			this.messages.push({
 				role: "bot",
-				content: this.formatMessageContent(SYSTEM.CHAT.errorMessage),
+				content: this.formatMessageContent(errorMessage),
 				timestamp: timestamp,
 				isError: true,
 			});
 
-			// Show error toast
-			this.$app.$def.showToast("无法连接到服务器");
+			// Show error toast with specific message
+			const toastMessage = imageDataToSend ? "图片分析失败" : "无法连接到服务器";
+			this.$app.$def.showToast(toastMessage);
 
 			// Scroll to the bottom to show error message
 			try {
@@ -383,9 +447,42 @@ export default {
 				console.error("Failed to scroll to bottom:", error);
 			}
 		} finally {
-			// Reset processing state
-			this.isProcessingMessage = false;
+			// Reset processing state using utility function
+			this.resetUIState();
 		}
+	},
+
+	// Progress indicator for long operations
+	startProgressIndicator: function() {
+		this.processingProgress = 0;
+		this.progressInterval = setInterval(() => {
+			this.processingProgress += 1;
+			if (this.processingProgress >= 100) {
+				this.processingProgress = 10; // Reset but keep some progress
+			}
+			
+			// Update loading text with progress
+			const baseText = this.loadingText.split('(')[0] + '(' + this.loadingText.split('(')[1].split(')')[0] + ')';
+			this.loadingText = `${baseText} - 处理中... ${this.processingProgress}%`;
+		}, 2000); // Update every 2 seconds
+	},
+
+	stopProgressIndicator: function() {
+		if (this.progressInterval) {
+			clearInterval(this.progressInterval);
+			this.progressInterval = null;
+		}
+		this.processingProgress = 0;
+	},
+
+	// Reset UI state utility function
+	resetUIState: function() {
+		this.isProcessingMessage = false;
+		this.loadingText = "正在处理...";
+		this.stopProgressIndicator();
+		
+		// Force update the UI
+		this.$forceUpdate && this.$forceUpdate();
 	},
 };
 </script>

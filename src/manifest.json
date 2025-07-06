@@ -3,7 +3,7 @@
   "name": "ShopGuardAI",
   "versionName": "1.0.0",
   "versionCode": 1,
-  "minPlatformVersion": 1000,
+  "minPlatformVersion": 1060,
   "icon": "common/images/logo.jpeg",
   "features": [
     { "name": "system.prompt" },
@@ -22,7 +22,12 @@
   ],
   "config": {
     "logLevel": "debug",
-    "designWidth": 750
+    "designWidth": 750,
+    "network": {
+      "connectTimeout": 30000,
+      "readTimeout": 900000,
+      "writeTimeout": 180000
+    }
   },
   "router": {
     "entry": "pages/home",

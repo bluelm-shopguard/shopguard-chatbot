@@ -12,6 +12,8 @@ const API_CONFIG = {
   endpoint: getSystemSetting('API.endpoint') || 'http://localhost:8000/v1/chat/completions',
   model: getSystemSetting('API.model') || 'vivo-BlueLM-TB-Pro',
   timeout: SYSTEM.API_TIMEOUT,
+  timeoutImage: SYSTEM.API_TIMEOUT_IMAGE,
+  timeoutMax: SYSTEM.API_TIMEOUT_MAX,
   maxRetries: SYSTEM.MAX_RETRY,
 }
 
@@ -56,7 +58,15 @@ export function fileUriToBase64DataUrl(uri) {
       uri: uri,
       success: function(data) {
         try {
-          console.log('File read success, buffer size:', data.buffer.length);
+          const fileSizeBytes = data.buffer.length;
+          const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
+          console.log(`File read success, buffer size: ${fileSizeBytes} bytes (${fileSizeMB} MB)`);
+          
+          // Warn about large files
+          if (fileSizeBytes > 5 * 1024 * 1024) { // 5MB
+            console.warn(`Large image detected: ${fileSizeMB}MB. This may cause slower processing.`);
+          }
+          
           // Convert ArrayBuffer to base64
           const uint8Array = new Uint8Array(data.buffer);
           let binary = '';
@@ -167,6 +177,32 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
       const requestBodyString = JSON.stringify(requestBody);
       console.log('Sending API request with payload:', requestBody);
 
+      // Determine timeout based on whether image is present and its size
+      let requestTimeout = imageData ? API_CONFIG.timeoutImage : API_CONFIG.timeout;
+      
+      // For large images, increase timeout dynamically
+      if (imageData) {
+        const imageSizeKB = imageData.length / 1024;
+        if (imageSizeKB > 5000) { // More than 5MB
+          // Add extra time for very large images: 2 minutes per MB over 5MB
+          const extraMB = (imageSizeKB - 5000) / 1024;
+          const extraTime = Math.ceil(extraMB) * 120000; // 2 minutes per MB
+          requestTimeout = Math.min(requestTimeout + extraTime, API_CONFIG.timeoutMax); // Max 15 minutes
+          console.log(`Large image detected (${(imageSizeKB/1024).toFixed(2)}MB), extending timeout to ${(requestTimeout/1000/60).toFixed(1)} minutes`);
+        }
+      }
+      
+      console.log(`Using timeout: ${requestTimeout}ms (${imageData ? 'image' : 'text'} request)`);
+      console.log(`Platform timeouts: connectTimeout=30s, readTimeout=15min, writeTimeout=3min`);
+      
+      // Log request size information
+      const requestSize = (requestBodyString.length / 1024).toFixed(2);
+      console.log(`Request size: ${requestSize} KB`);
+      if (imageData) {
+        const imageSize = (imageData.length / 1024).toFixed(2);
+        console.log(`Image data size: ${imageSize} KB`);
+      }
+
       // Using system.fetch to make the API call
       fetch.fetch({
         url: API_CONFIG.endpoint,
@@ -175,7 +211,7 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
         header: {
           'Content-Type': 'application/json'
         },
-        timeout: API_CONFIG.timeout,
+        timeout: requestTimeout,
         success: function(response) {
           console.log(`API response status: ${response.code}`);
           
