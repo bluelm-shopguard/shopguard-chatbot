@@ -12,28 +12,6 @@
     
     <!-- Settings Content -->
     <div class="page-content">
-      <!-- General Settings Group -->
-      <div class="setting-group">
-        <text class="setting-group-title">通用</text>
-        <div class="setting-list">
-          <!-- Language Setting -->
-           <!-- TODO add English UI language mode -->
-          <div class="setting-list-item">
-            <text class="setting-label">语言</text>
-            <div class="setting-control">
-              <div class="segmented-control">
-                <div 
-                  for="{{languageOptions}}" 
-                  class="{{currentLanguage === $item.id ? 'control-option-selected' : 'control-option'}}"
-                  onclick="setLanguage($item.id)">
-                  <text class="option-text">{{$item.name}}</text>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
       <!-- Chat Settings Group -->
       <div class="setting-group">
         <text class="setting-group-title">聊天</text>
@@ -75,9 +53,7 @@ import storage from '@system.storage'
 export default {
   data() {
     return {
-      saveChatHistory: true,
-      currentLanguage: 'zh-CN',
-      languageOptions: []
+      saveChatHistory: true
     }
   },
   
@@ -117,15 +93,6 @@ export default {
       
       const userSettings = app.globalData.userSettings
       
-      // Set language
-      if (userSettings.language) {
-        this.currentLanguage = userSettings.language.default || 'zh-CN';
-        this.languageOptions = userSettings.language.options || [];
-        console.log('Loaded language:', this.currentLanguage);
-      } else {
-        console.log('No language setting found, using default:', this.currentLanguage)
-      }
-      
       // Set chat history setting
       if (userSettings.chat && userSettings.chat.history !== undefined) {
         this.saveChatHistory = userSettings.chat.history.save !== false
@@ -137,33 +104,6 @@ export default {
       console.error('Error loading settings:', error.message)
       console.error('Error stack:', error.stack)
       console.log('Using default settings')
-    }
-  },
-  
-  // Set language - Moved outside methods object
-  setLanguage: function(languageId) {
-    try {
-      console.log('Setting language to:', languageId)
-      this.currentLanguage = languageId
-      
-      // Update app global data
-      const app = this.$app.$def
-      if (app.globalData.userSettings) {
-        app.globalData.userSettings.language = app.globalData.userSettings.language || {}
-        app.globalData.userSettings.language.default = languageId
-        app.saveUserSettings()
-        
-        // Apply language
-        if (app.globalData.languageManager) {
-          app.globalData.languageManager.setLanguage(languageId)
-        }
-        
-        // Show toast confirmation
-        app.showToast('语言已更改')
-      }
-    } catch (error) {
-      console.error('Error setting language:', error)
-      this.displayError('设置语言时出错')
     }
   },
   
