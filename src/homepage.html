@@ -307,10 +307,49 @@
 
             const botMessageElement = appendMessage('bot', '...');
             const botMessageContentElement = botMessageElement.querySelector('.chat-message__content');
+            
+            // Show a special loading message for image processing
+            if (imageDataToSend) {
+                botMessageContentElement.textContent = '正在分析图片，这可能需要一些时间...';
+                
+                // Add a simple loading animation for image requests
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'loading-indicator';
+                botMessageContentElement.appendChild(loadingIndicator);
+            }
 
             try {
                 const botMessage = await callChatbotAPI(prompt, imageDataToSend);
-                botMessageContentElement.textContent = botMessage;
+                
+                // Remove loading indicator if it exists
+                const loadingIndicator = botMessageContentElement.querySelector('.loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+                
+                // Process any API commands in the response
+                const processedResult = processBotMessage(botMessage);
+                botMessageContentElement.textContent = processedResult.text;
+
+                // If the response is an API command that requires further action
+                if (processedResult.isApiCommand) {
+                    // Add a special class to the message to indicate it's an API command
+                    botMessageElement.classList.add('api-command-message');
+                    
+                    // Add a note for search operations
+                    if (processedResult.commandData && processedResult.commandData[0].name === 'web_search') {
+                        const searchNote = document.createElement('div');
+                        searchNote.className = 'search-note';
+                        searchNote.textContent = '请等待搜索结果，这可能需要一点时间...';
+                        botMessageContentElement.appendChild(searchNote);
+                        
+                        // Store command data for potential follow-up
+                        botMessageElement.dataset.commandData = JSON.stringify(processedResult.commandData);
+                        
+                        // In a production environment, you might implement polling here
+                        // to check for search results and update the message
+                    }
+                }
 
                 // Add message to chat history
                 state.chatHistory.push({
@@ -320,7 +359,11 @@
                 });
                 state.chatHistory.push({
                     role: 'bot',
-                    content: botMessage
+                    isApiCommand: processedResult.isApiCommand,
+                    // Store the processed text for API commands, original message otherwise
+                    content: processedResult.isApiCommand ? processedResult.text : botMessage,
+                    // Store original response for debugging/reference
+                    originalContent: processedResult.isApiCommand ? botMessage : null
                 });
 
                 // Save chat history if enabled
@@ -333,7 +376,9 @@
                 // Differentiate between different types of errors
                 let errorMessage;
                 if (error.name === 'AbortError') {
-                    errorMessage = '请求超时，请稍后再试';
+                    errorMessage = imageDataToSend ? 
+                        '图片处理超时，请使用较小的图片或稍后再试' : 
+                        '请求超时，请稍后再试';
                 } else if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
                     errorMessage = '网络连接错误，请检查您的网络连接';
                 } else if (error.response && error.response.status) {
@@ -353,6 +398,12 @@
                     }
                 } else {
                     errorMessage = window.getSystemSetting('chat.errorMessage');
+                }
+
+                // Remove loading indicator if it exists
+                const loadingIndicator = botMessageContentElement.querySelector('.loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
                 }
 
                 botMessageContentElement.textContent = errorMessage;
@@ -423,7 +474,9 @@
         async function callChatbotAPI(userInput, imageData = null, history = []) {
             const API_ENDPOINT = window.getSystemSetting('api.endpoint');
             const MODEL = window.getSystemSetting('api.model');
-            const TIMEOUT = window.getSystemSetting('api.timeout') || 30000;
+            // Increase timeout for image requests since they take longer to process
+            const BASE_TIMEOUT = window.getSystemSetting('api.timeout') || 30000;
+            const TIMEOUT = imageData ? BASE_TIMEOUT * 3 : BASE_TIMEOUT; // Triple the timeout for image requests
             const MAX_RETRIES = window.getSystemSetting('api.maxRetries') || 3;
 
             let messages = [...history];
@@ -525,6 +578,57 @@
 
             // If all retries failed
             throw lastError;
+        }
+
+        /**
+         * Process special API commands in bot responses
+         * @param {string} message - The message from the bot
+         * @returns {object} Processed message info with text and command data
+         */
+        function processBotMessage(message) {
+            // Result object with processed message and command data
+            const result = {
+                text: message,
+                isApiCommand: false,
+                commandData: null,
+                requiresFollowUp: false
+            };
+            
+            // Check if the message contains API commands
+            if (message.trim().startsWith('<APIs>') && message.trim().endsWith('</APIs>')) {
+                // This is an API command, extract the command data
+                try {
+                    const apiCommandsText = message.trim().replace('<APIs>', '').replace('</APIs>', '');
+                    const apiCommands = JSON.parse(apiCommandsText);
+                    
+                    result.isApiCommand = true;
+                    result.commandData = apiCommands;
+                    
+                    // Handle different types of API commands
+                    if (Array.isArray(apiCommands) && apiCommands.length > 0) {
+                        const command = apiCommands[0];
+                        
+                        // Handle web search command
+                        if (command.name === 'web_search') {
+                            result.text = `正在搜索相关信息: "${command.parameters.search_query}"...`;
+                            result.requiresFollowUp = true;
+                        }
+                        
+                        // Handle other command types as needed
+                        // ...
+                        
+                        // Default fallback for unhandled commands
+                        if (!result.text || result.text === message) {
+                            result.text = "正在处理您的请求...";
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to parse API commands:", e);
+                    result.text = "正在处理您的请求...";
+                }
+            }
+            
+            return result;
         }
 
         /**
