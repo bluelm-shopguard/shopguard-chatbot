@@ -5,8 +5,8 @@
 
 export default {
   // Common
-  "app.name": "ShopGuard AI",
-  "app.title": "ShopGuard AI - Shopping Anti-Fraud Assistant",
+  "app.name": "BlueLM Shopguard",
+  "app.title": "BlueLM Shopguard - Shopping Anti-Fraud Assistant",
   "app.description": "Shopping Anti-Fraud Assistant",
 
   // Navigation
@@ -16,7 +16,7 @@ export default {
   "nav.about": "About",
 
   // Homepage
-  "home.welcome": "Welcome to ShopGuard AI",
+  "home.welcome": "Welcome to BlueLM Shopguard",
   "home.subtitle": "Your Shopping Anti-Fraud Assistant",
   "home.conversation.placeholder": "Send a message to analyze...",
   "home.conversation.send": "Send",
@@ -39,13 +39,13 @@ export default {
   "settings.chat": "Chat",
   "settings.chat.saveHistory": "Save Chat History",
   "settings.about": "About",
-  "settings.about.appInfo": "About ShopGuard AI",
+  "settings.about.appInfo": "About BlueLM Shopguard",
 
   // About
-  "about.title": "About ShopGuard AI",
+  "about.title": "About BlueLM Shopguard",
   "about.version": "Version",
   "about.description":
-    "ShopGuard AI is an artificial intelligence-based shopping anti-fraud assistant that helps users identify potential shopping scams.",
+    "BlueLM Shopguard is an artificial intelligence-based shopping anti-fraud assistant that helps users identify potential shopping scams.",
   "about.developer": "Developer",
   "about.copyright": "Copyright",
 

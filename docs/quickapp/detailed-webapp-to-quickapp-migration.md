@@ -1,6 +1,6 @@
-# Detailed WebApp to QuickApp Migration Guide for ShopGuard AI
+# Detailed WebApp to QuickApp Migration Guide for BlueLM Shopguard
 
-This comprehensive guide outlines the process of migrating the ShopGuard AI chatbot from a traditional web application to a QuickApp. It provides specific technical details, code examples, and best practices for developers familiar with web technologies but new to QuickApp development.
+This comprehensive guide outlines the process of migrating the BlueLM Shopguard chatbot from a traditional web application to a QuickApp. It provides specific technical details, code examples, and best practices for developers familiar with web technologies but new to QuickApp development.
 
 ## Table of Contents
 
@@ -52,7 +52,7 @@ HTML files in the web application need to be transformed into UX files. Here's a
    <head>
      <meta charset="UTF-8">
      <link rel="stylesheet" href="styles/main.css">
-     <title>ShopGuard AI</title>
+     <title>BlueLM Shopguard</title>
    </head>
    <body>
      <div class="chat-container">
@@ -606,6 +606,6 @@ export default {
 
 ## Conclusion
 
-Migrating from a web application to a QuickApp requires careful planning and understanding of the platform differences. By following this guide, you can successfully transform your ShopGuard AI chatbot into a high-performance QuickApp while maintaining all its core functionalities.
+Migrating from a web application to a QuickApp requires careful planning and understanding of the platform differences. By following this guide, you can successfully transform your BlueLM Shopguard chatbot into a high-performance QuickApp while maintaining all its core functionalities.
 
 Remember that QuickApp development combines the familiarity of web technologies with the performance benefits of native apps, offering the best of both worlds for developers and users alike.

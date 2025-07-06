@@ -5,8 +5,8 @@
 
 export default {
   // Common
-  "app.name": "ShopGuard AI",
-  "app.title": "ShopGuard AI - 购物防诈骗助手",
+  "app.name": "BlueLM Shopguard",
+  "app.title": "BlueLM Shopguard - 购物防诈骗助手",
   "app.description": "购物防诈骗助手",
 
   // Navigation
@@ -16,7 +16,7 @@ export default {
   "nav.about": "关于",
 
   // Homepage
-  "home.welcome": "欢迎使用 ShopGuard AI",
+  "home.welcome": "欢迎使用 BlueLM Shopguard",
   "home.subtitle": "您的购物防诈骗助手",
   "home.conversation.placeholder": "发消息给我分析一下...",
   "home.conversation.send": "发送",
@@ -39,13 +39,13 @@ export default {
   "settings.chat": "聊天",
   "settings.chat.saveHistory": "保存聊天记录",
   "settings.about": "关于",
-  "settings.about.appInfo": "关于 ShopGuard AI",
+  "settings.about.appInfo": "关于 BlueLM Shopguard",
 
   // About
-  "about.title": "关于 ShopGuard AI",
+  "about.title": "关于 BlueLM Shopguard",
   "about.version": "版本",
   "about.description":
-    "ShopGuard AI 是一款基于人工智能的购物防诈骗助手，帮助用户识别潜在的购物诈骗。",
+    "BlueLM Shopguard 是一款基于人工智能的购物防诈骗助手，帮助用户识别潜在的购物诈骗。",
   "about.developer": "开发者",
   "about.copyright": "版权所有",
 

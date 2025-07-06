@@ -1,5 +1,5 @@
 /**
- * Chinese language pack for ShopGuard AI
+ * Chinese language pack for BlueLM Shopguard
  */
 
 export default {
@@ -24,14 +24,14 @@ export default {
   
   // Home page
   home: {
-    title: 'ShopGuard AI',
+    title: 'BlueLM Shopguard',
     subtitle: '购物防诈骗助手',
     inputPlaceholder: '发送商品链接或描述...',
     welcomeMessage: '遇到可疑商品，随时发给我分析',
     send: '发送',
     typing: '正在输入...',
     newChat: '新对话',
-    messageFromAI: 'ShopGuard AI',
+    messageFromAI: 'BlueLM Shopguard',
     messageFromUser: '你'
   },
   
@@ -43,7 +43,7 @@ export default {
     chatHistory: '聊天记录',
     clearHistory: '清除聊天记录',
     historyCleared: '聊天记录已清除',
-    about: '关于 ShopGuard AI',
+    about: '关于 BlueLM Shopguard',
     feedback: '发送反馈',
     version: '版本'
   },
@@ -63,8 +63,8 @@ export default {
   
   // About page
   about: {
-    title: '关于 ShopGuard AI',
-    description: 'ShopGuard AI 是您的个人助手，帮助识别潜在的购物诈骗。只需分享商品详情、链接或描述，让我们的AI为您分析可疑模式。',
+    title: '关于 BlueLM Shopguard',
+    description: 'BlueLM Shopguard 是您的个人助手，帮助识别潜在的购物诈骗。只需分享商品详情、链接或描述，让我们的AI为您分析可疑模式。',
     version: '版本',
     copyright: '© 2023-2025 ShopGuard 团队。保留所有权利。',
     privacyPolicy: '隐私政策',

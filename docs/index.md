@@ -1,10 +1,10 @@
 # ShopGuard Chatbot
 
-Welcome to the ShopGuard Chatbot documentation. This website contains comprehensive information about the ShopGuard AI project, a shopping anti-fraud assistant that helps users identify potential shopping scams through AI-powered analysis.
+Welcome to the ShopGuard Chatbot documentation. This website contains comprehensive information about the BlueLM Shopguard project, a shopping anti-fraud assistant that helps users identify potential shopping scams through AI-powered analysis.
 
 ## About ShopGuard
 
-ShopGuard AI is designed to help users identify potential shopping scams through:
+BlueLM Shopguard is designed to help users identify potential shopping scams through:
 
 - Chat-based analysis
 - Image upload and analysis

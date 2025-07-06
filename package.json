@@ -14,7 +14,7 @@
     "hap-toolkit": "^1.9.0"
   },
   "dependencies": {},
-  "author": "ShopGuard AI Team",
+  "author": "BlueLM Shopguard Team",
   "license": "MIT",
   "browserslist": [
     "chrome 65"

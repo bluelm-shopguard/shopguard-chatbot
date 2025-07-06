@@ -1,5 +1,5 @@
 /**
- * User settings for ShopGuard AI
+ * User settings for BlueLM Shopguard
  * Default user preferences
  */
 

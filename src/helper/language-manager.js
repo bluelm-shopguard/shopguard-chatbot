@@ -1,5 +1,5 @@
 /**
- * Language Manager for ShopGuard AI
+ * Language Manager for BlueLM Shopguard
  * Handles internationalization and language switching
  */
 

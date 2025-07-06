@@ -9,7 +9,7 @@ This guide provides concrete examples and implementation details for converting 
 ```html
 <script>
 /**
- * ShopGuard AI - 购物防诈骗助手
+ * BlueLM Shopguard - 购物防诈骗助手
  * QuickApp version entry point
  */
 
@@ -1088,7 +1088,7 @@ export const themeStyles = {
 ```json
 {
   "package": "com.shopguard.quickapp",
-  "name": "ShopGuard AI",
+  "name": "BlueLM Shopguard",
   "versionName": "1.0.0",
   "versionCode": 1,
   "icon": "/common/images/logo.jpeg",
@@ -1128,7 +1128,7 @@ export const themeStyles = {
     "menu": true,
     "pages": {
       "pages/home": {
-        "titleBarText": "ShopGuard AI"
+        "titleBarText": "BlueLM Shopguard"
       },
       "pages/settings": {
         "titleBarText": "设置"

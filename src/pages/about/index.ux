@@ -16,7 +16,7 @@
 			<!-- TODO change to actual logo -->
           <text class="about-logo-text">SG</text>
         </div>
-        <text class="about-title">ShopGuard AI</text>
+        <text class="about-title">BlueLM Shopguard</text>
         <text class="about-version">版本 {{ appVersion }}</text>
       </div>
 
@@ -74,7 +74,7 @@
       </div>
 
       <div class="copyright">
-        <text>© 2025 ShopGuard AI Team</text>
+        <text>© 2025 BlueLM Shopguard Team</text>
       </div>
     </div>
   </div>
@@ -92,7 +92,7 @@ export default {
 	data() {
 		return {
 			appVersion: "1.0.0",
-			description: "**ShopGuard AI** 是一款专为保护消费者权益而设计的智能购物助手。我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的*虚假宣传*、*价格欺诈*和*潜在风险*，让每一次消费都安心、放心。",
+			description: "**BlueLM Shopguard** 是一款专为保护消费者权益而设计的智能购物助手。我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的*虚假宣传*、*价格欺诈*和*潜在风险*，让每一次消费都安心、放心。",
 		};
 	},
 

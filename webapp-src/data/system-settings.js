@@ -35,7 +35,7 @@ export let SystemSettings = {
     maxRetries: 3,
   },
   app: {
-    name: "ShopGuard AI",
+    name: "BlueLM Shopguard",
     version: "1.0.0",
     environment: "development", // development, staging, production
   },

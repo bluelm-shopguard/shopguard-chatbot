@@ -1,11 +1,11 @@
 /**
- * System settings for ShopGuard AI
+ * System settings for BlueLM Shopguard
  * Contains default system configuration
  */
 
 // System-wide constants
 const SYSTEM = {
-  APP_NAME: 'ShopGuard AI',
+  APP_NAME: 'BlueLM Shopguard',
   VERSION: '1.0.0',
   BUILD_NUMBER: 1,
   DEBUG_MODE: false,

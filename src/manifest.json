@@ -49,7 +49,7 @@
     "menu": true,
     "pages": {
       "pages/home": {
-        "titleBarText": "ShopGuard AI"
+        "titleBarText": "BlueLM Shopguard"
       },
       "pages/history": {
         "titleBarText": "历史记录"

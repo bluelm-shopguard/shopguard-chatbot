@@ -1,5 +1,5 @@
 /**
- * API Service for ShopGuard AI
+ * API Service for BlueLM Shopguard
  * Handles API communication with the backend
  */
 

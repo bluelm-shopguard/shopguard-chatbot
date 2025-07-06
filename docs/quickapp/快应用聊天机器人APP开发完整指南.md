@@ -27,7 +27,7 @@ source: https://manus.im/share/wP7A6IP1j5SL6IBQI29IlQ?replay=1
 
 ## 项目概述
 
-本指南旨在为初学者提供一个完整的快应用聊天机器人 APP 开发方案，特别针对已掌握 HTML、CSS、JavaScript 基础但缺乏 APP 开发经验的开发者。我们将以 ShopGuard AI 购物防欺诈助手为例，详细说明如何构建一个现代化、功能完整的聊天机器人应用。
+本指南旨在为初学者提供一个完整的快应用聊天机器人 APP 开发方案，特别针对已掌握 HTML、CSS、JavaScript 基础但缺乏 APP 开发经验的开发者。我们将以 BlueLM Shopguard 购物防欺诈助手为例，详细说明如何构建一个现代化、功能完整的聊天机器人应用。
 
 快应用作为一种新兴的应用形态，结合了 Web 技术的易开发性和原生应用的高性能体验。它无需安装即可使用，为用户提供了便捷的访问方式，同时为开发者提供了相对较低的开发门槛。对于聊天机器人这类交互密集的应用，快应用平台提供了良好的技术支持和用户体验保障。
 
@@ -164,7 +164,7 @@ project-root/
 ```json
 {
   "package": "com.example.chatbot",
-  "name": "ShopGuard AI",
+  "name": "BlueLM Shopguard",
   "versionName": "1.0.0",
   "versionCode": 1,
   "minPlatformVersion": 1070,
@@ -1433,7 +1433,7 @@ class StorageManager {
             </div>
             <div class="message-bubble">
               <div class="message-header">
-                <text class="sender-name">ShopGuard AI</text>
+                <text class="sender-name">BlueLM Shopguard</text>
                 <text class="message-time">{{formatTime($item.timestamp)}}</text>
               </div>
               <div class="message-body">
@@ -4646,7 +4646,7 @@ class ReleaseManager {
   }
 
   generateReleaseNotes(version) {
-    return `# ShopGuard AI 聊天机器人 v${version.name}
+    return `# BlueLM Shopguard 聊天机器人 v${version.name}
 
 ## 发布信息
 - 版本号: ${version.name}
@@ -4699,7 +4699,7 @@ class ReleaseManager {
 - 如遇到问题，请尝试清除应用数据后重新启动
 
 ## 卸载方法
-在快应用管理器中找到"ShopGuard AI"，点击卸载即可。
+在快应用管理器中找到"BlueLM Shopguard"，点击卸载即可。
 `;
   }
 

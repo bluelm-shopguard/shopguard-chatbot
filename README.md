@@ -1,7 +1,7 @@
-# ShopGuard AI - 购物防诈骗助手
+# BlueLM Shopguard - 购物防诈骗助手
 
 <div align="center">
-  <img src="docs/assets/full-design.png" alt="ShopGuard AI Logo" width="200">
+  <img src="docs/assets/full-design.png" alt="BlueLM Shopguard Logo" width="200">
   <p>
     <strong>智能购物防诈骗助手，基于大语言模型，帮助您识别商品风险</strong>
   </p>
@@ -16,7 +16,7 @@
 
 ## 📱 项目概述
 
-ShopGuard AI 是一款专为识别购物诈骗风险设计的智能助手应用。用户可以发送商品截图、链接或聊天记录，AI 将分析内容并提供风险评估。项目支持网页版和快应用两种形式，本仓库主要包含快应用前端的实现。
+BlueLM Shopguard 是一款专为识别购物诈骗风险设计的智能助手应用。用户可以发送商品截图、链接或聊天记录，AI 将分析内容并提供风险评估。项目支持网页版和快应用两种形式，本仓库主要包含快应用前端的实现。
 
 ### 主要功能
 

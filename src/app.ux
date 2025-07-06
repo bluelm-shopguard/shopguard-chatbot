@@ -1,6 +1,6 @@
 <script>
 /**
- * ShopGuard AI - Super Simplified Version
+ * BlueLM Shopguard - Super Simplified Version
  * QuickApp entry point
  */
 
@@ -17,7 +17,7 @@ import * as chatHistoryHelper from './helper/chat-history'
 
 // Initialize global data outside the component to ensure it's available before onCreate
 const initGlobalData = {
-  appName: 'ShopGuard AI',
+  appName: 'BlueLM Shopguard',
   version: '1.0.0',
   userSettings: {
     language: {

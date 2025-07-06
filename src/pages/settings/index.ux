@@ -56,7 +56,7 @@ j<template>
         <div class="setting-list">
           <!-- About App Link -->
           <div class="setting-list-item is-link" onclick="navigateTo('pages/about')">
-            <text class="setting-label">关于 ShopGuard AI</text>
+            <text class="setting-label">关于 BlueLM Shopguard</text>
             <text class="item-icon">›</text>
           </div>
         </div>

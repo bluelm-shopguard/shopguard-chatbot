@@ -1,5 +1,5 @@
 /**
- * English language pack for ShopGuard AI
+ * English language pack for BlueLM Shopguard
  */
 
 export default {
@@ -24,14 +24,14 @@ export default {
   
   // Home page
   home: {
-    title: 'ShopGuard AI',
+    title: 'BlueLM Shopguard',
     subtitle: 'Shopping Fraud Prevention Assistant',
     inputPlaceholder: 'Send me product links or descriptions...',
     welcomeMessage: 'Need to verify suspicious products? Send them to me for analysis!',
     send: 'Send',
     typing: 'Typing...',
     newChat: 'New Chat',
-    messageFromAI: 'ShopGuard AI',
+    messageFromAI: 'BlueLM Shopguard',
     messageFromUser: 'You'
   },
   
@@ -43,7 +43,7 @@ export default {
     chatHistory: 'Chat History',
     clearHistory: 'Clear Chat History',
     historyCleared: 'Chat history cleared',
-    about: 'About ShopGuard AI',
+    about: 'About BlueLM Shopguard',
     feedback: 'Send Feedback',
     version: 'Version'
   },
@@ -63,8 +63,8 @@ export default {
   
   // About page
   about: {
-    title: 'About ShopGuard AI',
-    description: 'ShopGuard AI is your personal assistant to help identify potential shopping scams and frauds. Simply share product details, links, or descriptions, and let our AI analyze them for suspicious patterns.',
+    title: 'About BlueLM Shopguard',
+    description: 'BlueLM Shopguard is your personal assistant to help identify potential shopping scams and frauds. Simply share product details, links, or descriptions, and let our AI analyze them for suspicious patterns.',
     version: 'Version',
     copyright: '© 2023-2025 ShopGuard Team. All rights reserved.',
     privacyPolicy: 'Privacy Policy',

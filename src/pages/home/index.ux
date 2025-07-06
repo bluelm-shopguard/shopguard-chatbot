@@ -5,7 +5,7 @@
       <div class="header-button" onclick="openSidebar">
         <text class="header-icon">☰</text>
       </div>
-      <text class="chat-header-title">ShopGuard AI</text>
+      <text class="chat-header-title">BlueLM Shopguard</text>
 	  <!-- TODO change title, all occurences, to BlueLM Shopguard -->
       <div class="header-button" onclick="startNewChat">
         <text class="header-icon">+</text>
