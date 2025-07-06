@@ -160,6 +160,7 @@ export default {
 		loadingText: "", // IMPORTANT: Must initialize as empty to avoid showing loading message at startup
 		processingProgress: 0, // Progress indicator for long operations
 		welcomeMessage: "遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品**截图**、**链接**还是**聊天记录**，我都会帮你识别风险，提供明确的\"**虚假诈骗风险星级**\"和建议，让我们一起安心购物不踩坑！",
+		_isDeletingConversation: null, // Internal flag to track conversation deletion
 	},
 
 	computed: {
@@ -286,6 +287,40 @@ export default {
 			event.stopPropagation();
 		}
 		
+		// Check if this is being called while a conversation is being deleted
+		// This helps prevent the "该对话已不存在" message when we know we just deleted it
+		if (this._isDeletingConversation === id) {
+			console.log(`Ignoring loadConversation for ${id} as it's currently being deleted`);
+			return; // Skip loading as we know it's being deleted
+		}
+		
+		// First check if the conversation exists in the current list
+		const conversationExists = this.conversations.some(conv => conv.id === id);
+		if (!conversationExists) {
+			console.log(`Conversation ${id} not found in the list, might have been deleted`);
+			
+			// Reset to welcome screen as conversation doesn't exist anymore
+			this.message = "";
+			this.currentImageData = null;
+			this.showWelcome = true;
+			this.messages = [];
+			this.isProcessingMessage = false;
+			this.loadingText = "";
+			
+			// Generate a new conversation ID
+			this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
+			
+			// Reset UI state properly
+			this.resetUIState();
+			
+			// Check if we're in a deletion process before showing message
+			if (!this._isDeletingConversation) {
+				this.$app.$def.showToast('该对话已不存在');
+			}
+			
+			return; // Don't attempt to load a conversation that doesn't exist
+		}
+		
 		// Save current conversation if it exists and has messages
 		if (this.currentConversationId && this.messages.length > 0 && this.currentConversationId !== id) {
 			await this.saveCurrentConversation();
@@ -297,6 +332,11 @@ export default {
 			
 			// Load the selected conversation
 			const conversation = await this.$app.$def.chatHistoryHelper.loadConversation(id);
+			
+			// Additional validation: Make sure we have a valid conversation object
+			if (!conversation || !conversation.messages) {
+				throw new Error('Invalid conversation format');
+			}
 			
 			// Update the UI
 			this.currentConversationId = id;
@@ -312,36 +352,84 @@ export default {
 			});
 		} catch (error) {
 			console.error('Failed to load conversation:', error);
-			this.$app.$def.showToast('无法加载对话');
+			
+			// Check if the error is related to a file not found (code 301)
+			const isFileNotFound = error.message && error.message.includes('301');
+			
+			// Only show toast message if we're not in the middle of a deletion
+			if (!this._isDeletingConversation) {
+				// Show appropriate message
+				if (isFileNotFound) {
+					this.$app.$def.showToast('该对话已不存在');
+				} else {
+					this.$app.$def.showToast('无法加载对话');
+				}
+			}
+			
+			// If there was an error loading the conversation, reset to welcome screen
+			this.message = "";
+			this.currentImageData = null;
+			this.showWelcome = true;
+			this.messages = [];
+			this.isProcessingMessage = false;
+			this.loadingText = "";
+			this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
+			this.resetUIState();
 		}
 	},
 	
 	// Delete a conversation
 	deleteConversation: async function(id, event) {
-		// Stop event propagation to prevent loading the conversation
+		// Make sure to completely stop event propagation to prevent the parent click handler
 		if (event) {
 			event.stopPropagation();
+			// Prevent any further event handling to be absolutely sure
+			event.preventDefault && event.preventDefault();
 		}
 		
+		// Set flag to indicate this conversation is being deleted
+		// This helps prevent the "该对话已不存在" message when we're intentionally deleting
+		this._isDeletingConversation = id;
+		
 		try {
+			// First check if we need to reset UI (if this is the current conversation)
+			const isCurrentConversation = (this.currentConversationId === id);
+			if (isCurrentConversation) {
+				// Reset the UI state completely BEFORE deleting to avoid any loading attempts
+				this.message = "";
+				this.currentImageData = null;
+				this.showWelcome = true;
+				this.messages = [];
+				this.isProcessingMessage = false;
+				this.loadingText = "";
+				
+				// Generate a new conversation ID immediately
+				this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
+				
+				// Reset UI state properly
+				this.resetUIState();
+			}
+			
 			// Delete the conversation
 			await this.$app.$def.chatHistoryHelper.deleteConversation(id);
 			
 			// Reload the conversation list
 			await this.loadConversationHistory();
 			
-			// If the deleted conversation was the current one, start a new chat
-			if (this.currentConversationId === id) {
-				// Generate a new ID but keep current messages
-				this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
-			}
-			
 			console.log('Conversation deleted:', id);
 			this.$app.$def.showToast('已删除对话');
 		} catch (error) {
 			console.error('Failed to delete conversation:', error);
 			this.$app.$def.showToast('无法删除对话');
+		} finally {
+			// Clear the deletion flag
+			setTimeout(() => {
+				this._isDeletingConversation = null;
+			}, 500); // Small timeout to allow any pending events to complete
 		}
+		
+		// Explicitly return false to prevent any further event propagation
+		return false;
 	},
 
 	handleImageUpload: function () {
@@ -651,7 +739,6 @@ export default {
 // TODO modern design
 // TODO change tool button
 // TODO make welcome message more friendly
-// TODO change new chat button
 
 .page {
 	flex-direction: column;
