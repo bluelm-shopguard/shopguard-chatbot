@@ -52,12 +52,7 @@
             <text class="toolbar-icon">📷</text>
           </div>
           <text class="toolbar-text">图片</text>
-        </div>
-        <div class="toolbar-button" onclick="handleWebSearch">
-          <div class="icon-container">
-            <text class="toolbar-icon">🔍</text>
-          </div>
-          <text class="toolbar-text">搜索</text>
+          <!-- TODO implement imange input -->
         </div>
       </div>
       
@@ -87,11 +82,13 @@
       </div>
       
       <div class="sidebar-content">
-        <!-- Conversation history will be implemented later -->
+        <!-- TODO implement conversation history -->
         <text class="sidebar-empty-text">暂无历史对话</text>
       </div>
       
       <div class="sidebar-footer">
+        <!-- TODO implement user login -->
+         <!-- TODO implement user database including chat history -->
         <div class="account-info">
           <div class="account-avatar">
             <text class="avatar-text">👤</text>
