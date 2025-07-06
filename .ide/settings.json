@@ -1,21 +1,4 @@
 {
     "hap-debugger.checkedCard": "",
-    "hap.typesVersion": "1100",
-    "hapsetting.apkConfig": {
-        "apkName": "Default Version",
-        "apkPath": "d:\\Program Files\\Quick App IDE\\resources\\app\\extensions\\hap-debugger\\toolkit\\quickapp-apk.zip",
-        "platform": {
-            "packageName": "org.hapjs.mockup",
-            "path": "quickapp_platform.apk",
-            "activity": ".activity.MainActivity",
-            "action": "android.intent.action.MAIN"
-        },
-        "debugger": {
-            "packageName": "org.hapjs.debugger",
-            "path": "quickapp_debugger.apk",
-            "activity": "org.hapjs.debugger.MainActivity",
-            "action": "org.hapjs.debugger.action.MAIN"
-        },
-        "apkDir": "C:\\Users\\krisspy\\AppData\\Roaming\\QuickAppIDE\\Apks\\quickapp-apk"
-    }
+    "hap.typesVersion": "1100"
 }

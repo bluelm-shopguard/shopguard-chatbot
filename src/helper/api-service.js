@@ -136,49 +136,43 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
         console.log('Image data is already in format:', imageData.substring(0, 30) + '...');
       }
       
-      // Format message history for API
-      const apiMessages = messageHistory.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-      
-      // Check if the last message in history is already from the user
-      const lastMessage = messageHistory.length > 0 ? messageHistory[messageHistory.length - 1] : null;
-      const shouldAddUserMessage = !lastMessage || lastMessage.role !== 'user';
-      
-      console.log('Should add user message:', shouldAddUserMessage);
-      
-      // Only add the current user message if it's not already the last message in history
-      if (shouldAddUserMessage) {
-        console.log('Adding current message to API messages');
-        // Add current user message (with or without image)
-        if (imageData && userInput) {
-          // If both text and image are present
-          console.log('Adding both text and image to message');
-          apiMessages.push({
-            role: "user",
-            content: [
-              { type: "text", text: userInput },
-              { type: "image_url", image_url: { url: imageData } }
-            ]
-          });
-        } else if (imageData) {
-          // If only image is present (OpenAI requires at least minimal text)
-          console.log('Adding only image to message with minimal text');
-          apiMessages.push({
-            role: "user",
-            content: [
-              { type: "text", text: "分析这个图片" },
-              { type: "image_url", image_url: { url: imageData } }
-            ]
-          });
-        } else {
-          // If only text is present
-          console.log('Adding only text to message');
-          apiMessages.push({ role: "user", content: userInput });
+      // Format message history for API, only including text content from previous messages
+      const apiMessages = messageHistory.map(msg => {
+        if (Array.isArray(msg.content)) {
+          // For multimodal messages, extract only the text part for history
+          const textPart = msg.content.find(part => part.type === 'text');
+          return { role: msg.role, content: textPart ? textPart.text : '' };
         }
+        // For simple text messages, keep them as is
+        return { role: msg.role, content: msg.content };
+      }).filter(msg => msg.content); // Filter out any messages that might now be empty
+      
+      console.log('Adding current message to API messages');
+      // Add current user message (with or without image)
+      if (imageData && userInput) {
+        // If both text and image are present
+        console.log('Adding both text and image to message');
+        apiMessages.push({
+          role: "user",
+          content: [
+            { type: "text", text: userInput },
+            { type: "image_url", image_url: { url: imageData } }
+          ]
+        });
+      } else if (imageData) {
+        // If only image is present (OpenAI requires at least minimal text)
+        console.log('Adding only image to message with minimal text');
+        apiMessages.push({
+          role: "user",
+          content: [
+            { type: "text", text: "分析这个图片" },
+            { type: "image_url", image_url: { url: imageData } }
+          ]
+        });
       } else {
-        console.log('User message already in history, not adding again');
+        // If only text is present
+        console.log('Adding only text to message');
+        apiMessages.push({ role: "user", content: userInput });
       }
       
       const requestBody = {
