@@ -6,7 +6,6 @@
         <text class="header-icon">☰</text>
       </div>
       <text class="chat-header-title">BlueLM Shopguard</text>
-	  <!-- TODO change title, all occurences, to BlueLM Shopguard -->
       <div class="header-button" onclick="startNewChat">
         <text class="header-icon">+</text>
       </div>
@@ -82,8 +81,8 @@
         </div>
       </div>
 
-      <!-- Loading indicator -->
-      <div class="loading-indicator" show="{{isProcessingMessage}}">
+      <!-- Loading indicator - only shown when actively processing a message AND there's actually a message to show -->
+      <div class="loading-indicator" show="{{isProcessingMessage && loadingText !== ''}}">
         <text class="loading-text">{{loadingText}}</text>
       </div>
     </div>
@@ -156,7 +155,7 @@ export default {
 		isProcessingMessage: false,
 		currentImageData: null,
 		sidebarActive: false,
-		loadingText: "正在处理...", // Dynamic loading text
+		loadingText: "", // IMPORTANT: Must initialize as empty to avoid showing loading message at startup
 		processingProgress: 0, // Progress indicator for long operations
 		welcomeMessage: "遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品**截图**、**链接**还是**聊天记录**，我都会帮你识别风险，提供明确的\"**虚假诈骗风险星级**\"和建议，让我们一起安心购物不踩坑！",
 	},
@@ -175,10 +174,10 @@ export default {
 		// Initialize chat state
 		this.showWelcome = true;
 		this.messages = [];
-		this.isProcessingMessage = false;
+		this.isProcessingMessage = false;  // Explicitly set to false to ensure loading indicator doesn't show at startup
 		this.currentImageData = null;
 		this.sidebarActive = false;
-		this.loadingText = "正在处理...";
+		this.loadingText = "";  // Set to empty to ensure loading text doesn't show at startup
 		this.currentConversationId = null;
 		
 		// Load conversation history
@@ -234,6 +233,8 @@ export default {
 		this.currentImageData = null;
 		this.showWelcome = true;
 		this.messages = [];
+		this.isProcessingMessage = false;  // Explicitly set to false
+		this.loadingText = "";  // Clear loading text
 		
 		// Generate a new conversation ID
 		this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
@@ -417,6 +418,8 @@ export default {
 		this.currentImageData = null;
 		// Ensure UI is not stuck in processing state when image is removed
 		if (this.isProcessingMessage) {
+			this.isProcessingMessage = false;
+			this.loadingText = "";  // Clear loading text explicitly
 			this.resetUIState();
 		}
 	},
@@ -462,6 +465,7 @@ export default {
 		this.isProcessingMessage = true;
 		this.processingProgress = 0;
 		
+		// Only set loading text when we're actually processing something
 		if (imageDataToSend) {
 			// Estimate processing time based on image data size
 			const imageSizeKB = imageDataToSend.length / 1024;
@@ -481,7 +485,7 @@ export default {
 			if (imageSizeMB > 3) {
 				this.startProgressIndicator();
 			}
-		} else {
+		} else if (userMessage) {
 			this.loadingText = "正在处理...";
 		}
 
@@ -639,10 +643,10 @@ export default {
 	// Reset UI state utility function
 	resetUIState: function() {
 		this.isProcessingMessage = false;
-		this.loadingText = "正在处理...";
+		this.loadingText = ""; // IMPORTANT: Always clear loading text when resetting UI state
 		this.stopProgressIndicator();
 		
-		// Force update the UI
+		// Force update the UI to ensure loading indicator disappears
 		this.$forceUpdate && this.$forceUpdate();
 	},
 };
