@@ -15,12 +15,13 @@ const API_CONFIG = {
 }
 
 /**
- * Call chatbot API with text
+ * Call chatbot API with text and optional image data
  * @param {string} userInput - User text input
  * @param {Array} messageHistory - Previous messages in the conversation
+ * @param {string} imageData - Optional base64 image data
  * @returns {Promise<string>} Bot response text
  */
-export function callChatbotAPI(userInput, messageHistory = []) {
+export function callChatbotAPI(userInput, messageHistory = [], imageData = null) {
   return new Promise((resolve, reject) => {
     // Format message history for API
     const apiMessages = messageHistory.map(msg => ({
@@ -28,8 +29,28 @@ export function callChatbotAPI(userInput, messageHistory = []) {
       content: msg.content
     }));
     
-    // Add current user message
-    apiMessages.push({ role: "user", content: userInput });
+    // Add current user message (with or without image)
+    if (imageData && userInput) {
+      // If both text and image are present
+      apiMessages.push({
+        role: "user",
+        content: [
+          { type: "text", text: userInput },
+          { type: "image_url", image_url: { url: imageData } }
+        ]
+      });
+    } else if (imageData) {
+      // If only image is present
+      apiMessages.push({
+        role: "user",
+        content: [
+          { type: "image_url", image_url: { url: imageData } }
+        ]
+      });
+    } else {
+      // If only text is present
+      apiMessages.push({ role: "user", content: userInput });
+    }
     
     const requestBody = {
       model: API_CONFIG.model,

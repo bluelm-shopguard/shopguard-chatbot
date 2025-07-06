@@ -35,6 +35,8 @@
                 <text class="timestamp-text">{{ $item.timestamp }}</text>
               </div>
               <div class="message-content-container">
+                <!-- Show image if present -->
+                <image class="message-image" src="{{$item.imageData}}" show="{{$item.imageData !== undefined && $item.imageData !== null}}"></image>
                 <div class="message-text-wrapper">
                   <text class="message-text-content">{{ $item.content }}</text>
                 </div>
@@ -54,7 +56,12 @@
             <text class="toolbar-icon">📷</text>
           </div>
           <text class="toolbar-text">图片</text>
-          <!-- TODO implement imange input -->
+        </div>
+        <div class="toolbar-button" onclick="handleTakePhoto">
+          <div class="icon-container">
+            <text class="toolbar-icon">📸</text>
+          </div>
+          <text class="toolbar-text">拍照</text>
         </div>
       </div>
 
@@ -63,6 +70,14 @@
           onchange="handleInputChange" disabled="{{isProcessingMessage}}" />
         <div class="send-button" onclick="sendMessage" style="opacity: {{isProcessingMessage ? '0.5' : '1'}}">
           <text class="send-icon">↑</text>
+        </div>
+      </div>
+      
+      <!-- Image preview container -->
+      <div class="image-preview-container" show="{{currentImageData !== null}}">
+        <image class="preview-image" src="{{currentImageData}}"></image>
+        <div class="remove-image-button" onclick="removeSelectedImage">
+          <text class="remove-icon">✕</text>
         </div>
       </div>
 
@@ -108,6 +123,7 @@
 <script>
 import { callChatbotAPI } from "../../helper/api-service";
 import SYSTEM from "../../helper/system-settings";
+import media from '@system.media';
 
 export default {
 	data: {
@@ -155,7 +171,55 @@ export default {
 	},
 
 	handleImageUpload: function () {
-		this.$app.$def.showToast("图片上传功能即将推出");
+		// Use the imported media module
+		media.pickImage({
+			success: (data) => {
+				if (data && data.uri) {
+					console.log("Image selected:", data.uri);
+					// Store the image URI
+					this.currentImageData = data.uri;
+					this.$app.$def.showToast("图片已选择");
+				}
+			},
+			fail: (data, code) => {
+				console.log(`Image pick failed, code = ${code}, data = ${data}`);
+				this.$app.$def.showToast("选择图片失败");
+			},
+			cancel: () => {
+				console.log("Image pick cancelled");
+			}
+		});
+	},
+
+	handleTakePhoto: function() {
+		// Use the camera to take a photo
+		media.takePhoto({
+			success: (data) => {
+				if (data && data.uri) {
+					console.log("Photo taken:", data.uri);
+					// Store the photo URI
+					this.currentImageData = data.uri;
+					this.$app.$def.showToast("已拍摄照片");
+				}
+			},
+			fail: (data, code) => {
+				console.log(`Taking photo failed, code = ${code}, data = ${data}`);
+				if (code === 201) {
+					this.$app.$def.showToast("需要相机权限");
+				} else if (code === 207) {
+					this.$app.$def.showToast("相机权限被拒绝，请在设置中开启");
+				} else {
+					this.$app.$def.showToast("拍照失败");
+				}
+			},
+			cancel: () => {
+				console.log("Taking photo cancelled");
+			}
+		});
+	},
+	
+	removeSelectedImage: function() {
+		this.currentImageData = null;
 	},
 
 	handleWebSearch: function () {
@@ -229,16 +293,21 @@ export default {
 
 		// Save the user message to display
 		const userMessage = this.message.trim();
+		
+		// Store image data before clearing it
+		const imageDataToSend = this.currentImageData;
 
-		// Add user message to messages array
+		// Add user message to messages array (including image if present)
 		this.messages.push({
 			role: "user",
 			content: this.formatMessageContent(userMessage),
 			timestamp: timestamp,
+			imageData: imageDataToSend
 		});
 
-		// Clear input
+		// Clear input and image
 		this.message = "";
+		this.currentImageData = null;
 
 		try {
 			// Add temporary bot message
@@ -252,10 +321,11 @@ export default {
 			// Exclude the temporary bot message we just added
 			const conversationHistory = this.messages.slice(0, -1);
 
-			// Call the API with message history
+			// Call the API with message history and image data
 			const botResponse = await callChatbotAPI(
 				userMessage,
-				conversationHistory
+				conversationHistory,
+				imageDataToSend
 			);
 
 			// Replace the temporary message with the actual response
@@ -541,152 +611,56 @@ export default {
 	color: @text-color-tertiary;
 }
 
+/* Image preview styles */
+.image-preview-container {
+	width: 100%;
+	margin: 10px 0;
+	position: relative;
+	border-radius: 16px;
+	border: 1px solid @border-color;
+	padding: 8px;
+	background-color: @background-color;
+}
+
+.preview-image {
+	width: 240px;
+	height: 240px;
+	object-fit: contain;
+	border-radius: 8px;
+}
+
+.remove-image-button {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 48px;
+	height: 48px;
+	border-radius: 24px;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.remove-icon {
+	color: white;
+	font-size: @font-size-medium;
+}
+
+/* Message image styles */
+.message-image {
+	width: 200px;
+	height: 200px;
+	margin-bottom: 8px;
+	border-radius: 8px;
+	object-fit: contain;
+}
+
 .input-area-wrapper {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	gap: 16px;
 	width: 100%;
-}
-
-.text-input {
-	flex: 1;
-	min-height: 64px;
-	max-height: 120px;
-	padding: @spacing-medium @spacing-large;
-	border-radius: 16px;
-	font-size: @font-size-medium;
-	border: 1px solid @border-color;
-	background-color: #f9fafb;
-	color: @text-color-primary;
-}
-
-.send-button {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 80px;
-	height: 80px;
-	border-radius: 40px;
-	background-color: @primary-color;
-	flex-shrink: 0;
-}
-
-.send-icon {
-	color: @text-color-inverse;
-	font-size: @font-size-xxlarge;
-	font-weight: bold;
-}
-
-/* Sidebar Styles */
-.sidebar-overlay {
-	position: fixed;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.5);
-	z-index: 998;
-}
-
-/* Sidebar Component */
-.sidebar {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 300px;
-	height: 100%;
-	z-index: 999;
-	transition-property: transform;
-	transition-duration: 300ms;
-	display: flex;
-	flex-direction: column;
-	background-color: @component-background;
-}
-
-.sidebar-header {
-	padding: 16px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	border-bottom: 1px solid @border-color;
-}
-
-.sidebar-title {
-	font-size: @font-size-medium;
-	font-weight: bold;
-	color: @text-color-primary;
-}
-
-.close-button {
-	padding: @spacing-small;
-	border-radius: 12px;
-	width: 64px;
-	height: 64px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-.sidebar-content {
-	flex: 1;
-	overflow-y: scroll;
-	padding: 16px;
-	display: flex;
-	flex-direction: column;
-}
-
-.sidebar-empty-text {
-	font-size: @font-size-xsmall;
-	text-align: center;
-	margin-top: 50px;
-	color: @text-color-tertiary;
-}
-
-.sidebar-footer {
-	padding: 16px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	border-top: 1px solid @border-color;
-}
-
-.account-info {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.account-avatar {
-	width: 64px;
-	height: 64px;
-	border-radius: 32px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: @background-color;
-}
-
-.avatar-text {
-	font-size: @font-size-large;
-}
-
-.account-name {
-	font-size: @font-size-small;
-	font-weight: bold;
-	color: @text-color-primary;
-}
-
-.settings-button {
-	width: 64px;
-	height: 64px;
-	border-radius: 12px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.settings-icon {
-	font-size: @font-size-xxlarge;
 }
 </style>

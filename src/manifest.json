@@ -10,10 +10,13 @@
     { "name": "system.router" },
     { "name": "system.fetch" },
     { "name": "system.storage" },
-    { "name": "system.device" }
+    { "name": "system.device" },
+    { "name": "system.media" }
   ],
   "permissions": [
-    { "origin": "*" }
+    { "origin": "*" },
+    { "name": "android.permission.READ_EXTERNAL_STORAGE" },
+    { "name": "android.permission.CAMERA" }
   ],
   "config": {
     "logLevel": "debug",
