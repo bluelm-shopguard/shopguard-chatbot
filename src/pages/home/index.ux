@@ -40,7 +40,8 @@
                 <!-- Show image if present -->
                 <image class="message-image" src="{{$item.imageData}}" show="{{$item.imageData !== undefined && $item.imageData !== null}}"></image>
                 <div class="message-text-wrapper">
-                  <text class="message-text-content">{{ $item.content }}</text>
+                  <!-- Use richtext for markdown support, just like in welcome message -->
+                  <richtext type="html" class="message-text-content">{{ $item.content }}</richtext>
                 </div>
               </div>
             </div>
@@ -626,6 +627,10 @@ export default {
 		this.currentImageData = null;
 
 		try {
+			// Prepare conversation history for the API
+			// Only use existing messages, don't add temporary bot message to history
+			const conversationHistory = [...this.messages];
+			
 			// Add temporary bot message with appropriate loading text
 			const loadingMessage = imageDataToSend ? "正在分析图片，请稍候..." : "...";
 			this.messages.push({
@@ -633,10 +638,6 @@ export default {
 				content: loadingMessage,
 				timestamp: timestamp
 			});
-
-			// Prepare conversation history for the API
-			// Exclude the temporary bot message we just added
-			const conversationHistory = this.messages.slice(0, -1);
 
 			// Call the API with message history and image data
 			// Extract the URI if imageDataToSend is an object

@@ -22,6 +22,12 @@ export function renderMarkdown(text) {
   // Process code
   text = text.replace(/`(.*?)`/g, '<span style="font-family: monospace; background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px;">$1</span>');
   
+  // Process line breaks - replace newlines with <br> tags
+  text = text.replace(/\n/g, '<br>');
+  
+  // Process lists - improve list rendering
+  text = text.replace(/- (.*?)(?=<br>|$)/g, '• $1');
+  
   return text;
 }
 

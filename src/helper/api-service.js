@@ -142,31 +142,42 @@ export function callChatbotAPI(userInput, messageHistory = [], imageData = null)
         content: msg.content
       }));
       
-      console.log('Adding current message to API messages');
-      // Add current user message (with or without image)
-      if (imageData && userInput) {
-        // If both text and image are present
-        console.log('Adding both text and image to message');
-        apiMessages.push({
-          role: "user",
-          content: [
-            { type: "text", text: userInput },
-            { type: "image_url", image_url: { url: imageData } }
-          ]
-        });
-      } else if (imageData) {
-        // If only image is present
-        console.log('Adding only image to message');
-        apiMessages.push({
-          role: "user",
-          content: [
-            { type: "image_url", image_url: { url: imageData } }
-          ]
-        });
+      // Check if the last message in history is already from the user
+      const lastMessage = messageHistory.length > 0 ? messageHistory[messageHistory.length - 1] : null;
+      const shouldAddUserMessage = !lastMessage || lastMessage.role !== 'user';
+      
+      console.log('Should add user message:', shouldAddUserMessage);
+      
+      // Only add the current user message if it's not already the last message in history
+      if (shouldAddUserMessage) {
+        console.log('Adding current message to API messages');
+        // Add current user message (with or without image)
+        if (imageData && userInput) {
+          // If both text and image are present
+          console.log('Adding both text and image to message');
+          apiMessages.push({
+            role: "user",
+            content: [
+              { type: "text", text: userInput },
+              { type: "image_url", image_url: { url: imageData } }
+            ]
+          });
+        } else if (imageData) {
+          // If only image is present
+          console.log('Adding only image to message');
+          apiMessages.push({
+            role: "user",
+            content: [
+              { type: "image_url", image_url: { url: imageData } }
+            ]
+          });
+        } else {
+          // If only text is present
+          console.log('Adding only text to message');
+          apiMessages.push({ role: "user", content: userInput });
+        }
       } else {
-        // If only text is present
-        console.log('Adding only text to message');
-        apiMessages.push({ role: "user", content: userInput });
+        console.log('User message already in history, not adding again');
       }
       
       const requestBody = {
