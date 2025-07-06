@@ -1,6 +1,6 @@
 /* Theme Variables */
 
-/* Colors */
+/* Colors - Light Theme */
 @primary-color: #10a37f;
 @primary-color-light: #d1e9e0; /* Light green for user message backgrounds */
 @background-color: #f3f4f6;
@@ -11,6 +11,18 @@
 @text-color-tertiary: #6b7280;
 @text-color-inverse: #ffffff;
 @error-color: #dc2626;
+
+/* Colors - Dark Theme - Used with media query */
+@dark-primary-color: #10a37f; /* Keep primary brand color */
+@dark-primary-color-light: #1e3e38; /* Darker green for dark mode */
+@dark-background-color: #121212;
+@dark-component-background: #1e1e1e;
+@dark-border-color: #333333;
+@dark-text-color-primary: #f1f1f1;
+@dark-text-color-secondary: #bbbbbb;
+@dark-text-color-tertiary: #999999;
+@dark-text-color-inverse: #000000;
+@dark-error-color: #ef4444;
 
 /* Font Sizes */
 @font-size-xxlarge: 40px;
@@ -26,3 +38,14 @@
 @spacing-medium: 16px;
 @spacing-small: 12px;
 @spacing-xsmall: 8px;
+
+/* Dark Mode Helpers */
+.darkMode() {
+  background-color: @dark-background-color;
+  color: @dark-text-color-primary;
+}
+
+.darkModeComponent() {
+  background-color: @dark-component-background;
+  color: @dark-text-color-primary;
+}

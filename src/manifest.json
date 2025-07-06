@@ -47,6 +47,8 @@
     "titleBarBackgroundColor": "#ffffff",
     "titleBarTextColor": "#333333",
     "menu": true,
+    "themeMode": -1,
+    "forceDark": true,
     "pages": {
       "pages/home": {
         "titleBarText": "BlueLM Shopguard"

@@ -1,13 +1,15 @@
+<import name="svg-icon" src="../../components/ui/svg-icon.ux"></import>
+
 <template>
   <div class="page">
     <!-- Header -->
     <div class="chat-header">
       <div class="header-button" onclick="openSidebar">
-        <text class="header-icon">☰</text>
+        <svg-icon name="align-justify" size="24" color="#333333" darkColor="#FFFFFF"></svg-icon>
       </div>
       <text class="chat-header-title">BlueLM Shopguard</text>
       <div class="header-button" onclick="startNewChat">
-        <text class="header-icon">⊕</text>
+        <svg-icon name="circle-plus" size="24" color="#333333" darkColor="#FFFFFF"></svg-icon>
       </div>
     </div>
 
@@ -687,13 +689,7 @@ export default {
 	align-items: center;
 }
 
-.header-icon {
-	width: 48px;
-	height: 48px;
-	text-align: center;
-	font-size: @font-size-xxlarge;
-	color: @text-color-tertiary;
-}
+/* SVG icons will use their own styling */
 
 /* Content Area Styles */
 .chat-content {

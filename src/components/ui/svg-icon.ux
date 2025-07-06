@@ -1,0 +1,78 @@
+<template>
+  <image class="svg-icon" src="../icons/{{name}}.svg" style="width: {{size}}px; height: {{size}}px; color: {{currentColor}};" forcedark="false"></image>
+</template>
+
+<style>
+  .svg-icon {
+    object-fit: contain;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .svg-icon {
+      filter: invert(1);
+    }
+  }
+</style>
+
+<script>
+  import configuration from '@system.configuration'
+
+  export default {
+    props: {
+      name: {
+        type: String,
+        default: ''
+      },
+      size: {
+        type: Number,
+        default: 24
+      },
+      color: {
+        type: String,
+        default: 'currentColor'
+      },
+      darkColor: {
+        type: String,
+        default: '#FFFFFF'
+      }
+    },
+    
+    data() {
+      return {
+        isDarkMode: false,
+        currentColor: ''
+      }
+    },
+    
+    onInit() {
+      console.log(`SVG Icon initialized: ${this.name}`);
+      // Check the current theme mode
+      this.checkThemeMode();
+      // Set the appropriate color
+      this.updateColor();
+    },
+    
+    checkThemeMode() {
+      try {
+        const themeMode = configuration.getThemeMode();
+        this.isDarkMode = themeMode === 1;
+        console.log(`Theme mode checked for icon ${this.name}: ${this.isDarkMode ? 'dark' : 'light'}`);
+      } catch (error) {
+        console.error('Failed to get theme mode:', error);
+        this.isDarkMode = false;
+      }
+    },
+    
+    updateColor() {
+      // Use the appropriate color based on the theme
+      this.currentColor = this.isDarkMode ? this.darkColor : this.color;
+    },
+    
+    onConfigurationChanged(params) {
+      if (params.type === 'themeMode') {
+        this.checkThemeMode();
+        this.updateColor();
+      }
+    }
+  }
+</script>

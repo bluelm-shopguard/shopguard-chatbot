@@ -1,9 +1,11 @@
-j<template>
+<import name="svg-icon" src="../../components/ui/svg-icon.ux"></import>
+
+<template>
   <div class="page">
     <!-- Header -->
     <div class="page-header">
       <div class="header-button" onclick="goBack">
-        <text class="header-icon">←</text>
+        <svg-icon name="chevron-left" size="24" color="#333333" darkColor="#FFFFFF"></svg-icon>
       </div>
       <text class="page-header-title">设置</text>
     </div>
@@ -57,7 +59,7 @@ j<template>
           <!-- About App Link -->
           <div class="setting-list-item is-link" onclick="navigateTo('pages/about')">
             <text class="setting-label">关于 BlueLM Shopguard</text>
-            <text class="item-icon">›</text>
+            <svg-icon name="chevron-right" size="18" color="#999999" darkColor="#CCCCCC"></svg-icon>
           </div>
         </div>
       </div>
@@ -243,11 +245,7 @@ export default {
   display: flex;
 }
 
-.header-icon {
-  font-size: @font-size-xxlarge;
-  text-align: center;
-  color: @text-color-tertiary;
-}
+/* SVG icons will use their own styling */
 
 .page-header-title {
   flex: 1;
@@ -350,12 +348,5 @@ export default {
   height: 56px;
 }
 
-.item-icon {
-  font-size: @font-size-xxlarge;
-  margin-left: @spacing-medium;
-  color: @text-color-tertiary;
-  width: 48px;
-  height: 48px;
-  text-align: center;
-}
+/* Using SVG icons instead of text characters */
 </style>
