@@ -7,7 +7,7 @@
       </div>
       <text class="chat-header-title">BlueLM Shopguard</text>
       <div class="header-button" onclick="startNewChat">
-        <text class="header-icon">+</text>
+        <text class="header-icon">⊕</text>
       </div>
     </div>
 
@@ -470,16 +470,8 @@ export default {
 			// Estimate processing time based on image data size
 			const imageSizeKB = imageDataToSend.length / 1024;
 			const imageSizeMB = imageSizeKB / 1024;
-			let estimatedTime = "3-5分钟";
-			
-			if (imageSizeMB > 5) {
-				estimatedTime = "5-10分钟";
-			}
-			if (imageSizeMB > 8) {
-				estimatedTime = "10-15分钟";
-			}
-			
-			this.loadingText = `正在分析图片(${imageSizeMB.toFixed(1)}MB)，预计需要${estimatedTime}，请耐心等待...`;
+			// BUG image size
+			this.loadingText = `正在分析图片(${imageSizeMB.toFixed(1)}MB)，请耐心等待...`;
 			
 			// Start a progress indicator for large images
 			if (imageSizeMB > 3) {
@@ -656,7 +648,6 @@ export default {
 @import "../../common/styles/theme.less";
 // TODO modern design
 // TODO change tool button
-// BUG "正在处理" even at startup
 // TODO make welcome message more friendly
 // TODO change new chat button
 
