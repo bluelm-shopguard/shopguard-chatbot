@@ -25,8 +25,7 @@
 		<!-- TODO put content-card-title at the top part of content-card -->
         <text class="content-card-title">产品介绍</text>
         <div class="description-container">
-			<!-- BUG markdown render failure of description text -->
-          <text class="description-text">{{ formattedDescription }}</text>
+          <richtext type="html" class="description-text">{{ formattedDescription }}</richtext>
         </div>
       </div>
 
@@ -83,7 +82,6 @@
 <script>
 import router from "@system.router";
 import formattedText from "../../components/ui/formatted-text";
-
 export default {
 	// Register the formatted-text component
 	components: {
@@ -303,7 +301,7 @@ export default {
 	font-size: @font-size-medium;
 	color: @text-color-secondary;
 	text-align: left;
-	height: 140px;
+	min-height: 140px;
 	margin-bottom: 10px;
 	width: 100%;
 }
