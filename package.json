@@ -1,6 +1,6 @@
 {
   "name": "shopguard-chatbot",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "购物防诈骗助手，基于大语言模型，帮助用户识别商品风险",
   "scripts": {
     "server": "hap server",
