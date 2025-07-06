@@ -23,7 +23,7 @@
       <div class="content-card">
         <text class="content-card-title">产品介绍</text>
         <div class="description-container">
-          <text class="description-text">ShopGuard AI 是一款专为保护消费者权益而设计的智能购物助手。我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的虚假宣传、价格欺诈和潜在风险，让每一次消费都安心、放心。</text>
+          <text class="description-text">{{ formattedDescription }}</text>
         </div>
       </div>
 
@@ -78,12 +78,28 @@
 
 <script>
 import router from "@system.router";
+import formattedText from "../../components/ui/formatted-text";
 
 export default {
+	// Register the formatted-text component
+	components: {
+		'formatted-text': formattedText
+	},
 	data() {
 		return {
 			appVersion: "1.0.0",
+			description: "**ShopGuard AI** 是一款专为保护消费者权益而设计的智能购物助手。我们致力于利用先进的人工智能技术，帮助用户识别网络购物中的*虚假宣传*、*价格欺诈*和*潜在风险*，让每一次消费都安心、放心。",
 		};
+	},
+
+	computed: {
+		formattedDescription() {
+			// Use the markdown helper from app to format the description
+			if (this.$app.$def && this.$app.$def.markdownHelper) {
+				return this.$app.$def.markdownHelper.formatMessageContent(this.description);
+			}
+			return this.description;
+		}
 	},
 
 	onInit() {

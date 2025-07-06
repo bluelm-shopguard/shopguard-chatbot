@@ -20,9 +20,9 @@
         </div>
         <text class="welcome-title">蓝心购物防诈骗助手</text>
         <div class="welcome-message-container">
-          <text class="welcome-message">
-            遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！
-          </text>
+          <richtext type="html" class="welcome-message">
+            {{formattedWelcomeMessage}}
+          </richtext>
         </div>
       </div>
 
@@ -124,8 +124,13 @@
 import { callChatbotAPI } from "../../helper/api-service";
 import SYSTEM from "../../helper/system-settings";
 import media from '@system.media';
+import formattedText from "../../components/ui/formatted-text";
 
 export default {
+	// Register the formatted-text component
+	components: {
+		'formatted-text': formattedText
+	},
 	data: {
 		message: "",
 		messages: [], // Array to store chat messages
@@ -135,6 +140,17 @@ export default {
 		sidebarActive: false,
 		loadingText: "正在处理...", // Dynamic loading text
 		processingProgress: 0, // Progress indicator for long operations
+		welcomeMessage: "遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品**截图**、**链接**还是**聊天记录**，我都会帮你识别风险，提供明确的\"**虚假诈骗风险星级**\"和建议，让我们一起安心购物不踩坑！",
+	},
+
+	computed: {
+		formattedWelcomeMessage() {
+			// Format welcome message using markdown helper
+			if (this.$app.$def && this.$app.$def.markdownHelper) {
+				return this.$app.$def.markdownHelper.formatMessageContent(this.welcomeMessage);
+			}
+			return this.welcomeMessage;
+		}
 	},
 
 	onInit() {
@@ -263,40 +279,14 @@ export default {
 			uri: "pages/settings",
 		});
 	},
-	// TODO render markdown in chat
 	/**
-	 * Format message content for display
-	 * This ensures long text is displayed properly
+	 * Format message content for display with markdown support
 	 * @param {string} content - The message content
-	 * @return {string} - The formatted content
+	 * @return {string} - Formatted message content
 	 */
 	formatMessageContent: function (content) {
-		// Trim the message
-		content = content.trim();
-
-		// Insert line breaks every ~40 characters at word boundaries for better display
-		// This helps prevent horizontal scrolling issues in QuickApp text elements
-		let result = "";
-		const words = content.split(" ");
-		let currentLine = "";
-
-		for (let i = 0; i < words.length; i++) {
-			const word = words[i];
-			// If adding this word would make the line too long, add a line break
-			if (currentLine.length + word.length > 40 && currentLine.length > 0) {
-				result += currentLine.trim() + "\n";
-				currentLine = word + " ";
-			} else {
-				currentLine += word + " ";
-			}
-		}
-
-		// Add the final line
-		if (currentLine.length > 0) {
-			result += currentLine.trim();
-		}
-
-		return result;
+		// Use the markdown helper to process the content
+		return this.$app.$def.markdownHelper.formatMessageContent(content);
 	},
 
 	sendMessage: async function () {
@@ -361,9 +351,10 @@ export default {
 		}
 
 		// Add user message to messages array (including image if present)
+		const formattedContent = this.formatMessageContent(userMessage);
 		this.messages.push({
 			role: "user",
-			content: this.formatMessageContent(userMessage),
+			content: formattedContent,
 			timestamp: timestamp,
 			imageData: imageDataToSend
 		});
@@ -378,7 +369,7 @@ export default {
 			this.messages.push({
 				role: "bot",
 				content: loadingMessage,
-				timestamp: timestamp,
+				timestamp: timestamp
 			});
 
 			// Prepare conversation history for the API
@@ -394,10 +385,13 @@ export default {
 
 			// Replace the temporary message with the actual response
 			this.messages.pop(); // Remove temporary message
+			
+			// Format the bot response with markdown support
+			const formattedContent = this.formatMessageContent(botResponse);
 			this.messages.push({
 				role: "bot",
-				content: this.formatMessageContent(botResponse),
-				timestamp: timestamp,
+				content: formattedContent,
+				timestamp: timestamp
 			});
 
 			// Scroll to the bottom to show new message
@@ -427,11 +421,13 @@ export default {
 				}
 			}
 			
+			// Format the error message with markdown support
+			const formattedContent = this.formatMessageContent(errorMessage);
 			this.messages.push({
 				role: "bot",
-				content: this.formatMessageContent(errorMessage),
+				content: formattedContent,
 				timestamp: timestamp,
-				isError: true,
+				isError: true
 			});
 
 			// Show error toast with specific message
@@ -489,7 +485,7 @@ export default {
 
 <style lang="less">
 @import "../../common/styles/theme.less";
-
+// TODO modern design
 .page {
 	flex-direction: column;
 	width: 100%;
@@ -594,7 +590,6 @@ export default {
 	font-size: @font-size-medium;
 	color: @text-color-secondary;
 	text-align: left;
-	height: 140px;
 	margin-bottom: 10px;
 	width: 100%;
 }
@@ -661,7 +656,16 @@ export default {
 	text-align: left;
 	/* Ensure text breaks at appropriate points */
 	flex-wrap: wrap;
-	white-space: normal;
+	white-space: pre-wrap;
+}
+
+/* We're using a simpler approach for markdown, the formatMessageContent 
+   function handles the formatting with special markers */
+
+.message-text-markdown {
+	width: 100%;
+	margin: 4px 0;
+	padding: 4px 0;
 }
 
 /* Loading Indicator */

@@ -1,0 +1,221 @@
+<template>
+  <div class="markdown-container">
+    <block for="{{elements}}" tid="type">
+      <!-- Headings -->
+      <text if="{{$item.type === 'heading' && $item.level === 1}}" class="h1">{{renderInlineContent($item.content)}}</text>
+      <text if="{{$item.type === 'heading' && $item.level === 2}}" class="h2">{{renderInlineContent($item.content)}}</text>
+      <text if="{{$item.type === 'heading' && $item.level === 3}}" class="h3">{{renderInlineContent($item.content)}}</text>
+      <text if="{{$item.type === 'heading' && $item.level >= 4}}" class="h4">{{renderInlineContent($item.content)}}</text>
+      
+      <!-- Paragraph -->
+      <text if="{{$item.type === 'paragraph'}}" class="paragraph">{{renderInlineContent($item.content)}}</text>
+      
+      <!-- Code Block -->
+      <div if="{{$item.type === 'code-block'}}" class="code-block">
+        <text class="code-text">{{$item.content}}</text>
+      </div>
+      
+      <!-- Blockquote -->
+      <div if="{{$item.type === 'blockquote'}}" class="blockquote">
+        <text class="blockquote-text">{{renderInlineContent($item.content)}}</text>
+      </div>
+      
+      <!-- Horizontal Rule -->
+      <div if="{{$item.type === 'hr'}}" class="hr"></div>
+      
+      <!-- Unordered List -->
+      <div if="{{$item.type === 'ul'}}" class="list">
+        <div for="{{$item.items}}" class="list-item">
+          <text class="bullet">•</text>
+          <text class="list-text">{{renderInlineContent($item)}}</text>
+        </div>
+      </div>
+      
+      <!-- Ordered List -->
+      <div if="{{$item.type === 'ol'}}" class="list">
+        <div for="(index, listItem) in $item.items" class="list-item">
+          <text class="number">{{index + 1}}.</text>
+          <text class="list-text">{{renderInlineContent(listItem)}}</text>
+        </div>
+      </div>
+    </block>
+  </div>
+</template>
+
+<script>
+  import { parseMarkdown } from '../../helper/util/markdown-utils';
+  
+  export default {
+    props: {
+      content: {
+        type: String,
+        default: ''
+      }
+    },
+    
+    data: {
+      elements: []
+    },
+    
+    onInit() {
+      this.updateContent();
+    },
+    
+    /**
+     * Watch for content changes and update the rendered elements
+     */
+    onContentChanged() {
+      this.updateContent();
+    },
+    
+    updateContent() {
+      if (this.content && typeof this.content === 'string') {
+        this.elements = parseMarkdown(this.content);
+      } else {
+        this.elements = [];
+      }
+    },
+    
+    /**
+     * Render inline content elements (bold, italic, links, code)
+     * This is a simplified approach that converts the elements back to a string
+     */
+    renderInlineContent(elements) {
+      if (!elements || elements.length === 0) return '';
+      
+      // If this is just a string (from list items), return it directly
+      if (typeof elements === 'string') {
+        return elements;
+      }
+      
+      let result = '';
+      
+      for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        
+        if (element.type === 'text') {
+          result += element.content;
+        } else if (element.type === 'bold') {
+          result += '*' + element.content + '*'; // Using * for bold since QuickApp doesn't support HTML
+        } else if (element.type === 'italic') {
+          result += '_' + element.content + '_'; // Using _ for italic
+        } else if (element.type === 'code') {
+          result += '`' + element.content + '`'; // We'll style these with CSS
+        } else if (element.type === 'link') {
+          // In QuickApp, we can't have clickable links in text components
+          // So we just show the link text
+          result += element.text;
+        }
+      }
+      
+      return result;
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "../../common/styles/theme.less";
+  
+  .markdown-container {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .h1 {
+    font-size: @font-size-xlarge;
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 16px;
+    color: @text-color-primary;
+  }
+  
+  .h2 {
+    font-size: @font-size-large;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    color: @text-color-primary;
+  }
+  
+  .h3 {
+    font-size: @font-size-medium;
+    font-weight: bold;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    color: @text-color-primary;
+  }
+  
+  .h4 {
+    font-size: @font-size-medium;
+    font-weight: bold;
+    color: @text-color-secondary;
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .paragraph {
+    font-size: @font-size-medium;
+    color: @text-color-primary;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  
+  .code-block {
+    background-color: @background-color;
+    border: 1px solid @border-color;
+    border-radius: 4px;
+    padding: 16px;
+    margin: 12px 0;
+    width: 100%;
+  }
+  
+  .code-text {
+    font-family: monospace;
+    font-size: @font-size-small;
+    color: @text-color-primary;
+    white-space: pre-wrap;
+  }
+  
+  .blockquote {
+    border-left: 4px solid @primary-color;
+    padding-left: 16px;
+    margin: 12px 0;
+  }
+  
+  .blockquote-text {
+    font-size: @font-size-medium;
+    color: @text-color-secondary;
+    font-style: italic;
+  }
+  
+  .hr {
+    height: 1px;
+    background-color: @border-color;
+    margin: 20px 0;
+    width: 100%;
+  }
+  
+  .list {
+    flex-direction: column;
+    margin: 12px 0;
+    width: 100%;
+  }
+  
+  .list-item {
+    flex-direction: row;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  
+  .bullet, .number {
+    margin-right: 8px;
+    color: @text-color-secondary;
+    font-size: @font-size-medium;
+  }
+  
+  .list-text {
+    flex: 1;
+    font-size: @font-size-medium;
+    color: @text-color-primary;
+  }
+</style>

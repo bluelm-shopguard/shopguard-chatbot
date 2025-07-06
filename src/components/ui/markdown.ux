@@ -1,0 +1,23 @@
+<template>
+  <div class="markdown">
+    <markdown-renderer content="{{content}}"></markdown-renderer>
+  </div>
+</template>
+
+<script>
+  export default {
+    props: {
+      content: {
+        type: String,
+        default: ''
+      }
+    }
+  }
+</script>
+
+<style>
+  .markdown {
+    width: 100%;
+    flex-direction: column;
+  }
+</style>

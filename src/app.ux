@@ -9,6 +9,10 @@ import router from '@system.router'
 import storage from '@system.storage'
 import device from '@system.device'
 
+// Import markdown helpers
+import * as markdownHelper from './helper/markdown-helper'
+import * as markdownSegments from './helper/markdown-segments'
+
 // Initialize global data outside the component to ensure it's available before onCreate
 const initGlobalData = {
   appName: 'ShopGuard AI',
@@ -160,7 +164,11 @@ export default {
     router.push({
       uri: page
     })
-  }
+  },
+  
+  // Make markdown helpers available globally
+  markdownHelper: markdownHelper,
+  markdownSegments: markdownSegments
 }
 </script>
 

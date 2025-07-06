@@ -1,0 +1,126 @@
+<template>
+  <div class="formatted-text-container">
+    <text class="text-normal">{{processedContent}}</text>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    content: {
+      type: String,
+      default: ''
+    }
+  },
+  
+  data: {
+    processedContent: ''
+  },
+  
+  onInit() {
+    this.processMarkdown(this.content);
+  },
+  
+  /**
+   * Watch for changes to content prop
+   */
+  onContentChange(newValue) {
+    this.processMarkdown(newValue);
+  },
+  
+  /**
+   * Process markdown content with simplified approach
+   */
+  processMarkdown(text) {
+    if (!text) {
+      this.processedContent = '';
+      return;
+    }
+    
+    // For now, we'll just display the content as is
+    // This provides a foundation to build upon
+    this.processedContent = text;
+  }
+}
+</script>
+
+<style lang="less">
+.formatted-text-container {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.text-normal {
+  font-size: 16px;
+  color: #333333;
+}
+
+.text-bold {
+  font-weight: bold;
+  font-size: 16px;
+  color: #000000;
+}
+
+.text-italic {
+  font-style: italic;
+  font-size: 16px;
+  color: #333333;
+}
+
+.text-code {
+  font-family: monospace;
+  background-color: #f0f0f0;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 14px;
+  color: #333333;
+}
+
+.text-code-block {
+  font-family: monospace;
+  background-color: #f0f0f0;
+  padding: 8px;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 14px;
+  color: #333333;
+  margin: 8px 0;
+}
+
+.text-h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.text-h2 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333333;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.text-h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333333;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+.text-quote {
+  color: #666666;
+  border-left: 3px solid #cccccc;
+  padding-left: 8px;
+  margin: 8px 0;
+  font-style: italic;
+  width: 100%;
+}
+</style>
