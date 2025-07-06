@@ -450,12 +450,12 @@ export default {
 						}
 					}
 					
-					// Store the image URI
-					this.currentImageData = data.uri;
+					// Store the entire image data object (not just URI)
+					this.currentImageData = data;
 					this.$app.$def.showToast("图片已选择");
 					
 					// Log the stored data
-					console.log("Image data stored in currentImageData:", this.currentImageData);
+					console.log("Image data stored in currentImageData:", JSON.stringify(this.currentImageData));
 				}
 			},
 			fail: (data, code) => {
@@ -486,12 +486,12 @@ export default {
 						}
 					}
 					
-					// Store the image URI
-					this.currentImageData = data.uri;
+					// Store the entire image data object (not just URI)
+					this.currentImageData = data;
 					this.$app.$def.showToast("照片已拍摄");
 					
 					// Log the stored data
-					console.log("Photo data stored in currentImageData:", this.currentImageData);
+					console.log("Photo data stored in currentImageData:", JSON.stringify(this.currentImageData));
 				}
 			},
 			fail: (data, code) => {
@@ -557,10 +557,21 @@ export default {
 		
 		// Only set loading text when we're actually processing something
 		if (imageDataToSend) {
-			// Estimate processing time based on image data size
-			const imageSizeKB = imageDataToSend.length / 1024;
-			const imageSizeMB = imageSizeKB / 1024;
-			// BUG image size
+			// Get image size information
+			let imageSizeMB = 0;
+			
+			// If imageDataToSend is an object with size property (from recent selection)
+			if (typeof imageDataToSend === 'object' && imageDataToSend.size) {
+				imageSizeMB = imageDataToSend.size / (1024 * 1024);
+			} 
+			// Otherwise fetch the file info using stored URI
+			else if (typeof imageDataToSend === 'string') {
+				// We store the URI string when selecting the image, but need to estimate size
+				// QuickApp doesn't provide direct file size access for URIs
+				// Using a reasonable default estimate for typical photos
+				imageSizeMB = 2.0; // Default estimate of 2MB
+			}
+			
 			this.loadingText = `正在分析图片(${imageSizeMB.toFixed(1)}MB)，请耐心等待...`;
 			
 			// Start a progress indicator for large images
@@ -584,18 +595,30 @@ export default {
 		}
 		
 		if (imageDataToSend) {
-			console.log('Image data available for sending:', imageDataToSend);
-			console.log('Image data type:', typeof imageDataToSend);
-			console.log('Is internal URI?', imageDataToSend.startsWith('internal://'));
+			if (typeof imageDataToSend === 'object') {
+				console.log('Image data available for sending:', JSON.stringify(imageDataToSend));
+				console.log('Image URI:', imageDataToSend.uri);
+				console.log('Image size:', imageDataToSend.size ? (imageDataToSend.size / (1024 * 1024)).toFixed(2) + 'MB' : 'unknown');
+				console.log('Is internal URI?', imageDataToSend.uri && imageDataToSend.uri.startsWith('internal://'));
+			} else {
+				console.log('Image data available for sending:', imageDataToSend);
+				console.log('Image data type:', typeof imageDataToSend);
+				console.log('Is internal URI?', imageDataToSend.startsWith && imageDataToSend.startsWith('internal://'));
+			}
 		}
 
 		// Add user message to messages array (including image if present)
 		const formattedContent = this.formatMessageContent(userMessage);
+		
+		// Store image data properly in messages
+		// For backward compatibility and storage efficiency, only store the URI in the messages array
+		const imageUri = imageDataToSend && (typeof imageDataToSend === 'object' ? imageDataToSend.uri : imageDataToSend);
+		
 		this.messages.push({
 			role: "user",
 			content: formattedContent,
 			timestamp: timestamp,
-			imageData: imageDataToSend
+			imageData: imageUri
 		});
 
 		// Clear input and image
@@ -616,10 +639,13 @@ export default {
 			const conversationHistory = this.messages.slice(0, -1);
 
 			// Call the API with message history and image data
+			// Extract the URI if imageDataToSend is an object
+			const imageUri = imageDataToSend && (typeof imageDataToSend === 'object' ? imageDataToSend.uri : imageDataToSend);
+			
 			const botResponse = await callChatbotAPI(
 				userMessage,
 				conversationHistory,
-				imageDataToSend
+				imageUri
 			);
 
 			// Replace the temporary message with the actual response
@@ -652,8 +678,14 @@ export default {
 			if (error.message && error.message.includes('2001')) {
 				// Code 2001 is typically timeout
 				if (imageDataToSend) {
-					const imageSizeKB = imageDataToSend.length / 1024;
-					const imageSizeMB = imageSizeKB / 1024;
+					// Get image size for error message
+					let imageSizeMB = 0;
+					if (typeof imageDataToSend === 'object' && imageDataToSend.size) {
+						imageSizeMB = imageDataToSend.size / (1024 * 1024);
+					} else {
+						// Default size estimate if we don't have actual size
+						imageSizeMB = 2.0;
+					}
 					errorMessage = `图片分析超时(${imageSizeMB.toFixed(1)}MB)。建议：1) 重试一次 2) 使用更小的图片 3) 检查网络连接。注意：平台已配置15分钟超时。`;
 				} else {
 					errorMessage = "请求超时，请检查网络连接后重试";
