@@ -11,6 +11,7 @@ j<template>
     <!-- Settings Content -->
     <div class="page-content">
       <!-- General Settings Group -->
+       <!-- TODO change layout from left and top align -->
       <div class="setting-group">
         <text class="setting-group-title">通用</text>
         <div class="setting-list">

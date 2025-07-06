@@ -13,6 +13,7 @@
       <!-- About Header Section -->
       <div class="about-header">
         <div class="about-logo-container">
+			<!-- TODO change to actual logo -->
           <text class="about-logo-text">SG</text>
         </div>
         <text class="about-title">ShopGuard AI</text>
@@ -21,8 +22,10 @@
 
       <!-- Product Introduction -->
       <div class="content-card">
+		<!-- TODO put content-card-title at the top part of content-card -->
         <text class="content-card-title">产品介绍</text>
         <div class="description-container">
+			<!-- BUG markdown render failure of description text -->
           <text class="description-text">{{ formattedDescription }}</text>
         </div>
       </div>
@@ -31,6 +34,7 @@
       <div class="content-card">
         <text class="content-card-title">相关链接</text>
         <div class="link-list">
+			<!-- TODO add icons for each link-list-item -->
           <!-- Team Homepage -->
           <div class="link-list-item" onclick="openExternalUrl('https://github.com/bluelm-shopguard')">
             <div class="link-content">

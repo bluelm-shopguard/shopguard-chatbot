@@ -6,6 +6,7 @@
         <text class="header-icon">☰</text>
       </div>
       <text class="chat-header-title">ShopGuard AI</text>
+	  <!-- TODO change title, all occurences, to BlueLM Shopguard -->
       <div class="header-button" onclick="startNewChat">
         <text class="header-icon">+</text>
       </div>
@@ -650,6 +651,11 @@ export default {
 <style lang="less">
 @import "../../common/styles/theme.less";
 // TODO modern design
+// TODO change tool button
+// BUG "正在处理" even at startup
+// TODO make welcome message more friendly
+// TODO change new chat button
+
 .page {
 	flex-direction: column;
 	width: 100%;
@@ -1013,7 +1019,7 @@ export default {
 	padding: 16px;
 	overflow-y: scroll;
 }
-
+// TODO adjust position of history list placeholder
 .sidebar-empty-text {
 	color: @text-color-tertiary;
 	font-size: @font-size-medium;
@@ -1076,7 +1082,7 @@ export default {
 	font-size: @font-size-medium;
 	color: @error-color;
 }
-
+// TODO beautify sidebar footer
 .sidebar-footer {
 	padding: 16px;
 	border-top: 1px solid @border-color;
