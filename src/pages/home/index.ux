@@ -99,8 +99,23 @@
       </div>
 
       <div class="sidebar-content">
-        <!-- TODO implement conversation history -->
-        <text class="sidebar-empty-text">暂无历史对话</text>
+        <list class="conversation-list" if="{{conversations.length > 0}}">
+          <block for="{{conversations}}">
+            <list-item type="conversation" onclick="loadConversation($item.id)">
+              <div class="conversation-item">
+                <div class="conversation-info">
+                  <text class="conversation-title">{{$item.title}}</text>
+                  <text class="conversation-preview">{{$item.preview}}</text>
+                  <text class="conversation-timestamp">{{$item.displayDate}}</text>
+                </div>
+                <div class="delete-conversation-btn" onclick="deleteConversation($item.id, $event)">
+                  <text class="delete-icon">🗑️</text>
+                </div>
+              </div>
+            </list-item>
+          </block>
+        </list>
+        <text class="sidebar-empty-text" if="{{conversations.length === 0}}">暂无历史对话</text>
       </div>
 
       <div class="sidebar-footer">
@@ -110,7 +125,7 @@
           <div class="account-avatar">
             <text class="avatar-text">👤</text>
           </div>
-          <text class="account-name">用户</text>
+          <text class="account-name">游客</text>
         </div>
         <div class="settings-button" onclick="navigateToSettings">
           <text class="settings-icon">⚙️</text>
@@ -134,6 +149,8 @@ export default {
 	data: {
 		message: "",
 		messages: [], // Array to store chat messages
+		conversations: [], // Array to store conversation history
+		currentConversationId: null, // Current conversation ID
 		showWelcome: true, // Whether to show welcome screen
 		isProcessingMessage: false,
 		currentImageData: null,
@@ -161,6 +178,36 @@ export default {
 		this.currentImageData = null;
 		this.sidebarActive = false;
 		this.loadingText = "正在处理...";
+		this.currentConversationId = null;
+		
+		// Load conversation history
+		this.loadConversationHistory();
+	},
+	
+	loadConversationHistory: async function() {
+		try {
+			// Access chat history helper through app instance
+			const chatHistoryHelper = this.$app.$def.chatHistoryHelper;
+			
+			// Initialize storage
+			await chatHistoryHelper.initializeStorage();
+			
+			// Load conversation index
+			const conversationIndex = await chatHistoryHelper.loadConversationIndex();
+			
+			// Format dates for display
+			this.conversations = conversationIndex.map(conv => {
+				return {
+					...conv,
+					displayDate: chatHistoryHelper.formatConversationDate(conv.timestamp)
+				};
+			});
+			
+			console.log(`Loaded ${this.conversations.length} conversations`);
+		} catch (error) {
+			console.error('Failed to load conversation history:', error);
+			this.$app.$def.showToast('无法加载历史对话');
+		}
 	},
 
 	handleInputChange: function (e) {
@@ -175,17 +222,122 @@ export default {
 		this.sidebarActive = false;
 	},
 
-	startNewChat: function () {
+	startNewChat: async function () {
+		// Save current conversation if it exists and has messages
+		if (this.currentConversationId && this.messages.length > 0) {
+			await this.saveCurrentConversation();
+		}
+		
 		// Reset chat state completely
 		this.message = "";
 		this.currentImageData = null;
 		this.showWelcome = true;
 		this.messages = [];
 		
+		// Generate a new conversation ID
+		this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
+		console.log('Starting new conversation with ID:', this.currentConversationId);
+		
 		// Reset UI state properly
 		this.resetUIState();
 
 		this.$app.$def.showToast("开始新的对话");
+	},
+	
+	// Save the current conversation to storage
+	saveCurrentConversation: async function() {
+		if (!this.currentConversationId || this.messages.length === 0) {
+			return;
+		}
+		
+		try {
+			const chatHistoryHelper = this.$app.$def.chatHistoryHelper;
+			
+			// Create conversation object
+			const conversation = {
+				id: this.currentConversationId,
+				title: chatHistoryHelper.generateConversationTitle(this.messages),
+				preview: chatHistoryHelper.generateConversationPreview(this.messages),
+				timestamp: new Date().toISOString(),
+				messages: this.messages
+			};
+			
+			// Save to storage
+			await chatHistoryHelper.saveConversation(conversation);
+			
+			// Reload the conversation list
+			await this.loadConversationHistory();
+			
+			console.log('Conversation saved:', this.currentConversationId);
+		} catch (error) {
+			console.error('Failed to save conversation:', error);
+			this.$app.$def.showToast('无法保存对话');
+		}
+	},
+	
+	// Load a conversation from history
+	loadConversation: async function(id, event) {
+		// If event is provided, stop propagation to prevent click on the parent item
+		if (event) {
+			event.stopPropagation();
+		}
+		
+		// Save current conversation if it exists and has messages
+		if (this.currentConversationId && this.messages.length > 0 && this.currentConversationId !== id) {
+			await this.saveCurrentConversation();
+		}
+		
+		try {
+			// Close the sidebar
+			this.closeSidebar();
+			
+			// Load the selected conversation
+			const conversation = await this.$app.$def.chatHistoryHelper.loadConversation(id);
+			
+			// Update the UI
+			this.currentConversationId = id;
+			this.messages = conversation.messages || [];
+			this.showWelcome = false;
+			
+			console.log(`Loaded conversation ${id} with ${this.messages.length} messages`);
+			
+			// Scroll to the bottom to show latest message
+			this.$element && this.$element("chat-content-list") && 
+			this.$element("chat-content-list").scrollTo({
+				index: this.messages.length - 1,
+			});
+		} catch (error) {
+			console.error('Failed to load conversation:', error);
+			this.$app.$def.showToast('无法加载对话');
+		}
+	},
+	
+	// Delete a conversation
+	deleteConversation: async function(id, event) {
+		// Stop event propagation to prevent loading the conversation
+		if (event) {
+			event.stopPropagation();
+		}
+		
+		try {
+			// Delete the conversation
+			await this.$app.$def.chatHistoryHelper.deleteConversation(id);
+			
+			// Reload the conversation list
+			await this.loadConversationHistory();
+			
+			// If the deleted conversation was the current one, start a new chat
+			if (this.currentConversationId === id) {
+				// Generate a new ID but keep current messages
+				this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
+			}
+			
+			console.log('Conversation deleted:', id);
+			this.$app.$def.showToast('已删除对话');
+		} catch (error) {
+			console.error('Failed to delete conversation:', error);
+			this.$app.$def.showToast('无法删除对话');
+		}
 	},
 
 	handleImageUpload: function () {
@@ -445,6 +597,18 @@ export default {
 		} finally {
 			// Reset processing state using utility function
 			this.resetUIState();
+			
+			// If we don't have a conversation ID yet, generate one
+			if (!this.currentConversationId) {
+				this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
+			}
+			
+			// Save the conversation if we have messages
+			if (this.messages.length > 0) {
+				this.saveCurrentConversation().catch(error => {
+					console.error('Failed to save conversation after message:', error);
+				});
+			}
 		}
 	},
 
@@ -855,6 +1019,62 @@ export default {
 	font-size: @font-size-medium;
 	text-align: center;
 	margin-top: 32px;
+}
+
+/* Conversation list styles */
+.conversation-list {
+	flex-direction: column;
+	width: 100%;
+}
+
+.conversation-item {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 8px;
+	margin: 4px 0;
+	border-radius: 8px;
+	background-color: @background-color;
+}
+
+.conversation-info {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.conversation-title {
+	font-size: @font-size-medium;
+	color: @text-color-primary;
+	margin-bottom: 4px;
+	font-weight: 500;
+}
+
+.conversation-preview {
+	font-size: @font-size-small;
+	color: @text-color-secondary;
+	margin-bottom: 4px;
+}
+
+.conversation-timestamp {
+	font-size: @font-size-xsmall;
+	color: @text-color-tertiary;
+}
+
+.delete-conversation-btn {
+	width: 48px;
+	height: 48px;
+	border-radius: 24px;
+	background-color: @background-color;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.delete-icon {
+	font-size: @font-size-medium;
+	color: @error-color;
 }
 
 .sidebar-footer {

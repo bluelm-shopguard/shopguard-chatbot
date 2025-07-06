@@ -12,6 +12,8 @@ import device from '@system.device'
 // Import markdown helpers
 import * as markdownHelper from './helper/markdown-helper'
 import * as markdownSegments from './helper/markdown-segments'
+// Import chat history helper
+import * as chatHistoryHelper from './helper/chat-history'
 
 // Initialize global data outside the component to ensure it's available before onCreate
 const initGlobalData = {
@@ -168,7 +170,8 @@ export default {
   
   // Make markdown helpers available globally
   markdownHelper: markdownHelper,
-  markdownSegments: markdownSegments
+  markdownSegments: markdownSegments,
+  chatHistoryHelper: chatHistoryHelper
 }
 </script>
 
