@@ -77,7 +77,7 @@
       
       <!-- Image preview container -->
       <div class="image-preview-container" show="{{currentImageData !== null}}">
-        <image class="preview-image" src="{{currentImageData}}"></image>
+        <image class="preview-image" src="{{currentImageData !== null ? (typeof currentImageData === 'object' ? currentImageData.uri : currentImageData) : ''}}"></image>
         <div class="remove-image-button" onclick="removeSelectedImage">
           <text class="remove-icon">✕</text>
         </div>
