@@ -47,6 +47,7 @@
               <div class="toggle-switch">
                 <switch checked="{{saveChatHistory}}" onchange="toggleSaveChatHistory"></switch>
               </div>
+              <text class="setting-status">{{saveChatHistory ? '已开启' : '已关闭'}}</text>
             </div>
           </div>
         </div>
@@ -74,7 +75,7 @@ import storage from '@system.storage'
 export default {
   data() {
     return {
-      saveHistory: true,
+      saveChatHistory: true,
       currentLanguage: 'zh-CN',
       languageOptions: []
     }
@@ -84,6 +85,9 @@ export default {
     console.log('Settings page loaded')
     // Load user settings using the direct method
     this.loadSettings()
+    
+    // Log the initial state of saveChatHistory
+    console.log('Initial saveChatHistory state:', this.saveChatHistory)
   },
   
   // Direct methods
@@ -179,6 +183,12 @@ export default {
         
         // Show toast confirmation
         app.showToast(this.saveChatHistory ? '已开启聊天记录保存' : '已关闭聊天记录保存')
+        
+        // If chat history saving is disabled and we're on a new conversation
+        // offer to clear current conversation history
+        if (!this.saveChatHistory) {
+          console.log('Chat history saving disabled')
+        }
       }
     } catch (error) {
       console.error('Error toggling chat history:', error)
@@ -314,6 +324,12 @@ export default {
 .setting-control {
   flex-direction: row;
   align-items: center;
+}
+
+.setting-status {
+  margin-left: 12px;
+  font-size: @font-size-small;
+  color: @text-color-secondary;
 }
 
 /* Segmented Control Styles */

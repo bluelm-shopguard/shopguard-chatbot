@@ -227,8 +227,15 @@ export default {
 	},
 
 	startNewChat: async function () {
-		// Save current conversation if it exists and has messages
-		if (this.currentConversationId && this.messages.length > 0) {
+		// Check user settings to see if chat history should be saved
+		const userSettings = this.$app.$def.globalData.userSettings;
+		const shouldSaveHistory = userSettings && 
+			userSettings.chat && 
+			userSettings.chat.history && 
+			userSettings.chat.history.save !== false;
+			
+		// Save current conversation if saving is enabled and there are messages
+		if (shouldSaveHistory && this.currentConversationId && this.messages.length > 0) {
 			await this.saveCurrentConversation();
 		}
 		
@@ -244,9 +251,6 @@ export default {
 		this.currentConversationId = this.$app.$def.chatHistoryHelper.generateConversationId();
 		console.log('Starting new conversation with ID:', this.currentConversationId);
 		
-		// Reset UI state properly
-		this.resetUIState();
-
 		this.$app.$def.showToast("开始新的对话");
 	},
 	
@@ -257,6 +261,19 @@ export default {
 		}
 		
 		try {
+			// Check user settings to see if chat history should be saved
+			const userSettings = this.$app.$def.globalData.userSettings;
+			const shouldSaveHistory = userSettings && 
+				userSettings.chat && 
+				userSettings.chat.history && 
+				userSettings.chat.history.save !== false;
+				
+			// If saving is disabled, don't save
+			if (!shouldSaveHistory) {
+				console.log('Chat history saving is disabled, skipping save');
+				return;
+			}
+			
 			const chatHistoryHelper = this.$app.$def.chatHistoryHelper;
 			
 			// Create conversation object
