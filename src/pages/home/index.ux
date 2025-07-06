@@ -10,7 +10,7 @@
         <text class="header-icon">+</text>
       </div>
     </div>
-    
+
     <!-- Main Content Area -->
     <div class="chat-content">
       <div class="chat-welcome" show="{{showWelcome}}">
@@ -20,21 +20,23 @@
         </div>
         <text class="welcome-title">蓝心购物防诈骗助手</text>
         <div class="welcome-message-container">
-          <text class="welcome-message">遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！</text>
+          <text class="welcome-message">
+            遇到可疑商品、卖家或付款方式？随时发给我分析。无论是商品截图、链接还是聊天记录，我都会帮你识别风险，提供明确的"虚假诈骗风险星级"和建议，让我们一起安心购物不踩坑！
+          </text>
         </div>
       </div>
-      
+
       <!-- Chat Messages Area -->
       <list class="chat-messages-list" id="chat-content-list" show="{{!showWelcome}}">
         <block for="{{messages}}">
           <list-item type="message">
             <div class="{{$item.role === 'user' ? 'user-message' : 'bot-message'}}">
               <div class="message-timestamp">
-                <text class="timestamp-text">{{$item.timestamp}}</text>
+                <text class="timestamp-text">{{ $item.timestamp }}</text>
               </div>
               <div class="message-content-container">
                 <div class="message-text-wrapper">
-                  <text class="message-text-content">{{$item.content}}</text>
+                  <text class="message-text-content">{{ $item.content }}</text>
                 </div>
               </div>
             </div>
@@ -42,7 +44,7 @@
         </block>
       </list>
     </div>
-    
+
     <!-- Input Area - Redesigned to match webapp -->
     <div class="chat-input-area">
       <!-- Toolbar now positioned above the input area -->
@@ -55,24 +57,24 @@
           <!-- TODO implement imange input -->
         </div>
       </div>
-      
+
       <div class="input-area-wrapper">
-        <input id="chat-input" class="text-input" type="text" placeholder="发消息给我分析一下..." value="{{message}}" onchange="handleInputChange" disabled="{{isProcessingMessage}}"/>
+        <input id="chat-input" class="text-input" type="text" placeholder="发消息给我分析一下..." value="{{message}}"
+          onchange="handleInputChange" disabled="{{isProcessingMessage}}" />
         <div class="send-button" onclick="sendMessage" style="opacity: {{isProcessingMessage ? '0.5' : '1'}}">
           <text class="send-icon">↑</text>
         </div>
       </div>
-      
+
       <!-- Loading indicator -->
       <div class="loading-indicator" show="{{isProcessingMessage}}">
         <text class="loading-text">正在处理...</text>
       </div>
     </div>
-    
+
     <!-- Sidebar Component -->
-    <div class="sidebar-overlay" show="{{sidebarActive}}" onclick="closeSidebar">
-    </div>
-    
+    <div class="sidebar-overlay" show="{{sidebarActive}}" onclick="closeSidebar"></div>
+
     <div class="sidebar" style="transform: {{sidebarActive ? 'translateX(0)' : 'translateX(-100%)'}}">
       <div class="sidebar-header">
         <text class="sidebar-title">历史对话</text>
@@ -80,15 +82,15 @@
           <text class="header-icon">✕</text>
         </div>
       </div>
-      
+
       <div class="sidebar-content">
         <!-- TODO implement conversation history -->
         <text class="sidebar-empty-text">暂无历史对话</text>
       </div>
-      
+
       <div class="sidebar-footer">
         <!-- TODO implement user login -->
-         <!-- TODO implement user database including chat history -->
+        <!-- TODO implement user database including chat history -->
         <div class="account-info">
           <div class="account-avatar">
             <text class="avatar-text">👤</text>
@@ -104,579 +106,587 @@
 </template>
 
 <script>
-import { callChatbotAPI } from '../../helper/api-service'
-import SYSTEM from '../../helper/system-settings'
+import { callChatbotAPI } from "../../helper/api-service";
+import SYSTEM from "../../helper/system-settings";
 
 export default {
-  data: {
-    message: '',
-    messages: [], // Array to store chat messages
-    showWelcome: true, // Whether to show welcome screen
-    isProcessingMessage: false,
-    currentImageData: null,
-    sidebarActive: false
-  },
-  
-  onInit() {
-    // Initialize chat state
-    this.showWelcome = true
-    this.messages = []
-  },
-  
-  handleInputChange: function(e) {
-    this.message = e.value
-  },
-  
-  openSidebar: function() {
-    this.sidebarActive = true
-  },
-  
-  closeSidebar: function() {
-    this.sidebarActive = false
-  },
-  
-  startNewChat: function() {
-    // Reset chat state
-    this.message = ''
-    this.currentImageData = null
-    this.showWelcome = true
-    this.messages = []
-    
-    // Get the input element and clear it
-    // Don't use setValue() as it's not supported in this QuickApp environment
-    // Instead, rely on the data binding between the message variable and the input field
-    
-    // Make sure the input field is properly updated through data binding
-    this.$forceUpdate && this.$forceUpdate()
-    
-    this.$app.$def.showToast('开始新的对话')
-  },
-  
-  handleImageUpload: function() {
-    this.$app.$def.showToast('图片上传功能即将推出')
-  },
-  
-  handleWebSearch: function() {
-    this.$app.$def.showToast('网页搜索功能即将推出')
-  },
-  
-  navigateToSettings: function() {
-    // Navigate to settings page
-    const router = require('@system.router')
-    router.push({
-      uri: 'pages/settings'
-    })
-  },
-  
-  /**
-   * Format message content for display
-   * This ensures long text is displayed properly
-   * @param {string} content - The message content
-   * @return {string} - The formatted content
-   */
-  formatMessageContent: function(content) {
-    // Trim the message
-    content = content.trim()
-    
-    // Insert line breaks every ~40 characters at word boundaries for better display
-    // This helps prevent horizontal scrolling issues in QuickApp text elements
-    let result = ''
-    const words = content.split(' ')
-    let currentLine = ''
-    
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i]
-      // If adding this word would make the line too long, add a line break
-      if (currentLine.length + word.length > 40 && currentLine.length > 0) {
-        result += currentLine.trim() + '\n'
-        currentLine = word + ' '
-      } else {
-        currentLine += word + ' '
-      }
-    }
-    
-    // Add the final line
-    if (currentLine.length > 0) {
-      result += currentLine.trim()
-    }
-    
-    return result
-  },
-  
-  sendMessage: async function() {
-    if (!this.message.trim() && !this.currentImageData) {
-      return
-    }
-    
-    if (this.isProcessingMessage) {
-      return
-    }
-    
-    // Hide welcome screen
-    this.showWelcome = false
-    
-    // Set processing state
-    this.isProcessingMessage = true
-    
-    // Format timestamp
-    const now = new Date()
-    const timestamp = now.getHours().toString().padStart(2, '0') + ':' + 
-                      now.getMinutes().toString().padStart(2, '0')
-    
-    // Save the user message to display
-    const userMessage = this.message.trim()
-    
-    // Add user message to messages array
-    this.messages.push({
-      role: 'user',
-      content: this.formatMessageContent(userMessage),
-      timestamp: timestamp
-    })
-    
-    // Clear input
-    this.message = ''
-    
-    try {
-      // Add temporary bot message
-      this.messages.push({
-        role: 'bot',
-        content: '...',
-        timestamp: timestamp
-      })
-      
-      // Prepare conversation history for the API
-      // Exclude the temporary bot message we just added
-      const conversationHistory = this.messages.slice(0, -1);
-      
-      // Call the API with message history
-      const botResponse = await callChatbotAPI(userMessage, conversationHistory)
-      
-      // Replace the temporary message with the actual response
-      this.messages.pop() // Remove temporary message
-      this.messages.push({
-        role: 'bot',
-        content: this.formatMessageContent(botResponse),
-        timestamp: timestamp
-      })
-      
-      // Scroll to the bottom to show new message
-      try {
-        this.$element('chat-content-list').scrollTo({
-          index: this.messages.length - 1
-        })
-      } catch (error) {
-        console.error('Failed to scroll to bottom:', error)
-      }
-    } catch (error) {
-      console.error('API call failed:', error)
-      
-      // Replace loading message with error
-      this.messages.pop() // Remove temporary message
-      this.messages.push({
-        role: 'bot',
-        content: this.formatMessageContent(SYSTEM.CHAT.errorMessage),
-        timestamp: timestamp,
-        isError: true
-      })
-      
-      // Show error toast
-      this.$app.$def.showToast('无法连接到服务器')
-      
-      // Scroll to the bottom to show error message
-      try {
-        this.$element('chat-content-list').scrollTo({
-          index: this.messages.length - 1
-        })
-      } catch (error) {
-        console.error('Failed to scroll to bottom:', error)
-      }
-    } finally {
-      // Reset processing state
-      this.isProcessingMessage = false
-    }
-  }
-}
+	data: {
+		message: "",
+		messages: [], // Array to store chat messages
+		showWelcome: true, // Whether to show welcome screen
+		isProcessingMessage: false,
+		currentImageData: null,
+		sidebarActive: false,
+	},
+
+	onInit() {
+		// Initialize chat state
+		this.showWelcome = true;
+		this.messages = [];
+	},
+
+	handleInputChange: function (e) {
+		this.message = e.value;
+	},
+
+	openSidebar: function () {
+		this.sidebarActive = true;
+	},
+
+	closeSidebar: function () {
+		this.sidebarActive = false;
+	},
+
+	startNewChat: function () {
+		// Reset chat state
+		this.message = "";
+		this.currentImageData = null;
+		this.showWelcome = true;
+		this.messages = [];
+
+		// Get the input element and clear it
+		// Don't use setValue() as it's not supported in this QuickApp environment
+		// Instead, rely on the data binding between the message variable and the input field
+
+		// Make sure the input field is properly updated through data binding
+		this.$forceUpdate && this.$forceUpdate();
+
+		this.$app.$def.showToast("开始新的对话");
+	},
+
+	handleImageUpload: function () {
+		this.$app.$def.showToast("图片上传功能即将推出");
+	},
+
+	handleWebSearch: function () {
+		this.$app.$def.showToast("网页搜索功能即将推出");
+	},
+
+	navigateToSettings: function () {
+		// Navigate to settings page
+		const router = require("@system.router");
+		router.push({
+			uri: "pages/settings",
+		});
+	},
+	// TODO render markdown in chat
+	/**
+	 * Format message content for display
+	 * This ensures long text is displayed properly
+	 * @param {string} content - The message content
+	 * @return {string} - The formatted content
+	 */
+	formatMessageContent: function (content) {
+		// Trim the message
+		content = content.trim();
+
+		// Insert line breaks every ~40 characters at word boundaries for better display
+		// This helps prevent horizontal scrolling issues in QuickApp text elements
+		let result = "";
+		const words = content.split(" ");
+		let currentLine = "";
+
+		for (let i = 0; i < words.length; i++) {
+			const word = words[i];
+			// If adding this word would make the line too long, add a line break
+			if (currentLine.length + word.length > 40 && currentLine.length > 0) {
+				result += currentLine.trim() + "\n";
+				currentLine = word + " ";
+			} else {
+				currentLine += word + " ";
+			}
+		}
+
+		// Add the final line
+		if (currentLine.length > 0) {
+			result += currentLine.trim();
+		}
+
+		return result;
+	},
+
+	sendMessage: async function () {
+		if (!this.message.trim() && !this.currentImageData) {
+			return;
+		}
+
+		if (this.isProcessingMessage) {
+			return;
+		}
+
+		// Hide welcome screen
+		this.showWelcome = false;
+
+		// Set processing state
+		this.isProcessingMessage = true;
+
+		// Format timestamp
+		const now = new Date();
+		const timestamp =
+			now.getHours().toString().padStart(2, "0") +
+			":" +
+			now.getMinutes().toString().padStart(2, "0");
+
+		// Save the user message to display
+		const userMessage = this.message.trim();
+
+		// Add user message to messages array
+		this.messages.push({
+			role: "user",
+			content: this.formatMessageContent(userMessage),
+			timestamp: timestamp,
+		});
+
+		// Clear input
+		this.message = "";
+
+		try {
+			// Add temporary bot message
+			this.messages.push({
+				role: "bot",
+				content: "...",
+				timestamp: timestamp,
+			});
+
+			// Prepare conversation history for the API
+			// Exclude the temporary bot message we just added
+			const conversationHistory = this.messages.slice(0, -1);
+
+			// Call the API with message history
+			const botResponse = await callChatbotAPI(
+				userMessage,
+				conversationHistory
+			);
+
+			// Replace the temporary message with the actual response
+			this.messages.pop(); // Remove temporary message
+			this.messages.push({
+				role: "bot",
+				content: this.formatMessageContent(botResponse),
+				timestamp: timestamp,
+			});
+
+			// Scroll to the bottom to show new message
+			try {
+				this.$element("chat-content-list").scrollTo({
+					index: this.messages.length - 1,
+				});
+			} catch (error) {
+				console.error("Failed to scroll to bottom:", error);
+			}
+		} catch (error) {
+			console.error("API call failed:", error);
+
+			// Replace loading message with error
+			this.messages.pop(); // Remove temporary message
+			this.messages.push({
+				role: "bot",
+				content: this.formatMessageContent(SYSTEM.CHAT.errorMessage),
+				timestamp: timestamp,
+				isError: true,
+			});
+
+			// Show error toast
+			this.$app.$def.showToast("无法连接到服务器");
+
+			// Scroll to the bottom to show error message
+			try {
+				this.$element("chat-content-list").scrollTo({
+					index: this.messages.length - 1,
+				});
+			} catch (error) {
+				console.error("Failed to scroll to bottom:", error);
+			}
+		} finally {
+			// Reset processing state
+			this.isProcessingMessage = false;
+		}
+	},
+};
 </script>
 
 <style lang="less">
-@import '../../common/styles/theme.less';
+@import "../../common/styles/theme.less";
 
 .page {
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  background-color: @background-color;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+		0 2px 4px -2px rgba(0, 0, 0, 0.1);
+	background-color: @background-color;
 }
 
 /* Header Styles */
 .chat-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background-color: @component-background;
-  border-bottom: 1px solid @border-color;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	background-color: @component-background;
+	border-bottom: 1px solid @border-color;
 }
 
 .chat-header-title {
-  font-size: @font-size-xlarge;
-  font-weight: bold;
-  color: @text-color-primary;
+	font-size: @font-size-xlarge;
+	font-weight: bold;
+	color: @text-color-primary;
 }
 
 .header-button {
-  padding: @spacing-small;
-  border-radius: 12px;
-  background: none;
-  width: 72px;
-  height: 72px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	padding: @spacing-small;
+	border-radius: 12px;
+	background: none;
+	width: 72px;
+	height: 72px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
-  text-align: center;
-  font-size: @font-size-xxlarge;
-  color: @text-color-tertiary;
+	width: 48px;
+	height: 48px;
+	text-align: center;
+	font-size: @font-size-xxlarge;
+	color: @text-color-tertiary;
 }
 
 /* Content Area Styles */
 .chat-content {
-  flex: 1;
-  overflow-y: scroll;
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
+	flex: 1;
+	overflow-y: scroll;
+	padding: 20px 16px;
+	display: flex;
+	flex-direction: column;
 }
 
 .chat-welcome {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  margin: auto;
-  width: 100%;
-  max-width: 600px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 32px;
+	margin: auto;
+	width: 100%;
+	max-width: 600px;
 }
 
 .logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100px;
-  height: 100px;
-  background-color: @primary-color;
-  border-radius: 50px;
-  margin-bottom: 20px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100px;
+	height: 100px;
+	background-color: @primary-color;
+	border-radius: 50px;
+	margin-bottom: 20px;
+	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+		0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
 .logo-text {
-  font-size: @font-size-xxlarge;
-  font-weight: bold;
-  color: @text-color-inverse;
-  text-align: center;
+	font-size: @font-size-xxlarge;
+	font-weight: bold;
+	color: @text-color-inverse;
+	text-align: center;
 }
 
 .welcome-title {
-  font-size: @font-size-xlarge;
-  font-weight: bold;
-  color: @primary-color;
-  margin-bottom: 12px;
+	font-size: @font-size-xlarge;
+	font-weight: bold;
+	color: @primary-color;
+	margin-bottom: 12px;
 }
 
 .welcome-message-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 16px 0;
-  margin-top: 8px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	padding: 16px 0;
+	margin-top: 8px;
 }
 
 .welcome-message {
-  font-size: @font-size-medium;
-  color: @text-color-secondary;
-  text-align: center;
-  height: 140px;
-  margin-bottom: 10px;
-  width: 100%;
+	font-size: @font-size-medium;
+	color: @text-color-secondary;
+	text-align: left;
+	height: 140px;
+	margin-bottom: 10px;
+	width: 100%;
 }
 
 /* Chat Messages Styles */
 .chat-messages-list {
-  flex-direction: column;
-  width: 100%;
+	flex-direction: column;
+	width: 100%;
 }
 
-.user-message, .bot-message {
-  display: flex;
-  flex-direction: column;
-  margin: 10px 0;
-  padding: 12px 16px;
-  border-radius: 16px;
-  width: 90%;
+.user-message,
+.bot-message {
+	display: flex;
+	flex-direction: column;
+	margin: 10px 0;
+	padding: 12px 16px;
+	border-radius: 16px;
+	width: 90%;
 }
 
 .user-message {
-  background-color: @primary-color-light;
-  align-self: flex-end;
-  margin-left: 10%;
+	background-color: @primary-color-light;
+	align-self: flex-end;
+	margin-left: 10%;
 }
 
 .bot-message {
-  background-color: @component-background;
-  border: 1px solid @border-color;
-  align-self: flex-start;
-  margin-right: 10%;
+	background-color: @component-background;
+	border: 1px solid @border-color;
+	align-self: flex-start;
+	margin-right: 10%;
 }
 
 .message-timestamp {
-  display: flex;
-  align-items: center;
-  margin-bottom: 6px;
+	display: flex;
+	align-items: center;
+	margin-bottom: 6px;
 }
 
 .timestamp-text {
-  font-size: @font-size-xsmall;
-  color: @text-color-tertiary;
+	font-size: @font-size-xsmall;
+	color: @text-color-tertiary;
 }
 
 .message-content-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 4px 0;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 4px 0;
 }
 
 .message-text-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 }
 
 .message-text-content {
-  font-size: @font-size-medium;
-  color: @text-color-primary;
-  margin: 4px 0;
-  padding: 4px 0;
-  width: 100%;
-  text-align: left;
-  /* Ensure text breaks at appropriate points */
-  flex-wrap: wrap;
-  white-space: normal;
+	font-size: @font-size-medium;
+	color: @text-color-primary;
+	margin: 4px 0;
+	padding: 4px 0;
+	width: 100%;
+	text-align: left;
+	/* Ensure text breaks at appropriate points */
+	flex-wrap: wrap;
+	white-space: normal;
 }
 
 /* Loading Indicator */
 .loading-indicator {
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-  width: 100%;
+	display: flex;
+	justify-content: center;
+	padding: 10px;
+	width: 100%;
 }
 
 .loading-text {
-  font-size: @font-size-small;
-  color: @text-color-tertiary;
+	font-size: @font-size-small;
+	color: @text-color-tertiary;
 }
 
 /* Input Area Styles - Redesigned to match webapp */
 .chat-input-area {
-  padding: 16px 20px 20px 20px;
-  border-top: 1px solid @border-color;
-  background-color: @component-background;
-  flex-direction: column;
+	padding: 16px 20px 20px 20px;
+	border-top: 1px solid @border-color;
+	background-color: @component-background;
+	flex-direction: column;
 }
 
 /* Toolbar now in a horizontal row above the input */
 .toolbar-row {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding: 0 4px;
+	display: flex;
+	flex-direction: row;
+	gap: 16px;
+	margin-bottom: 16px;
+	padding: 0 4px;
 }
 
 .toolbar-button {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: @spacing-medium @spacing-large;
-  border-radius: 12px;
-  background-color: @background-color;
-  border: 1px solid @border-color;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: @spacing-medium @spacing-large;
+	border-radius: 12px;
+	background-color: @background-color;
+	border: 1px solid @border-color;
 }
 
 .icon-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 48px;
-  height: 48px;
-  margin-right: @spacing-medium;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 48px;
+	height: 48px;
+	margin-right: @spacing-medium;
 }
 
 .toolbar-icon {
-  font-size: @font-size-xxlarge;
-  color: @text-color-tertiary;
+	font-size: @font-size-xxlarge;
+	color: @text-color-tertiary;
 }
 
 .toolbar-text {
-  font-size: @font-size-medium;
-  color: @text-color-tertiary;
+	font-size: @font-size-medium;
+	color: @text-color-tertiary;
 }
 
 .input-area-wrapper {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 16px;
+	width: 100%;
 }
 
 .text-input {
-  flex: 1;
-  min-height: 64px;
-  max-height: 120px;
-  padding: @spacing-medium @spacing-large;
-  border-radius: 16px;
-  font-size: @font-size-medium;
-  border: 1px solid @border-color;
-  background-color: #f9fafb;
-  color: @text-color-primary;
+	flex: 1;
+	min-height: 64px;
+	max-height: 120px;
+	padding: @spacing-medium @spacing-large;
+	border-radius: 16px;
+	font-size: @font-size-medium;
+	border: 1px solid @border-color;
+	background-color: #f9fafb;
+	color: @text-color-primary;
 }
 
 .send-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 80px;
-  height: 80px;
-  border-radius: 40px;
-  background-color: @primary-color;
-  flex-shrink: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 80px;
+	height: 80px;
+	border-radius: 40px;
+	background-color: @primary-color;
+	flex-shrink: 0;
 }
 
 .send-icon {
-  color: @text-color-inverse;
-  font-size: @font-size-xxlarge;
-  font-weight: bold;
+	color: @text-color-inverse;
+	font-size: @font-size-xxlarge;
+	font-weight: bold;
 }
 
 /* Sidebar Styles */
 .sidebar-overlay {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 998;
 }
 
 /* Sidebar Component */
 .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 300px;
-  height: 100%;
-  z-index: 999;
-  transition-property: transform;
-  transition-duration: 300ms;
-  display: flex;
-  flex-direction: column;
-  background-color: @component-background;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 300px;
+	height: 100%;
+	z-index: 999;
+	transition-property: transform;
+	transition-duration: 300ms;
+	display: flex;
+	flex-direction: column;
+	background-color: @component-background;
 }
 
 .sidebar-header {
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid @border-color;
+	padding: 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid @border-color;
 }
 
 .sidebar-title {
-  font-size: @font-size-medium;
-  font-weight: bold;
-  color: @text-color-primary;
+	font-size: @font-size-medium;
+	font-weight: bold;
+	color: @text-color-primary;
 }
 
 .close-button {
-  padding: @spacing-small;
-  border-radius: 12px;
-  width: 64px;
-  height: 64px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	padding: @spacing-small;
+	border-radius: 12px;
+	width: 64px;
+	height: 64px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .sidebar-content {
-  flex: 1;
-  overflow-y: scroll;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
+	flex: 1;
+	overflow-y: scroll;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
 }
 
 .sidebar-empty-text {
-  font-size: @font-size-xsmall;
-  text-align: center;
-  margin-top: 50px;
-  color: @text-color-tertiary;
+	font-size: @font-size-xsmall;
+	text-align: center;
+	margin-top: 50px;
+	color: @text-color-tertiary;
 }
 
 .sidebar-footer {
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid @border-color;
+	padding: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-top: 1px solid @border-color;
 }
 
 .account-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
 
 .account-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: @background-color;
+	width: 64px;
+	height: 64px;
+	border-radius: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: @background-color;
 }
 
 .avatar-text {
-  font-size: @font-size-large;
+	font-size: @font-size-large;
 }
 
 .account-name {
-  font-size: @font-size-small;
-  font-weight: bold;
-  color: @text-color-primary;
+	font-size: @font-size-small;
+	font-weight: bold;
+	color: @text-color-primary;
 }
 
 .settings-button {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	width: 64px;
+	height: 64px;
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .settings-icon {
-  font-size: @font-size-xxlarge;
+	font-size: @font-size-xxlarge;
 }
 </style>

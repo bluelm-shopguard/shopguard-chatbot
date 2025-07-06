@@ -15,6 +15,7 @@ j<template>
         <text class="setting-group-title">通用</text>
         <div class="setting-list">
           <!-- Language Setting -->
+           <!-- TODO add English UI language mode -->
           <div class="setting-list-item">
             <text class="setting-label">语言</text>
             <div class="setting-control">
@@ -36,6 +37,7 @@ j<template>
         <text class="setting-group-title">聊天</text>
         <div class="setting-list">
           <!-- Save Chat History Setting -->
+           <!-- TODO make saving chat history enabled by default and provide option to turn off it -->
           <div class="setting-list-item">
             <text class="setting-label">保存聊天记录</text>
             <div class="setting-control">
