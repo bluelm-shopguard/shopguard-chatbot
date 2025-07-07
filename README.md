@@ -1,4 +1,4 @@
-# ShopGuard AI - 购物防诈骗助手
+# Bluelm Shopguard - 购物防诈骗助手
 
 <div align="center">
   <img src="docs/assets/full-design.png" alt="ShopGuard AI Logo" width="200">
