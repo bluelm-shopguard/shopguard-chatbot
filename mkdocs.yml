@@ -5,7 +5,7 @@ copyright: Copyright &copy; 2025 ShopGuard Team
 
 # Repository
 repo_name: shopguard-chatbot
-repo_url: https://github.com/username/shopguard-chatbot
+repo_url: https://github.com/bluelm-shopguard/shopguard-chatbot
 edit_uri: edit/main/docs/
 
 # Configuration
@@ -48,6 +48,7 @@ markdown_extensions:
           class: mermaid
           format:
             !!python/name:pymdownx.superfences.fence_code_format # Navigation structure
+
 
 nav:
   - Home: index.md

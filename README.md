@@ -10,7 +10,7 @@
     ·
     <a href="https://shopguard-chatbot.readthedocs.io/"><strong>在线文档</strong></a>
     ·
-    <a href="docs/getting-started/quick-start.md"><strong>快速开始</strong></a>
+    <a href="https://github.com/bluelm-shopguard/shopguard-chatbot/tree/quickapp"><strong>快应用分支</strong></a>
   </p>
 </div>
 
@@ -73,6 +73,20 @@ npm run serve
 ```bash
 npm run build
 ```
+#### 解决 CORS 问题
+如果您在前端网页与后端 API 交互时遇到 CORS（跨域资源共享）错误，可以使用项目中提供的代理服务器解决：
+
+确保后端 API 服务器正在运行（默认为 http://localhost:8000）
+
+
+运行代理服务器
+```bash
+node server.js
+```
+
+使用以下 URL 访问应用：
+`http://localhost:8080/src/homepage.html`
+代理服务器将自动处理所有到 /v1 端点的请求，并添加必要的 CORS 头信息，使前端能够正常与后端通信。
 
 ## 📁 项目结构
 
@@ -80,8 +94,6 @@ npm run build
 shopguard-chatbot/
 ├── docs/                 # 项目文档
 ├── src/                  # 源代码
-│   ├── app.ux            # 快应用入口文件
-│   ├── manifest.json     # 快应用配置文件
 │   ├── homepage.html     # 网页版主页面
 │   ├── common/           # 共享资源
 │   │   ├── images/       # 图片资源
@@ -128,39 +140,9 @@ export let SystemSettings = {
 
 完整的开发文档请访问 [在线文档](https://shopguard-chatbot.readthedocs.io/)
 
-### 网页版到快应用转换
+### 快应用
 
-本项目正在从网页版向快应用迁移，详细转换指南请参考：[从网页版迁移到快应用](docs/getting-started/web-to-quickapp.md)
-
-### 组件开发
-
-参考 [组件库文档](docs/development/components.md) 了解组件设计和使用方式。
-
-### 样式指南
-
-我们遵循 [样式指南](docs/development/style-guide.md) 确保界面的一致性。
-
-## 📋 待办清单
-
-- [x] 项目基本结构搭建
-- [x] 网页版原型实现
-- [x] 聊天功能实现
-- [x] 图片上传功能
-- [ ] 完善快应用页面
-- [ ] 快应用程序实现
-- [ ] 在真机上测试
-
-## 🌍 浏览器兼容性
-
-- Chrome (最近2个版本)
-- Firefox (最近2个版本)
-- Safari (最近2个版本)
-- Edge (最近2个版本)
-
-## 📱 快应用兼容性
-
-- 兼容华为、OPPO、VIVO、小米等支持快应用标准的设备
-- 最低平台版本：1070
+见 `quickapp` 分支
 
 ## 👥 贡献指南
 
@@ -171,7 +153,3 @@ export let SystemSettings = {
 3. 提交您的更改: `git commit -m 'Add some amazing feature'`
 4. 推送到分支: `git push origin feature/amazing-feature`
 5. 提交 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 详情请参见 [LICENSE](LICENSE) 文件
