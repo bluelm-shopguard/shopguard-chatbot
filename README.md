@@ -73,13 +73,15 @@ npm run serve
 ```bash
 npm run build
 ```
+
 #### 解决 CORS 问题
+
 如果您在前端网页与后端 API 交互时遇到 CORS（跨域资源共享）错误，可以使用项目中提供的代理服务器解决：
 
-确保后端 API 服务器正在运行（默认为 http://localhost:8000）
-
+确保后端 API 服务器正在运行（默认为 <http://localhost:8000）>
 
 运行代理服务器
+
 ```bash
 node server.js
 ```
@@ -111,6 +113,7 @@ shopguard-chatbot/
 ### 系统设置
 
 编辑 `src/data/system-settings.js` 可配置：
+
 - API 端点和模型
 - 功能开关
 - 错误信息和欢迎语
@@ -130,6 +133,7 @@ export let SystemSettings = {
 ### 用户设置
 
 `src/data/user-settings.js` 存储用户首选项：
+
 - 主题设置
 - 语言选择
 - 历史记录保存选项

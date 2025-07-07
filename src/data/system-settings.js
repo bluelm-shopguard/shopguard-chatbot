@@ -29,7 +29,7 @@
 /** @type {SystemSettingsObject} */
 export let SystemSettings = {
   api: {
-    endpoint: "http://localhost:8000/v1/chat/completions",
+    endpoint: "http://localhost:8080/v1/chat/completions",
     model: "vivo-BlueLM-TB-Pro",
     timeout: 30000, // 30 seconds
     maxRetries: 3,
